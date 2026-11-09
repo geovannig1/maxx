@@ -28,6 +28,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_COMMENTS: "false"
+          # The action's default (8.24.3) ignores the [[allowlists]] tables in .gitleaks.toml.
+          GITLEAKS_VERSION: "8.30.1"
 
   dependency-audit:
     runs-on: ubuntu-latest
