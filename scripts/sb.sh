@@ -8,7 +8,7 @@
 # reads it. The local stack still binds the same ports, so `npm run test:db:integration` works unchanged.
 #
 # Usage:
-#   scripts/sb.sh start        # bring the stack up (applies supabase/migrations/0001_baseline.sql)
+#   scripts/sb.sh start        # bring the stack up (applies every file in supabase/migrations)
 #   scripts/sb.sh db reset     # drop + re-apply the baseline (use after editing the schema)
 #   scripts/sb.sh status
 #   scripts/sb.sh stop

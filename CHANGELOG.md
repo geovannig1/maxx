@@ -13,6 +13,19 @@ self-host. Compared with that private tool:
 
 ### Added
 
+- **Owner-approved changes** at Changes: turn a current Maxx decision into a change (pause or
+  activate an ad, set an ad set's daily budget, or duplicate an ad set as paused), approve and apply
+  it in one click, and roll it back. Writes need `WRITE_MODE_ENABLED`, run one at a time per account,
+  cap budget steps at `MAX_BUDGET_CHANGE_PERCENT`, and a stuck run can be recovered
+  ([ADR-059](docs/architecture/adr-059-owner-initiated-changes.md)).
+- **Copy studio** at Creative → Copy: ad copy variants written by your configured AI provider, each
+  scored 0 to 100 by a deterministic scorer (which also works with AI off), saved to a copy bank
+  ([ADR-061](docs/architecture/adr-061-ai-copy-engine.md)).
+- **Campaign plans:** a brief becomes a versioned campaign, ad set and ad plan; after approval Maxx
+  creates it in Meta **paused**, marks every object it created, and never touches objects it did not
+  create ([ADR-062](docs/architecture/adr-062-campaign-plans.md)).
+- **Ask Maxx actions:** the chat can write copy variants, draft a campaign plan and propose a change,
+  each landing as a draft you approve; answers lead with a summary.
 - **Generic business outcomes.** Results are outcomes of any type (`lead`, `booking`, `sale`,
   `signup`, `quote`, `subscription`, `custom`) with a status, an origin, exact decimal values where
   "not observed" (NULL) is never 0, and a business date in the account timezone
@@ -66,6 +79,11 @@ self-host. Compared with that private tool:
   remains for one release).
 - Business-specific data: the original business profile, competitor seed, benchmarks and target
   ranges are fictional placeholders you replace with your own.
+
+### Fixed
+
+- `record_conversion_delivery` serializes concurrent writers for one outcome (migration 0002), so
+  racing first deliveries merge into one row instead of failing on the (outcome, platform) key.
 
 ### Security
 

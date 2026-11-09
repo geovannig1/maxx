@@ -3,7 +3,7 @@
 These verify the durable-generation RPCs against a **real** Postgres + PostgREST — the
 four things PGlite's single in-process connection cannot prove:
 
-1. **Full schema replay** — `supabase start` applies `supabase/migrations/0001_baseline.sql` against real Postgres 17.
+1. **Full schema replay** — `supabase start` applies every file in `supabase/migrations` against real Postgres 17.
 2. **Multi-connection concurrency** — CAS rejects all-but-one racing commit; the shared `:decision`
    advisory lock serializes cross-stage (a concurrent flag commit blocks while a rec RPC holds the lock).
 3. **PostgREST RPC serialization** — the RPCs round-trip through the REST layer as `service_role`.
