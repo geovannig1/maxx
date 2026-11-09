@@ -1,0 +1,1312 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`golden: business facts aggregation > aggregates each slice identically (revenue completeness flips per slice) 1`] = `
+{
+  "allPaidRecorded": {
+    "acuityRecordedAmountPaid": 8750,
+    "acuityRecordedRevenue": 8750,
+    "amountPaidCoverage": {
+      "total": 150,
+      "withRecordedAmount": 150,
+    },
+    "bookedValue": 7649.849999999994,
+    "canceledAppointments": 75,
+    "confirmedAppointments": 150,
+    "originUnknownAppointments": 30,
+    "valueBearingBookings": 90,
+    "websiteOriginAppointments": 30,
+    "zeroValueAppointments": 60,
+  },
+  "empty": {
+    "acuityRecordedAmountPaid": 0,
+    "acuityRecordedRevenue": 0,
+    "amountPaidCoverage": {
+      "total": 0,
+      "withRecordedAmount": 0,
+    },
+    "bookedValue": 0,
+    "canceledAppointments": 0,
+    "confirmedAppointments": 0,
+    "originUnknownAppointments": 0,
+    "valueBearingBookings": 0,
+    "websiteOriginAppointments": 0,
+    "zeroValueAppointments": 0,
+  },
+  "explicitStateOverride": {
+    "acuityRecordedAmountPaid": 0,
+    "acuityRecordedRevenue": null,
+    "amountPaidCoverage": {
+      "total": 14,
+      "withRecordedAmount": 0,
+    },
+    "bookedValue": 0,
+    "canceledAppointments": 6,
+    "confirmedAppointments": 14,
+    "originUnknownAppointments": 3,
+    "valueBearingBookings": 7,
+    "websiteOriginAppointments": 2,
+    "zeroValueAppointments": 7,
+  },
+  "onlyActive": {
+    "acuityRecordedAmountPaid": 8750,
+    "acuityRecordedRevenue": null,
+    "amountPaidCoverage": {
+      "total": 250,
+      "withRecordedAmount": 150,
+    },
+    "bookedValue": 12749.749999999989,
+    "canceledAppointments": 0,
+    "confirmedAppointments": 250,
+    "originUnknownAppointments": 50,
+    "valueBearingBookings": 150,
+    "websiteOriginAppointments": 50,
+    "zeroValueAppointments": 100,
+  },
+  "onlyCanceled": {
+    "acuityRecordedAmountPaid": 0,
+    "acuityRecordedRevenue": 0,
+    "amountPaidCoverage": {
+      "total": 0,
+      "withRecordedAmount": 0,
+    },
+    "bookedValue": 0,
+    "canceledAppointments": 125,
+    "confirmedAppointments": 0,
+    "originUnknownAppointments": 0,
+    "valueBearingBookings": 0,
+    "websiteOriginAppointments": 0,
+    "zeroValueAppointments": 0,
+  },
+  "zeroPriceOnly": {
+    "acuityRecordedAmountPaid": 1750,
+    "acuityRecordedRevenue": null,
+    "amountPaidCoverage": {
+      "total": 50,
+      "withRecordedAmount": 30,
+    },
+    "bookedValue": 0,
+    "canceledAppointments": 25,
+    "confirmedAppointments": 50,
+    "originUnknownAppointments": 10,
+    "valueBearingBookings": 0,
+    "websiteOriginAppointments": 10,
+    "zeroValueAppointments": 50,
+  },
+}
+`;
+
+exports[`golden: business facts aggregation > aggregates the full population identically 1`] = `
+{
+  "acuityRecordedAmountPaid": 8750,
+  "acuityRecordedRevenue": null,
+  "amountPaidCoverage": {
+    "total": 250,
+    "withRecordedAmount": 150,
+  },
+  "bookedValue": 12749.749999999989,
+  "canceledAppointments": 125,
+  "confirmedAppointments": 250,
+  "originUnknownAppointments": 50,
+  "valueBearingBookings": 150,
+  "websiteOriginAppointments": 50,
+  "zeroValueAppointments": 100,
+}
+`;
+
+exports[`golden: business facts aggregation > classifies every row identically 1`] = `"1:active_zero_value,2:active_zero_value,3:active_zero_value,4:active_zero_value,5:active_zero_value,6:active_zero_value,7:active_zero_value,8:active_zero_value,9:active_zero_value,10:active_zero_value,11:canceled,12:canceled,13:canceled,14:canceled,15:canceled,16:active_zero_value,17:active_zero_value,18:active_zero_value,19:active_zero_value,20:active_zero_value,21:active_zero_value,22:active_zero_value,23:active_zero_value,24:active_zero_value,25:active_zero_value,26:canceled,27:canceled,28:canceled,29:canceled,30:canceled,31:active_zero_value,32:active_zero_value,33:active_zero_value,34:active_zero_value,35:active_zero_value,36:active_zero_value,37:active_zero_value,38:active_zero_value,39:active_zero_value,40:active_zero_value,41:canceled,42:canceled,43:canceled,44:canceled,45:canceled,46:active_zero_value,47:active_zero_value,48:active_zero_value,49:active_zero_value,50:active_zero_value,51:active_zero_value,52:active_zero_value,53:active_zero_value,54:active_zero_value,55:active_zero_value,56:canceled,57:canceled,58:canceled,59:canceled,60:canceled,61:active_zero_value,62:active_zero_value,63:active_zero_value,64:active_zero_value,65:active_zero_value,66:active_zero_value,67:active_zero_value,68:active_zero_value,69:active_zero_value,70:active_zero_value,71:canceled,72:canceled,73:canceled,74:canceled,75:canceled,76:active_zero_value,77:active_zero_value,78:active_zero_value,79:active_zero_value,80:active_zero_value,81:active_zero_value,82:active_zero_value,83:active_zero_value,84:active_zero_value,85:active_zero_value,86:canceled,87:canceled,88:canceled,89:canceled,90:canceled,91:active_zero_value,92:active_zero_value,93:active_zero_value,94:active_zero_value,95:active_zero_value,96:active_zero_value,97:active_zero_value,98:active_zero_value,99:active_zero_value,100:active_zero_value,101:canceled,102:canceled,103:canceled,104:canceled,105:canceled,106:active_zero_value,107:active_zero_value,108:active_zero_value,109:active_zero_value,110:active_zero_value,111:active_zero_value,112:active_zero_value,113:active_zero_value,114:active_zero_value,115:active_zero_value,116:canceled,117:canceled,118:canceled,119:canceled,120:canceled,121:active_zero_value,122:active_zero_value,123:active_zero_value,124:active_zero_value,125:active_zero_value,126:active_zero_value,127:active_zero_value,128:active_zero_value,129:active_zero_value,130:active_zero_value,131:canceled,132:canceled,133:canceled,134:canceled,135:canceled,136:active_zero_value,137:active_zero_value,138:active_zero_value,139:active_zero_value,140:active_zero_value,141:active_zero_value,142:active_zero_value,143:active_zero_value,144:active_zero_value,145:active_zero_value,146:canceled,147:canceled,148:canceled,149:canceled,150:canceled,151:active_value_bearing,152:active_value_bearing,153:active_value_bearing,154:active_value_bearing,155:active_value_bearing,156:active_value_bearing,157:active_value_bearing,158:active_value_bearing,159:active_value_bearing,160:active_value_bearing,161:canceled,162:canceled,163:canceled,164:canceled,165:canceled,166:active_value_bearing,167:active_value_bearing,168:active_value_bearing,169:active_value_bearing,170:active_value_bearing,171:active_value_bearing,172:active_value_bearing,173:active_value_bearing,174:active_value_bearing,175:active_value_bearing,176:canceled,177:canceled,178:canceled,179:canceled,180:canceled,181:active_value_bearing,182:active_value_bearing,183:active_value_bearing,184:active_value_bearing,185:active_value_bearing,186:active_value_bearing,187:active_value_bearing,188:active_value_bearing,189:active_value_bearing,190:active_value_bearing,191:canceled,192:canceled,193:canceled,194:canceled,195:canceled,196:active_value_bearing,197:active_value_bearing,198:active_value_bearing,199:active_value_bearing,200:active_value_bearing,201:active_value_bearing,202:active_value_bearing,203:active_value_bearing,204:active_value_bearing,205:active_value_bearing,206:canceled,207:canceled,208:canceled,209:canceled,210:canceled,211:active_value_bearing,212:active_value_bearing,213:active_value_bearing,214:active_value_bearing,215:active_value_bearing,216:active_value_bearing,217:active_value_bearing,218:active_value_bearing,219:active_value_bearing,220:active_value_bearing,221:canceled,222:canceled,223:canceled,224:canceled,225:canceled,226:active_value_bearing,227:active_value_bearing,228:active_value_bearing,229:active_value_bearing,230:active_value_bearing,231:active_value_bearing,232:active_value_bearing,233:active_value_bearing,234:active_value_bearing,235:active_value_bearing,236:canceled,237:canceled,238:canceled,239:canceled,240:canceled,241:active_value_bearing,242:active_value_bearing,243:active_value_bearing,244:active_value_bearing,245:active_value_bearing,246:active_value_bearing,247:active_value_bearing,248:active_value_bearing,249:active_value_bearing,250:active_value_bearing,251:canceled,252:canceled,253:canceled,254:canceled,255:canceled,256:active_value_bearing,257:active_value_bearing,258:active_value_bearing,259:active_value_bearing,260:active_value_bearing,261:active_value_bearing,262:active_value_bearing,263:active_value_bearing,264:active_value_bearing,265:active_value_bearing,266:canceled,267:canceled,268:canceled,269:canceled,270:canceled,271:active_value_bearing,272:active_value_bearing,273:active_value_bearing,274:active_value_bearing,275:active_value_bearing,276:active_value_bearing,277:active_value_bearing,278:active_value_bearing,279:active_value_bearing,280:active_value_bearing,281:canceled,282:canceled,283:canceled,284:canceled,285:canceled,286:active_value_bearing,287:active_value_bearing,288:active_value_bearing,289:active_value_bearing,290:active_value_bearing,291:active_value_bearing,292:active_value_bearing,293:active_value_bearing,294:active_value_bearing,295:active_value_bearing,296:canceled,297:canceled,298:canceled,299:canceled,300:canceled,301:active_value_bearing,302:active_value_bearing,303:active_value_bearing,304:active_value_bearing,305:active_value_bearing,306:active_value_bearing,307:active_value_bearing,308:active_value_bearing,309:active_value_bearing,310:active_value_bearing,311:canceled,312:canceled,313:canceled,314:canceled,315:canceled,316:active_value_bearing,317:active_value_bearing,318:active_value_bearing,319:active_value_bearing,320:active_value_bearing,321:active_value_bearing,322:active_value_bearing,323:active_value_bearing,324:active_value_bearing,325:active_value_bearing,326:canceled,327:canceled,328:canceled,329:canceled,330:canceled,331:active_value_bearing,332:active_value_bearing,333:active_value_bearing,334:active_value_bearing,335:active_value_bearing,336:active_value_bearing,337:active_value_bearing,338:active_value_bearing,339:active_value_bearing,340:active_value_bearing,341:canceled,342:canceled,343:canceled,344:canceled,345:canceled,346:active_value_bearing,347:active_value_bearing,348:active_value_bearing,349:active_value_bearing,350:active_value_bearing,351:active_value_bearing,352:active_value_bearing,353:active_value_bearing,354:active_value_bearing,355:active_value_bearing,356:canceled,357:canceled,358:canceled,359:canceled,360:canceled,361:active_value_bearing,362:active_value_bearing,363:active_value_bearing,364:active_value_bearing,365:active_value_bearing,366:active_value_bearing,367:active_value_bearing,368:active_value_bearing,369:active_value_bearing,370:active_value_bearing,371:canceled,372:canceled,373:canceled,374:canceled,375:canceled"`;
+
+exports[`golden: conversions event built from a booking > builds "expired" identically 1`] = `
+{
+  "ok": false,
+  "skip": "expired",
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "futureSkewCapped" identically 1`] = `
+{
+  "ok": true,
+  "payload": {
+    "data": [
+      {
+        "action_source": "website",
+        "custom_data": {
+          "currency": "USD",
+          "value": 125,
+        },
+        "event_id": "acuity-9001",
+        "event_name": "AppointmentConfirmed",
+        "event_source_url": "https://example-studio.test/book/",
+        "event_time": 1781524800,
+        "user_data": {
+          "em": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "external_id": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "fn": [
+            "8e924025a26c584ad4ac6365116e09b852ae6b7016da4c0851e269348d93c228",
+          ],
+          "ln": [
+            "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c",
+          ],
+          "ph": [
+            "e2bd2ffe3d8da79ec3f8f3f130c79347c398e24df2805976fdc2fa0cf96b5f37",
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "happyPath" identically 1`] = `
+{
+  "ok": true,
+  "payload": {
+    "data": [
+      {
+        "action_source": "website",
+        "custom_data": {
+          "currency": "USD",
+          "value": 125,
+        },
+        "event_id": "acuity-9001",
+        "event_name": "AppointmentConfirmed",
+        "event_source_url": "https://example-studio.test/book/",
+        "event_time": 1781517600,
+        "user_data": {
+          "em": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "external_id": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "fn": [
+            "8e924025a26c584ad4ac6365116e09b852ae6b7016da4c0851e269348d93c228",
+          ],
+          "ln": [
+            "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c",
+          ],
+          "ph": [
+            "e2bd2ffe3d8da79ec3f8f3f130c79347c398e24df2805976fdc2fa0cf96b5f37",
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "noContact" identically 1`] = `
+{
+  "ok": true,
+  "payload": {
+    "data": [
+      {
+        "action_source": "website",
+        "custom_data": {
+          "currency": "USD",
+          "value": 125,
+        },
+        "event_id": "acuity-9001",
+        "event_name": "AppointmentConfirmed",
+        "event_source_url": "https://example-studio.test/book/",
+        "event_time": 1781517600,
+        "user_data": {},
+      },
+    ],
+  },
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "noId" identically 1`] = `
+{
+  "ok": false,
+  "skip": "no_id",
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "originUnknown" identically 1`] = `
+{
+  "ok": false,
+  "skip": "origin_unknown",
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "staffCreated" identically 1`] = `
+{
+  "ok": false,
+  "skip": "staff_created",
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "testEventCode" identically 1`] = `
+{
+  "ok": true,
+  "payload": {
+    "data": [
+      {
+        "action_source": "website",
+        "custom_data": {
+          "currency": "USD",
+          "value": 125,
+        },
+        "event_id": "acuity-9001",
+        "event_name": "AppointmentConfirmed",
+        "event_source_url": "https://example-studio.test/book/",
+        "event_time": 1781517600,
+        "user_data": {
+          "em": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "external_id": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "fn": [
+            "8e924025a26c584ad4ac6365116e09b852ae6b7016da4c0851e269348d93c228",
+          ],
+          "ln": [
+            "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c",
+          ],
+          "ph": [
+            "e2bd2ffe3d8da79ec3f8f3f130c79347c398e24df2805976fdc2fa0cf96b5f37",
+          ],
+        },
+      },
+    ],
+    "test_event_code": "TEST123",
+  },
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "touchAfterBookingIgnored" identically 1`] = `
+{
+  "ok": true,
+  "payload": {
+    "data": [
+      {
+        "action_source": "website",
+        "custom_data": {
+          "currency": "USD",
+          "value": 125,
+        },
+        "event_id": "acuity-9001",
+        "event_name": "AppointmentConfirmed",
+        "event_source_url": "https://example-studio.test/book/",
+        "event_time": 1781517600,
+        "user_data": {
+          "em": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "external_id": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "fn": [
+            "8e924025a26c584ad4ac6365116e09b852ae6b7016da4c0851e269348d93c228",
+          ],
+          "ln": [
+            "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c",
+          ],
+          "ph": [
+            "e2bd2ffe3d8da79ec3f8f3f130c79347c398e24df2805976fdc2fa0cf96b5f37",
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "unparseablePrice" identically 1`] = `
+{
+  "ok": true,
+  "payload": {
+    "data": [
+      {
+        "action_source": "website",
+        "event_id": "acuity-9001",
+        "event_name": "AppointmentConfirmed",
+        "event_source_url": "https://example-studio.test/book/",
+        "event_time": 1781517600,
+        "user_data": {
+          "em": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "external_id": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "fn": [
+            "8e924025a26c584ad4ac6365116e09b852ae6b7016da4c0851e269348d93c228",
+          ],
+          "ln": [
+            "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c",
+          ],
+          "ph": [
+            "e2bd2ffe3d8da79ec3f8f3f130c79347c398e24df2805976fdc2fa0cf96b5f37",
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "withFbpAndTouch" identically 1`] = `
+{
+  "ok": true,
+  "payload": {
+    "data": [
+      {
+        "action_source": "website",
+        "custom_data": {
+          "currency": "USD",
+          "value": 125,
+        },
+        "event_id": "acuity-9001",
+        "event_name": "AppointmentConfirmed",
+        "event_source_url": "https://example-studio.test/book/",
+        "event_time": 1781517600,
+        "user_data": {
+          "em": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "external_id": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "fbc": "fb.1.1781416800000.IwAR-fixture",
+          "fbp": "fb.1.1700000000000.123",
+          "fn": [
+            "8e924025a26c584ad4ac6365116e09b852ae6b7016da4c0851e269348d93c228",
+          ],
+          "ln": [
+            "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c",
+          ],
+          "ph": [
+            "e2bd2ffe3d8da79ec3f8f3f130c79347c398e24df2805976fdc2fa0cf96b5f37",
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`golden: conversions event built from a booking > builds "zeroPrice" identically 1`] = `
+{
+  "ok": true,
+  "payload": {
+    "data": [
+      {
+        "action_source": "website",
+        "event_id": "acuity-9001",
+        "event_name": "AppointmentConfirmed",
+        "event_source_url": "https://example-studio.test/book/",
+        "event_time": 1781517600,
+        "user_data": {
+          "em": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "external_id": [
+            "9d7985276bb232d3c1d23c75ab2b547c0442452524827720737ce2faed074738",
+          ],
+          "fn": [
+            "8e924025a26c584ad4ac6365116e09b852ae6b7016da4c0851e269348d93c228",
+          ],
+          "ln": [
+            "50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c",
+          ],
+          "ph": [
+            "e2bd2ffe3d8da79ec3f8f3f130c79347c398e24df2805976fdc2fa0cf96b5f37",
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`golden: value reconciliation > classifies every case identically 1`] = `
+[
+  {
+    "appointmentId": 1,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 2,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 3,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 4,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 5,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 6,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 7,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 8,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 9,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 10,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 11,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 12,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 13,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 14,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 15,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 16,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 17,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 18,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 19,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 20,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 21,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 22,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 23,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 24,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 25,
+    "provenDelta": null,
+    "reason": "no observation lineage exists for this booking",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 26,
+    "provenDelta": null,
+    "reason": "delivered, with no recorded value or status change after the send",
+    "state": "no_observed_change",
+  },
+  {
+    "appointmentId": 27,
+    "provenDelta": -35,
+    "reason": "recorded after Meta accepted the event: 1 price change(s) totalling -35",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 28,
+    "provenDelta": null,
+    "reason": "delivered, with no recorded value or status change after the send",
+    "state": "no_observed_change",
+  },
+  {
+    "appointmentId": 29,
+    "provenDelta": null,
+    "reason": "recorded after Meta accepted the event: 1 cancellation(s)",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 30,
+    "provenDelta": -125,
+    "reason": "recorded after Meta accepted the event: 1 price change(s) totalling -125, 1 cancellation(s)",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 31,
+    "provenDelta": null,
+    "reason": "no observation lineage exists for this booking",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 32,
+    "provenDelta": null,
+    "reason": "delivered and unchanged since the send, yet the modelled plane still differs — a modelled-attribution disagreement, not a value-timing effect",
+    "state": "modeled_attribution_disagreement",
+  },
+  {
+    "appointmentId": 33,
+    "provenDelta": -35,
+    "reason": "recorded after Meta accepted the event: 1 price change(s) totalling -35",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 34,
+    "provenDelta": null,
+    "reason": "delivered and unchanged since the send, yet the modelled plane still differs — a modelled-attribution disagreement, not a value-timing effect",
+    "state": "modeled_attribution_disagreement",
+  },
+  {
+    "appointmentId": 35,
+    "provenDelta": null,
+    "reason": "recorded after Meta accepted the event: 1 cancellation(s)",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 36,
+    "provenDelta": -125,
+    "reason": "recorded after Meta accepted the event: 1 price change(s) totalling -125, 1 cancellation(s)",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 37,
+    "provenDelta": null,
+    "reason": "no observation lineage exists for this booking",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 38,
+    "provenDelta": null,
+    "reason": "delivered, with no recorded value or status change after the send",
+    "state": "no_observed_change",
+  },
+  {
+    "appointmentId": 39,
+    "provenDelta": -35,
+    "reason": "recorded after Meta accepted the event: 1 price change(s) totalling -35",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 40,
+    "provenDelta": null,
+    "reason": "delivered, with no recorded value or status change after the send",
+    "state": "no_observed_change",
+  },
+  {
+    "appointmentId": 41,
+    "provenDelta": null,
+    "reason": "recorded after Meta accepted the event: 1 cancellation(s)",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 42,
+    "provenDelta": -125,
+    "reason": "recorded after Meta accepted the event: 1 price change(s) totalling -125, 1 cancellation(s)",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 43,
+    "provenDelta": null,
+    "reason": "no observation lineage exists for this booking",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 44,
+    "provenDelta": null,
+    "reason": "delivered and unchanged since the send, yet the modelled plane still differs — a modelled-attribution disagreement, not a value-timing effect",
+    "state": "modeled_attribution_disagreement",
+  },
+  {
+    "appointmentId": 45,
+    "provenDelta": -35,
+    "reason": "recorded after Meta accepted the event: 1 price change(s) totalling -35",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 46,
+    "provenDelta": null,
+    "reason": "delivered and unchanged since the send, yet the modelled plane still differs — a modelled-attribution disagreement, not a value-timing effect",
+    "state": "modeled_attribution_disagreement",
+  },
+  {
+    "appointmentId": 47,
+    "provenDelta": null,
+    "reason": "recorded after Meta accepted the event: 1 cancellation(s)",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 48,
+    "provenDelta": -125,
+    "reason": "recorded after Meta accepted the event: 1 price change(s) totalling -125, 1 cancellation(s)",
+    "state": "proven_post_send_change",
+  },
+  {
+    "appointmentId": 49,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 50,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 51,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 52,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 53,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 54,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 55,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 56,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 57,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 58,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 59,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 60,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 61,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 62,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 63,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 64,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 65,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 66,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 67,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 68,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 69,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 70,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 71,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 72,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 73,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 74,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 75,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 76,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 77,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 78,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 79,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 80,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 81,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 82,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 83,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 84,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 85,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 86,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 87,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 88,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 89,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 90,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 91,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 92,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 93,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 94,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 95,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 96,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 97,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 98,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 99,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 100,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 101,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 102,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 103,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 104,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 105,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 106,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 107,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 108,
+    "provenDelta": null,
+    "reason": "no server CAPI delivery was recorded for this booking",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 109,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 110,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 111,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 112,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 113,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 114,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 115,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 116,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 117,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 118,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 119,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 120,
+    "provenDelta": null,
+    "reason": "server CAPI delivery was attempted but never accepted by Meta",
+    "state": "capi_delivery_missing",
+  },
+  {
+    "appointmentId": 121,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 122,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 123,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 124,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 125,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 126,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 127,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 128,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 129,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 130,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 131,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 132,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 133,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 134,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 135,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 136,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 137,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 138,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 139,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 140,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 141,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 142,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 143,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+  {
+    "appointmentId": 144,
+    "provenDelta": null,
+    "reason": "no first observation was recorded before this row was already mutable (migration snapshot) — a value change cannot be proven or ruled out",
+    "state": "unknown_no_lineage",
+  },
+]
+`;
+
+exports[`golden: value reconciliation > classifies every case identically 2`] = `
+{
+  "byState": {
+    "capi_delivery_missing": 72,
+    "modeled_attribution_disagreement": 4,
+    "no_observed_change": 4,
+    "proven_post_send_change": 12,
+    "unknown_no_lineage": 52,
+  },
+  "noProvenEvidence": false,
+  "provenTimingDelta": -640,
+  "total": 144,
+  "unexplainedCount": 132,
+}
+`;

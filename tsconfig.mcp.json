@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  // Scoped TYPECHECK of the MCP + lib surface (no app/components). The MCP server runs via tsx
+  // (npm run mcp:dev), which uses the inherited esnext/bundler settings — nothing consumes an emitted
+  // dist/mcp, and the old "module": "commonjs" override both broke under moduleResolution "bundler"
+  // (TS5095) and clashed with import.meta in src/mcp/env.ts. noEmit keeps this an honest gate.
+  // `server-only` is a marker Next resolves itself; it is not an installed package. The MCP server is a
+  // plain Node process (server code by definition), so tsx must load it with THIS config
+  // (TSX_TSCONFIG_PATH=tsconfig.mcp.json) to map the marker to Next's server-layer no-op. Overriding
+  // `paths` replaces the inherited map, so `@/*` is restated.
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "server-only": ["./node_modules/next/dist/compiled/server-only/empty.js"]
+    }
+  },
+  "include": ["src/mcp/**/*", "src/types/**/*", "src/lib/**/*"]
+}

@@ -1,0 +1,281 @@
+import { outcomeWords } from '@/config/outcome-nouns'
+import { CHAMPION_CONTEXT, type Playbook } from './types'
+
+const OW = outcomeWords()
+
+// The 10 reasoning procedures. Values cite REC_THRESHOLDS / target-ranges / corpus keys rather than
+// restating numbers (single-source discipline). Every `never` traces to a real past miss on this
+// account or a platform mechanic. See src/lib/playbooks/types.ts for the contract.
+
+export const PLAYBOOKS: readonly Playbook[] = [
+  {
+    intent: 'scale_decision',
+    question: 'Should we scale / raise budget / put more money behind this?',
+    required_evidence: ['get_operating_mode', 'get_recommendations', 'diagnose_ad_performance', 'get_learnings', 'get_decision_history'],
+    procedure: [
+      { step: 'Establish the mode and what claims are allowed right now.', tool: 'get_operating_mode', check: 'If pre_launch/low_data: scaling talk is premature — say so.' },
+      { step: 'Check what the structured engine already proposes.', tool: 'get_recommendations', check: 'Is there an open scale/hold rec on this entity? Reconcile — never duplicate or silently contradict.' },
+      { step: 'Get the deterministic diagnosis (true days-delivering, signal, learning state).', tool: 'diagnose_ad_performance', check: 'results_judgeable must be true before any performance-based scale call.' },
+      { step: 'Compare the candidate against the champion baseline and account learnings.', tool: 'get_learnings', check: 'CPA vs the champion prime CPA (CHAMPION_CONTEXT); pattern verdicts on this audience/goal.' },
+      { step: 'Run the proposed change through the grounding gate.', tool: 'evaluate_recommendation', check: 'gate_passed true, else present as held/test with the gate’s warnings.' },
+    ],
+    decision_rules: [
+      `Budget is CAPPED account-wide by DAILY_BUDGET_CEILING (the owner's ceiling). Raising it requires champion-beating proof: CPA at or under the champion prime CPA sustained ≥2 weeks with ≥MIN_BOOKINGS_STRONG_CLAIM ${OW.many} — then it is an OWNER decision, not an automatic action.`,
+      `Within the cap, scale EFFICIENCY first: creative iteration, landing conversion, signal quality (corpus: creative-diversification, message-match, capi-dedup-spec) — these raise ${OW.many}/week without new spend.`,
+      'Any budget change on a live ad set moves in ≤20% steps spaced days apart (corpus: significant-edits-reset) — larger swings re-enter learning.',
+      'IF the entity has not exited learning AND results_judgeable is false → hold; judge delivery health only (corpus: learning-exit-50-events).',
+      'A scale claim needs trend stability (no wild day-to-day swings) — one good week after a bad week is oscillation bait (corpus: fluctuation-bands).',
+    ],
+    never: [
+      'Never present the ~5×-CPA daily budget figure as a Meta rule — it is an industry heuristic (corpus: learning-budget-5x-heuristic), and it is moot here: the cap makes it ~4.5× the whole account budget.',
+      'Never scale on estimate-only ROAS or blended MER (corpus: mer-context-only).',
+      'Never scale mid-learning-window on early results — the 7d-click window means conversions lag clicks.',
+    ],
+    corpus_refs: ['learning-budget-5x-heuristic', 'significant-edits-reset', 'learning-exit-50-events', 'fluctuation-bands', 'mer-context-only', 'creative-diversification'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'kill_or_keep',
+    question: 'Should we pause/kill this ad or ad set — or keep it running?',
+    required_evidence: ['diagnose_ad_performance', 'get_winner_loser_flags', 'get_recommendations', 'get_decision_history'],
+    procedure: [
+      { step: 'Get the diagnosis — is performance even judgeable yet?', tool: 'diagnose_ad_performance', check: 'results_judgeable + days_delivering (from first SPEND, not creation).' },
+      { step: 'Read the flag engine’s verdict and evidence.', tool: 'get_winner_loser_flags', check: 'Is there a loser flag with window ≥ MIN_WINDOW_DAYS_REVERSAL and real spend behind it?' },
+      { step: 'Check the engine’s open recommendation and the owner’s standing decisions.', tool: 'get_decision_history', check: 'A previously rejected/snoozed kill on this entity is binding context — what changed since?' },
+      { step: 'Gate the kill.', tool: 'evaluate_recommendation', check: 'Reversal-class actions need trend stability + learning status — the gate enforces it.' },
+    ],
+    decision_rules: [
+      `A kill needs: window ≥ MIN_WINDOW_DAYS_REVERSAL, spend ≥ ~2× target CPA with zero ${OW.many} (the flag engine’s loser rule), AND a stable trend — steadily spending while steadily not converting.`,
+      'Champion-relative severity: CPA persistently >2× the champion prime CPA for a full week with healthy volume = strong kill candidate; between champion prime and 2× = watchlist, not kill.',
+      'Inside the learning window, judge DELIVERY (CTR/CPC/frequency bands) not results (corpus: learning-exit-50-events, attribution-windows-2026 — 7d-click conversions lag).',
+      'IF delivery itself is broken (near-zero impressions at healthy budget) → that is an auction/overlap problem, not a creative kill (corpus: auction-overlap, auction-total-value).',
+    ],
+    never: [
+      'Never kill from breakdown averages — segments are marginal-efficiency artifacts (corpus: breakdown-effect).',
+      'Never kill on 1–2 days of data or a single bad day (corpus: fluctuation-bands; past miss: day-2 panic reads).',
+      'Never re-push a kill the owner rejected without stating what changed (decision memory is binding).',
+    ],
+    corpus_refs: ['breakdown-effect', 'fluctuation-bands', 'learning-exit-50-events', 'auction-overlap', 'auction-total-value', 'attribution-windows-2026'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'creative_testing',
+    question: 'How do we test new creative / what should we test next?',
+    required_evidence: ['get_creative_performance', 'get_hook_suggestions', 'get_copy_bank', 'get_expert_knowledge', 'get_testing_backlog'],
+    procedure: [
+      { step: 'Read what has actually RUN and how, per creative.', tool: 'get_creative_performance', check: 'Early-view rate (video starts / impressions; UNAVAILABLE when Meta returned no start count) and the RETENTION MILESTONES at 25/50/75/100% of video LENGTH — which element underperforms? There is no three-second hook rate and no hold rate.' },
+      { step: 'Pull proven copy + the cited hook-pattern corpus.', tool: 'get_hook_suggestions', check: 'Prefer PROVEN hooks from ran_copy_performance; drafted items are untested until they run.' },
+      { step: 'Check the structured backlog before inventing tests.', tool: 'get_testing_backlog', check: 'Is this test already planned/running? What are its kill/keep/scale rules?' },
+      { step: 'Design ONE-variable tests with explicit rules.', check: 'Hypothesis, budget share, runtime, kill rule, keep rule, scale rule — before launch, not after.' },
+    ],
+    decision_rules: [
+      'Iterate the HOOK first — first ~3 seconds decide retention; hook swaps are the cheapest high-leverage test (corpus: hook-first-3s).',
+      'One variable per test; judge at the ad-set level; ≥500 impressions before any quality read (corpus: relevance-diagnostics, breakdown-effect).',
+      'Testing budget convention is ~10–20% of spend — at a small capped budget that means ONE live test slot at a time; sequence, don’t parallelize.',
+      'Diversify CONCEPTS across use-cases (photographers / podcasts / content teams) — under Andromeda the creative does the targeting (corpus: andromeda-creative-led, creative-diversification).',
+    ],
+    never: [
+      'Never claim a drafted hook/copy is "proven" without ran performance behind it (copy-bank discipline).',
+      'Never test multiple variables in one ad — the read is uninterpretable.',
+      'Never kill a test before its pre-declared window/kill rule (oscillation).',
+    ],
+    corpus_refs: ['hook-first-3s', 'andromeda-creative-led', 'creative-diversification', 'relevance-diagnostics', 'breakdown-effect'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'creative_refresh',
+    question: 'What exact-account delivery evidence exists for possible creative wear, and what remains unproven?',
+    required_evidence: ['get_creative_performance', 'get_creative_insights', 'get_recommendations'],
+    procedure: [
+      { step: 'Read exact-account ad delivery observations.', tool: 'get_creative_performance', check: 'Inspect raw spend, impressions, CTR and the daily frequency series. Daily frequency is not a period aggregate, a threshold verdict, or business-outcome proof.' },
+      { step: 'Read creative metadata and format coverage.', tool: 'get_creative_insights', check: 'Describe observed format mix and creative attributes without ranking creatives or translating Meta-modelled outcomes into direction.' },
+      { step: 'Check the governed decision feed.', tool: 'get_recommendations', check: 'Only a current governed recommendation may carry owner-review or execution authority. An empty feed means no action is supplied.' },
+    ],
+    decision_rules: [
+      'Frequency, CTR and retention are descriptive Meta delivery evidence. No single value or hard band proves creative fatigue or authorises a creative, status or budget change.',
+      `Meta lead, ${OW.one}, CPL and CPA fields remain labelled estimates and cannot establish unit-level business impact without complete interaction-cohort attribution.`,
+      'A longitudinal change is evidence about delivery, not causality. Structural continuity and an exact outcome cohort are required before connecting it to a money decision.',
+      'Creative-production direction additionally requires an approved stored CampaignPlan; this legacy evidence map cannot invent one.',
+    ],
+    never: [
+      'Never use the legacy health score: it blends Meta-modelled CPA into a composite grade and is unavailable for action use.',
+      'Never rank creatives or emit pause, scale, kill, refresh, budget or status direction from delivery telemetry.',
+      'Never turn the historical champion or a corpus threshold into current account policy.',
+    ],
+    corpus_refs: ['fatigue-signals', 'significant-edits-reset', 'hook-first-3s'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'budget_allocation',
+    question: 'How should the (capped) budget be split across campaigns/ad sets?',
+    required_evidence: ['get_account_summary', 'get_campaign_performance', 'diagnose_ad_performance', 'get_recommendations'],
+    procedure: [
+      { step: 'Get the account totals and where spend actually goes.', tool: 'get_account_summary', check: 'Spend by entity; share going to warm vs cold.' },
+      { step: 'Read per-campaign efficiency over a full window.', tool: 'get_campaign_performance', check: '≥7-day windows — pacing makes daily reads noise (corpus: budget-pacing).' },
+      { step: 'Check the structure verdict.', tool: 'diagnose_ad_performance', check: 'Optimization-signal sufficiency; whether consolidation is indicated.' },
+    ],
+    decision_rules: [
+      'Retargeting share norm is ~10–20% of spend post-Advantage+ (corpus: retargeting-share-norm). A warm share well above that range (e.g. half of spend) calls for rebalancing toward cold or consolidating.',
+      'Concentrate signal: fewer ad sets beat more at this volume (corpus: account-simplification; the champion was ONE consolidated set).',
+      'Do not CBO across the cold/warm split — CBO distributes to the best opportunity by design and would let cold absorb budget and starve the tiny warm set; ABO with explicit per-set budgets is the officially-sanctioned choice when warm must be guaranteed spend (corpus: cbo-funnel-caveat, cbo-two-adset-tradeoff). Keep ABO or consolidate deliberately.',
+      'Never put a cost/bid CAP on a small capped account — Meta’s own 5× rule means a cost-per-result goal needs a daily budget of at least five times that goal; below it a cost control chokes delivery. Highest Volume is correct at the cap; manage CPA via champion-relative judgment, not a bid cap (corpus: cost-goal-5x-rule-unsupported).',
+      'A single day up to ~75% over the daily budget is normal pacing (the daily budget is a weekly average, capped 7× per Sun–Sat week) — flag WEEKLY overspend, not daily spikes ≤175% (corpus: daily-budget-weekly-average).',
+      `More budget cannot fix scarce signal — floors are not the constraint; ${OW.many}/week is (corpus: budget-floors-not-binding).`,
+      'Move budgets in ≤20% steps spaced days apart (corpus: significant-edits-reset).',
+    ],
+    never: [
+      'Never reallocate based on breakdown-segment averages (corpus: breakdown-effect).',
+      'Never judge an allocation on <7 days (corpus: budget-pacing, fluctuation-bands).',
+      'Never exceed the account cap without the owner’s champion-beating proof decision.',
+    ],
+    corpus_refs: ['retargeting-share-norm', 'account-simplification', 'cbo-funnel-caveat', 'cbo-two-adset-tradeoff', 'cost-goal-5x-rule-unsupported', 'daily-budget-weekly-average', 'budget-floors-not-binding', 'significant-edits-reset', 'budget-pacing', 'breakdown-effect', 'fluctuation-bands'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'structure_audience',
+    question: 'Is the campaign/ad-set/audience structure right? Should we consolidate/split/re-target?',
+    required_evidence: ['diagnose_ad_performance', 'get_audience_breakdown', 'get_learnings', 'get_decision_history'],
+    procedure: [
+      { step: 'Get the structural diagnosis (signal, learning, overlap risk).', tool: 'diagnose_ad_performance', check: 'Signal verdict + active ad sets on the conversion event.' },
+      { step: 'Read audience performance the safe way.', tool: 'get_audience_breakdown', check: 'Directional only — breakdown averages are not kill lists (corpus: breakdown-effect).' },
+      { step: 'Check account-proven patterns and standing decisions.', tool: 'get_learnings', check: 'Audience/goal patterns with strong/weak verdicts; recorded structure decisions.' },
+    ],
+    decision_rules: [
+      'Default structural bias: CONSOLIDATE (corpus: account-simplification, auction-overlap) — at ~12 events/week site-wide, two conversion ad sets split an already-thin stream; the champion precedent is one set.',
+      'A separate retargeting set is justified only by a large, fresh warm pool AND ~10–20% share (corpus: retargeting-share-norm) — otherwise Advantage+ reaches warm inside prospecting.',
+      'Audience expansion ≠ geography: the configured geo radius is a business constraint, never widened to fix Learning Limited (corpus: broad-guidance-nontransfer).',
+      'Advantage+ audience does NOT widen geo — geo is a HARD control; only the separate "reach more people likely to respond" box expands it, and that box can default ON for city selections. Keep the radius strict by unchecking it (corpus: advantage-audience-no-geo-expand, location-expansion-default-on).',
+      'Keep the WARM set on ORIGINAL audience options — Meta advises against Advantage+ audience for retargeting, and the Advantage+ custom audience checkbox would let delivery leak beyond the warm pool (corpus: advantage-custom-audience-breaks-retargeting).',
+      'Under Andromeda, add audience reach via creative CONCEPTS, not more ad sets (corpus: andromeda-creative-led).',
+      'Auction overlap between the cold (expanded) and warm sets is an ASSUMPTION until checked — owner path: Ads Manager → Audiences → Audience Overlap (corpus: auction-overlap).',
+    ],
+    never: [
+      'Never average or blend the Professional vs Consumer audiences — they are separate businesses in the data.',
+      'Never assume a "broad" prospecting set is leaking outside the service radius — geo is a hard control; audit the location-expansion checkbox instead (corpus: location-expansion-default-on).',
+      'Never "fix" delivery by stacking interests — post-Andromeda that is not where targeting happens.',
+      'Never restructure mid-learning without treating it as a planned reset (corpus: significant-edits-reset).',
+    ],
+    corpus_refs: ['account-simplification', 'auction-overlap', 'retargeting-share-norm', 'broad-guidance-nontransfer', 'andromeda-creative-led', 'significant-edits-reset', 'breakdown-effect', 'advantage-audience-no-geo-expand', 'location-expansion-default-on', 'advantage-custom-audience-breaks-retargeting'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'optimization_event',
+    question: 'Are we optimizing for the right conversion event? Should we switch?',
+    required_evidence: ['diagnose_ad_performance', 'get_decision_history', 'get_expert_knowledge'],
+    procedure: [
+      { step: 'Get the signal diagnosis for the current event.', tool: 'diagnose_ad_performance', check: 'Site-wide event rate vs the per-ad-set threshold; verdict.' },
+      { step: 'Check recorded optimization-event decisions.', tool: 'get_decision_history', check: 'The event choice is a recorded setting — cite the ledger before proposing change.' },
+      { step: 'Pull the event doctrine.', tool: 'get_expert_knowledge', check: 'standard-over-custom-events entry + parity caveats.' },
+    ],
+    decision_rules: [
+      'NEVER abandon the goal event reflexively — check whether it is proven at the champion CPA first. Learning Limited alone is NOT a switch reason (corpus: learning-limited-profitable).',
+      `STANDARD-EVENT PARITY (when it holds): IF the pixel fires a standard event such as Schedule or Purchase at ~the same rate as a custom goal event (same trigger), switching optimization to a standard event = zero tracking work + Meta’s cross-advertiser priors at identical volume (corpus: standard-over-custom-events). It is NOT a learning-exit fix (same volume), it COSTS a learning reset (planned, owner-approved, via the ledger conflict flow), and Purchase-vs-Schedule depends on whether the outcome source collects payment when the ${OW.one} is made (owner confirms).`,
+      `One-rung-up (optimizing a denser mid-funnel event to FEED the goal event) is a LABELED TEST with pre-declared kill criteria — the clicker-not-booker risk is real: IF the upstream event volume spikes while downstream ${OW.many} stay ~0 past the click window → revert.`,
+      'Value optimization is volume-gated OFF at a low event rate (corpus: value-optimization-volume-gate).',
+      'Sequencing: landing/message-match → event hygiene (unify split event names) → CAPI → consolidation → THEN any optimization-event test.',
+    ],
+    never: [
+      `Never switch to Landing Page Views or clicks as the goal — it optimizes for cheap views, not ${OW.many} (a common past miss).`,
+      'Never execute an event switch yourself — it is a recorded-setting change through the ledger + owner approval, timed as a planned learning reset.',
+      'Never sell the switch as a learning-phase fix when volume is unchanged.',
+    ],
+    corpus_refs: ['standard-over-custom-events', 'learning-limited-profitable', 'value-optimization-volume-gate', 'learning-exit-50-events', 'significant-edits-reset'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'measurement_tracking',
+    question: `Can we trust these numbers? Where do ${OW.many}/ROAS actually come from?`,
+    required_evidence: ['get_outcomes', 'get_economics', 'get_ga4_by_campaign', 'get_utm_health', 'get_operating_mode'],
+    procedure: [
+      { step: 'Establish the populations and evidence planes.', check: 'Outcome source = business total; exact complete outcome-id join = paid outcomes; GA4 = session-channel event telemetry; Meta = modelled attribution.' },
+      { step: 'Check every paid-money prerequisite.', tool: 'get_economics', check: 'Exact outcome identity, full-window coverage, contradiction-free origin, complete campaign mapping, and authoritative spend are all required.' },
+      { step: 'Read the paid vs organic CONFIRMATION-EVENT split.', tool: 'get_ga4_by_campaign', check: `These are GA event counts with no outcome identity — attribution context only. They are NOT the ad result and must never be quoted as ${OW.many}, revenue or a ROAS numerator. A paid result requires an exact outcome-id join; without one, report it unavailable.` },
+    ],
+    decision_rules: [
+      'Ad-attributed ≠ total: Meta models attribution, GA4 reports web event/session telemetry, and outcome records business outcomes. Only the complete exact outcome-id join may form a paid subset.',
+      'Site-wide event rates come from GA4 — the pixel /stats edge retains only ~28 days, so a long window is INCOMPLETE there (corpus: truth-hierarchy).',
+      'Signal-quality ladder for a small account: event hygiene (unify duplicate event names) → CAPI with dedup (corpus: capi-dedup-spec; proposal-gated) → standard-event mapping (corpus: standard-over-custom-events).',
+      'Attribution windows (2026): only 1d-click / 7d-click / 1d-view / 1d-engaged-view exist — and 7d-click means conversions land days after clicks (corpus: attribution-windows-2026).',
+      'Incrementality at this scale = LEDGER paid-vs-organic baseline reads (via the exact outcome-id join) and on/off contrast — not lift studies, and never a GA confirmation-event split (corpus: lift-testing-unreachable).',
+    ],
+    never: [
+      `Never present Meta pixel ${OW.many}/ROAS as real money — label them Meta-reported estimates.`,
+      `Never credit organic ${OW.many} (or MER) to a campaign (corpus: mer-context-only).`,
+      'Never claim per-campaign ROAS from campaign-tagged GA events alone; require the complete exact paid join and authoritative mapped spend.',
+    ],
+    corpus_refs: ['truth-hierarchy', 'capi-dedup-spec', 'standard-over-custom-events', 'attribution-windows-2026', 'lift-testing-unreachable', 'mer-context-only'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'launch_setup',
+    question: 'Are we ready to launch / is the new campaign set up right / how is the launch doing?',
+    required_evidence: ['get_launch_readiness', 'diagnose_ad_performance', 'get_recommendations'],
+    procedure: [
+      { step: 'For readiness: run the cohort-scoped verdict.', tool: 'get_launch_readiness', check: 'confirmed / unverified / blockers — unverified is neither pass nor fail.' },
+      { step: 'For an in-flight launch: run the deterministic diagnosis.', tool: 'diagnose_ad_performance', check: 'TRUE days-delivering (first spend, not creation date); results_judgeable; delivery-health bands.' },
+      { step: 'Reconcile with the engine’s open holds.', tool: 'get_recommendations', check: 'The engine already holds most actions during launch — do not counter-propose churn.' },
+    ],
+    decision_rules: [
+      'Launch age counts from FIRST SPEND, never from ad-set creation (the start_time trap — a recorded past miss).',
+      'Inside the learning window judge DELIVERY (CTR/CPC/CPM/frequency bands), not conversions — 7d-click conversions lag (corpus: learning-exit-50-events, attribution-windows-2026).',
+      'No edits during the learning window; batch and time changes (corpus: significant-edits-reset).',
+      'Healthy delivery + zero conversions past the window points post-click (corpus: message-match, relevance-diagnostics) — landing before ad settings.',
+    ],
+    never: [
+      'Never judge a launch on <3 days or mid-learning results (corpus: fluctuation-bands).',
+      'Never answer a launch question from account-wide aggregates — cohort-scope it (old paused ads pollute).',
+      'Never panic-edit a healthy-delivery launch — that resets learning and burns the data.',
+    ],
+    corpus_refs: ['learning-exit-50-events', 'significant-edits-reset', 'attribution-windows-2026', 'message-match', 'relevance-diagnostics', 'fluctuation-bands'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'profit_economics',
+    question: 'Are the ads actually making money? What CPA can we afford? How do we grow profit on a capped budget?',
+    required_evidence: ['get_economics', 'get_outcomes', 'get_account_summary', 'diagnose_ad_performance', 'get_expert_knowledge'],
+    procedure: [
+      { step: 'Get paid economics from the EXACT ledger-linked join.', tool: 'get_economics', check: `get_economics reports paid CPA only from an exact outcome-id join over a fully covered window; otherwise it returns null with an unavailable_reason. If it is unavailable, say so and STOP — do NOT substitute GA confirmation events, which carry no outcome identity and are not ${OW.many} or revenue.` },
+      { step: 'Get business volume, scheduled value, and checkout revenue from the ledger.', tool: 'get_outcomes', check: `Confirmed ${OW.many} / value-bearing ${OW.many} / zero-value ${OW.many} / booked value / amount_paid checkout revenue are distinct. Blended revenue MER = checkout revenue ÷ spend across ALL sources — never paid performance.` },
+      { step: 'Compute CPA vs the champion baseline.', check: 'Champion-relative verdict: beats (under the champion prime CPA) / matches / worse.' },
+      { step: 'Frame breakeven honestly.', check: 'Margin + repeat rate are owner-unconfirmed → label breakeven ASSUMPTION; use champion-relative + revenue multiples until set.' },
+    ],
+    decision_rules: [
+      'Profit frame: contribution margin × AOV × (1 + repeat rate) bounds max CPA (corpus: profit-first-frame). Until the owner supplies margin/repeat, verdicts are champion-relative with assumptions labeled.',
+      'The champion IS the bar (its lifetime and prime CPA, CHAMPION_CONTEXT). Beating it sustainably is the owner’s stated condition for any budget-raise conversation.',
+      `Growth on a capped budget = raise ${OW.many}/week at flat spend: landing conversion (corpus: low-commitment-first-conversion, message-match), signal quality (capi-dedup-spec), creative efficiency (fatigue-signals, hook-first-3s), and organic→custom-audience loops.`,
+      'Learning-Limited-but-profitable is a legitimate steady state (corpus: learning-limited-profitable) — profit, not platform status, is the KPI.',
+      'MER is context, never per-campaign proof (corpus: mer-context-only); an organic-heavy account’s MER flatters paid.',
+    ],
+    never: [
+      'Never state breakeven/profit as fact while margin and repeat rate are unconfirmed — label the assumption.',
+      'Never use blended or organic-inflated numbers as ad performance.',
+      'Never chase learning-exit or ROAS vanity over profit-per-week at the cap.',
+    ],
+    corpus_refs: ['profit-first-frame', 'mer-context-only', 'learning-limited-profitable', 'low-commitment-first-conversion', 'message-match', 'capi-dedup-spec', 'fatigue-signals', 'hook-first-3s'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+  {
+    intent: 'seasonality',
+    question: 'Is this dip/spike seasonal or calendar-driven, or a real performance change?',
+    required_evidence: ['get_metric_anomalies', 'get_campaign_performance', 'get_outcomes_by_label', 'diagnose_ad_performance'],
+    procedure: [
+      { step: 'Is the metric move even outside normal fluctuation, or noise?', tool: 'get_metric_anomalies', check: 'Window decomposition — is the change beyond the fluctuation band, or within day-to-day variance (corpus: fluctuation-bands)?' },
+      { step: 'Is the change GRADUAL (seasonal drift) or a STEP (an event/edit)?', tool: 'get_campaign_performance', check: '≥7-day windows: a slow week-over-week slide tracking the calendar reads seasonal; an abrupt break reads structural/creative.' },
+      { step: 'Is the dip BROAD or CONCENTRATED?', tool: 'get_outcomes_by_label', check: 'A dip across all outcome types points to the market/season; a dip in ONE segment points to targeting/creative for that segment.' },
+    ],
+    decision_rules: [
+      'Check the local market calendar FIRST (corpus: local-creative-seasonality): map event weeks (creator and brand influx), storm or weather seasons (outdoor shoots move indoors or stop) and holiday windows for YOUR market, and read any week-over-week swing against that calendar before reading it as performance.',
+      'Seasonal moves are BROAD and GRADUAL (whole-account drift tracking the calendar); a real performance change is CONCENTRATED or a STEP (one ad set/creative, an abrupt break) — separate them before acting (corpus: fluctuation-bands, breakdown-effect).',
+      `The account’s own outcome ledger / GA4 ${OW.one} history OVERRIDES the market calendar — a business with indoor or locals-driven demand may damp the summer trough, so validate the prior against real ${OW.many} before concluding "it’s just the season."`,
+      `Weekly micro-seasonality is real: read day-of-week and hour-of-day demand from your own ${OW.one} history (corpus: studio-rental-segments-benchmark) — judge day-of-week performance against that pattern, not against a flat average.`,
+      'Do NOT extend budget cuts through a seasonal trough as if the creative failed — a summer dip is a market prior, not a kill signal (and note the champion\'s own decline was creative fatigue at frequency ~5.5, not seasonality — do not conflate the two).',
+    ],
+    never: [
+      'Never diagnose a seasonal or weather dip as creative fatigue or a broken funnel without ruling out the calendar AND checking outcome ledger / GA4 history (a real past-miss risk — inferring failure from a market swing).',
+      `Never treat the market calendar as measured fact — it is a market prior, validated against the account’s own ${OW.one} history.`,
+      'Never blanket-pause for a storm or weather season — act only on an ACTUAL watch/warning; weather shocks are multi-day demand gaps that recover, not fatigue.',
+    ],
+    corpus_refs: ['local-creative-seasonality', 'fluctuation-bands', 'studio-rental-segments-benchmark', 'breakdown-effect'],
+    champion_context: CHAMPION_CONTEXT,
+  },
+]

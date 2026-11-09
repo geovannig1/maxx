@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta content="light" name="color-scheme">
+  <body style="background-color:#fafafa; margin:0; padding:0">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+      <tbody>
+        <tr>
+          <td style="background-color:#fafafa; color:#1a1a1a; font-family:Arial, Helvetica, sans-serif; margin:0; padding:16px 0">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px; background-color:#fafafa; padding:0 16px" width="100%">
+              <tbody>
+                <tr style="width:100%">
+                  <td>
+                    <p style="font-size:18px; line-height:24px; color:#1a1a1a; font-weight:700; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                      "Maxx Daily"
+                    <p style="font-size:13px; line-height:20px; color:#6b7280; margin:2px 0 0 0; margin-top:2px; margin-right:0; margin-bottom:0; margin-left:0">
+                      "2026-08-12"
+                    <p style="font-size:13px; line-height:20px; color:#6b7280; margin:2px 0 0 0; margin-top:2px; margin-right:0; margin-bottom:0; margin-left:0">
+                      "Example Studio"
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Business"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#f3f4f6; border-left:4px solid #6b7280; color:#1a1a1a; font-size:14px; line-height:21px; padding:12px 14px">
+                            <span style="font-weight:700">
+                              "mixed"
+                            <br>
+                            "Business: mixed — active bookings and amount paid on currently active appointments did not move together beyond the diagnostic reporting thresholds. Canceled, refunded, and settled amounts are not reconciled here."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Paid delivery"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#f3f4f6; border-left:4px solid #6b7280; color:#1a1a1a; font-size:14px; line-height:21px; padding:12px 14px">
+                            <span style="font-weight:700">
+                              "improving"
+                            <br>
+                            "Paid delivery: improving — cost per landing-page view improved beyond a diagnostic reporting threshold with no significant opposing signal."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Data confidence"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#f3f4f6; border-left:4px solid #6b7280; color:#1a1a1a; font-size:14px; line-height:21px; padding:12px 14px">
+                            <span style="font-weight:700">
+                              "degraded"
+                            <br>
+                            "Data confidence: degraded — at least one required source, cohort check, blocker, or material-change reason is incomplete."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Spend context"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="font-size:20px; font-weight:700; line-height:26px; padding-right:14px; vertical-align:middle; white-space:nowrap">
+                                    "$82.50"
+                                  <td style="color:#6b7280; font-size:13px; line-height:20px; vertical-align:middle">
+                                    "reported-day spend"
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:6px 0 0 0; margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Weekly budget comparison unavailable — no exact budget-effective interval was provided for the trailing seven-day window."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "What changed"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; color:#6b7280; font-size:11px; letter-spacing:0.06em; padding:0 0 6px 0; text-transform:uppercase; width:40%">
+                                    "Metric"
+                                  <td style="border-bottom:1px solid #e3e3e3; color:#6b7280; font-size:11px; letter-spacing:0.06em; padding:0 0 6px 10px; text-transform:uppercase; text-align:right; width:24%">
+                                    "Today"
+                                  <td style="border-bottom:1px solid #e3e3e3; color:#6b7280; font-size:11px; letter-spacing:0.06em; padding:0 0 6px 10px; text-transform:uppercase; text-align:right; width:36%">
+                                    "vs 7-day daily avg"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Amount Spent"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#1a1a1a; font-weight:700; width:24%">
+                                    "$82.50"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#1a1a1a; font-weight:700; width:36%">
+                                    "▲ +34.2%"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Leads"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#1a1a1a; font-weight:700; width:24%">
+                                    "4"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "+12.4% within noise"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Value-bearing bookings (Acuity ledger)"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:24%">
+                                    "unavailable"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "no comparison"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Meta-modelled bookings"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#1a1a1a; font-weight:700; width:24%">
+                                    "2"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#1a1a1a; font-weight:700; width:36%">
+                                    "▼ -50.0%"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "CTR (all)"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#1a1a1a; font-weight:700; width:24%">
+                                    "1.83%"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "-5.4% within noise"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Cost per lead"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#1a1a1a; font-weight:700; width:24%">
+                                    "$20.63"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "no comparison"
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Observed flags"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Zero conversions in 48 hours — the account recorded no AppointmentConfirmed event since 2026-08-10."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Delivery is structurally starved of conversion signal for the current optimization event."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "The account is averaging roughly 11 optimization events per week against the 50 per week an ad set needs to exit learning."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example champion ad set 7-day: LEARNING_LIMITED · 42 results to exit."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Creative evidence"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example Studio — Private Photography Studio Full Walkthrough Tour Video Variant B — Cold Prospecting 30s: fatigue watch. Retention: 18.4% reached Retention 25%. Frequency has climbed for six consecutive days against a flat trailing CTR baseline."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example Studio — Natural Light Makeup Station Setup Walkthrough D Variant D — Warm Retargeting 45s Vertical: healthy delivery. Retention: 24.1% reached Retention 25%."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example Studio — Studio Reel A Hook Test Variant C Reserve Creative — Broad Advantage Plus Placement 15s Square: insufficient delivery to read. Retention: unavailable."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Exact paid creative outcomes are available in the committed diagnostic evidence; association is not causation."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example Studio — Private Photography Studio Full Walkthrough Tour Video Variant B — Cold Prospecting 30s: frequency 3.10 in the 2.5-3.5 action band — review weekly."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example Studio — Natural Light Makeup Station Setup Walkthrough D Variant D — Warm Retargeting 45s Vertical: frequency 4.20 above the 2.5-3.5 action band — review weekly."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Deterministic read"
+                    <p style="font-size:14px; line-height:21px; color:#1a1a1a; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                      "Business: mixed — active bookings and amount paid on currently active appointments did not move together beyond the diagnostic reporting thresholds. Canceled, refunded, and settled amounts are not reconciled here. Paid delivery: improving — cost per landing-page view improved beyond a diagnostic reporting threshold with no significant opposing signal. Data confidence: degraded — at least one required source, cohort check, blocker, or material-change reason is incomplete."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Governed actions"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example champion ad set 7-day: the ad set has not exited learning and the budget change under review would reset it [approval required]"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example Studio — Private Photography Studio Full Walkthrough Tour Video Variant B — Cold Prospecting 30s: frequency is inside the weekly creative-review band and the retention proxy is below the account median [approval required]"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Cold Prospecting CBO: campaign-level budget is carrying two ad sets with materially different result costs [approval required]"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example Studio — Studio Reel A Hook Test Variant C Reserve Creative — Broad Advantage Plus Placement 15s Square: the reserve creative has never been served and cannot be compared to the champion [approval required]"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Warm Retargeting 30-day: audience size is below the floor where delivery stays stable [approval required]"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Account: the summed active daily budget target moved without a recorded decision-ledger entry [approval required]"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Example Studio — Natural Light Makeup Station Setup Walkthrough D Variant D — Warm Retargeting 45s Vertical: the ad has outspent the champion baseline result cost for three consecutive settled days [approval required]"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#6b7280; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#1a1a1a; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "3 quarantined recommendations omitted from the current feed."
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0 0 0" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#1a1a1a; padding:12px 20px; text-align:center">
+                            <a href="https://example.com/dashboard" style="color:#fafafa; text-decoration-line:none; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:700; text-decoration:none" target="_blank">
+                              "Open the dashboard"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-top:1px solid #e3e3e3; margin:24px 0 0 0; padding:12px 0 0 0" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                              "Report date 2026-08-12. Generated from committed report facts."
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:6px 0 0 0; margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Diagnostic only — no new action authority is created here."
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:6px 0 0 0; margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Three planes, never mixed: the outcome ledger is the business total, Meta AppointmentConfirmed is a modelled estimate, and GA4 is web confirmation-event telemetry. They measure different populations and are not expected to agree."
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:6px 0 0 0; margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Dates inside the attribution re-pull window are provisional and may still restate; today is usually incomplete rather than zero."

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta content="light" name="color-scheme">
+  <body style="background-color:#ffffff; margin:0; padding:0">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+      <tbody>
+        <tr>
+          <td style="background-color:#ffffff; color:#202428; font-family:Arial, Helvetica, sans-serif; margin:0; padding:16px 0">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px; background-color:#ffffff; padding:0 16px" width="100%">
+              <tbody>
+                <tr style="width:100%">
+                  <td>
+                    <p style="font-size:20px; line-height:26px; color:#202428; font-weight:700; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                      "Maxx Weekly Executive Read"
+                    <p style="font-size:13px; line-height:20px; color:#5a6067; margin:3px 0 0 0; margin-top:3px; margin-right:0; margin-bottom:0; margin-left:0">
+                      "2026-08-03–2026-08-09"
+                    <p style="font-size:13px; line-height:20px; color:#5a6067; margin:3px 0 0 0; margin-top:3px; margin-right:0; margin-bottom:0; margin-left:0">
+                      "Example Studio"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin:16px 0 0 0" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#edf1f5; border-left:4px solid #5a6067; padding:12px 14px">
+                            <p style="font-size:14px; line-height:21px; color:#202428; margin:0; font-weight:700; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                              "Diagnostic only"
+                            <p style="font-size:12px; line-height:18px; color:#5a6067; margin:3px 0 0 0; margin-top:3px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "This email creates no action authority."
+                    <p style="font-size:12px; line-height:18px; border-bottom:1px solid #d8dde3; color:#5a6067; font-weight:700; letter-spacing:0.07em; margin:24px 0 8px 0; padding-bottom:5px; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:8px; margin-left:0">
+                      "Weekly context"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Outcome business totals: 18 active bookings; 18 value-bearing bookings; $5,400.00 amount paid on currently active bookings. Meta modelled attribution: $371.00 spend; 5 modelled bookings; $1,500.00 modelled booking value."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Prior outcome business totals: 15 active bookings; 15 value-bearing bookings; $4,500.00 amount paid on currently active bookings. Prior Meta modelled attribution: $363.00 spend; 4 modelled bookings; $1,200.00 modelled booking value."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "8 observed weeks — Outcome ledger active bookings: 112; Meta spend: $2,757.00."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Outcome business totals and Meta modelled attribution are different populations."
+                    <p style="font-size:12px; line-height:18px; border-bottom:1px solid #d8dde3; color:#5a6067; font-weight:700; letter-spacing:0.07em; margin:24px 0 8px 0; padding-bottom:5px; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:8px; margin-left:0">
+                      "Setup"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Setup evidence source: available; 2026-08-10T10:04:00.000Z."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Projection: available; complete: yes; blockers: none."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Cold/warm comparison: clean; role basis governed; cold cold-1; warm warm-1."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Configuration inventory: 1 campaigns; 2 ad sets. Detail is bounded to the first 2 campaigns and 4 ad sets by stable Meta ID."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Campaign Springfield bookings: objective OUTCOME_SALES; buying type AUCTION; budget control ABO; budget unavailable."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Ad set Cold prospecting [cold]: objective OUTCOME_SALES; optimization OFFSITE_CONVERSIONS / SCHEDULE; attribution [{&quot;event_type&quot;:&quot;CLICK_THROUGH&quot;,&quot;window_days&quot;:7},{&quot;event_type&quot;:&quot;VIEW_THROUGH&quot;,&quot;window_days&quot;:1}]; budget $32.00 daily; bid LOWEST_COST_WITHOUT_CAP ; learning LEARNING."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Ad set Warm retargeting [warm]: objective OUTCOME_SALES; optimization OFFSITE_CONVERSIONS / SCHEDULE; attribution [{&quot;event_type&quot;:&quot;CLICK_THROUGH&quot;,&quot;window_days&quot;:7},{&quot;event_type&quot;:&quot;VIEW_THROUGH&quot;,&quot;window_days&quot;:1}]; budget $21.00 daily; bid LOWEST_COST_WITHOUT_CAP ; learning ACTIVE."
+                    <p style="font-size:12px; line-height:18px; border-bottom:1px solid #d8dde3; color:#5a6067; font-weight:700; letter-spacing:0.07em; margin:24px 0 8px 0; padding-bottom:5px; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:8px; margin-left:0">
+                      "Audiences"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Cold/Warm Meta source: available; 2026-08-10T10:02:00.000Z."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Audience inventory: 2 configured ad sets; detail is bounded to the first 3 by stable Meta ID."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Cold prospecting [cold]: composition lookalike; custom audiences none; lookalikes Springfield lookalike 1%; exclusions none; expansion disabled; frozen no; health Springfield lookalike 1% ready 100000–120000."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Warm retargeting [warm]: composition retargeting_only; custom audiences Website visitors 180d; lookalikes none; exclusions none; expansion disabled; frozen no; health Website visitors 180d ready 4000–4500."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Cold/Warm comparison: blocked; window 2026-08-03–2026-08-09; blockers comparison_cell_edited_in_window, comparison_cell_learning, comparison_cell_learning_unknown, comparison_window_spans_material_change."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Cold prospecting [cold adset]: $228.00 spend; 40000 impressions; reach 28000; 600 link clicks; 450 landing-page views; 35 leads; 3 Meta-modelled bookings / $900.00; click/view/unknown split 2/1/0."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Warm retargeting [warm adset]: $143.00 spend; 40000 impressions; reach 28000; 600 link clicks; 450 landing-page views; 35 leads; 2 Meta-modelled bookings / $600.00; click/view/unknown split 1/1/0."
+                    <p style="font-size:12px; line-height:18px; border-bottom:1px solid #d8dde3; color:#5a6067; font-weight:700; letter-spacing:0.07em; margin:24px 0 8px 0; padding-bottom:5px; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:8px; margin-left:0">
+                      "Placements"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Meta placement source: available; 2026-08-10T10:02:00.000Z."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Placement configuration inventory: 2 ad sets; detail is bounded to the first 3 by stable Meta ID."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Cold prospecting: Advantage+ placements; selected automatic; Advantage+ evidence enabled."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Warm retargeting: Advantage+ placements; selected automatic; Advantage+ evidence enabled."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Meta placement window: 2026-08-03–2026-08-09; blockers none."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "platform_position instagram_reels: $190.00 spend; 18000 impressions; 310 clicks; 18 leads; 3 Meta-modelled bookings."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "publisher_platform instagram: $330.00 spend; 30000 impressions; 480 clicks; 30 leads; 4 Meta-modelled bookings."
+                    <p style="font-size:12px; line-height:18px; border-bottom:1px solid #d8dde3; color:#5a6067; font-weight:700; letter-spacing:0.07em; margin:24px 0 8px 0; padding-bottom:5px; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:8px; margin-left:0">
+                      "Creative"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Creative identity: 2 active wrappers; 2 Meta creative IDs; 2 distinct media; concept coverage complete."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Creative detail is bounded to the first 8 wrappers by stable Meta ad ID."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Cold studio reel: wrapper new_wrapper_media_reuse_not_observed; concept studio-tour; media video / not_observed_reused; latest-change relationship created_at_or_after; destination UTM present."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Warm proof carousel: wrapper new_wrapper_media_reuse_not_observed; concept social-proof; media carousel / not_observed_reused; latest-change relationship created_at_or_after; destination UTM present."
+                    <p style="font-size:12px; line-height:18px; border-bottom:1px solid #d8dde3; color:#5a6067; font-weight:700; letter-spacing:0.07em; margin:24px 0 8px 0; padding-bottom:5px; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:8px; margin-left:0">
+                      "Tracking"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Meta modelled attribution: $371.00 spend; 5 modelled bookings; $1,500.00 modelled booking value."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Prior Meta modelled attribution: $363.00 spend; 4 modelled bookings; $1,200.00 modelled booking value."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Tracking source: available; 2026-08-10T10:04:00.000Z."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "CAPI source: available; 2026-08-10T10:04:00.000Z."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "GA identity source: available; 2026-08-10T10:04:00.000Z."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Paid cohort source: unavailable; 2026-08-10T10:04:00.000Z; blockers: maturity_lag_not_met."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Paid-touch identity: 390 complete; 30 incomplete; 12 linked bookings."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "CAPI: live; 18/18 eligible bookings sent; 1 failed."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "GA identity: mixed_partial_coverage; 16/18 confirmation events identified."
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "Evidence blockers: paid_cohort:maturity_lag_not_met."
+                    <p style="font-size:12px; line-height:18px; border-bottom:1px solid #d8dde3; color:#5a6067; font-weight:700; letter-spacing:0.07em; margin:24px 0 8px 0; padding-bottom:5px; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:8px; margin-left:0">
+                      "Material changes"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:0 0 6px 0" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="color:#5a6067; font-size:14px; line-height:21px; padding-right:8px; vertical-align:top; width:12px">
+                                    "•"
+                                  <td style="color:#202428; font-size:14px; line-height:21px; vertical-align:top; word-break:break-word">
+                                    "2026-08-06T15:00:00.000Z — Cold daily budget changed from $27 to $32. Source: ad_setup_decisions; categories: budget; affected Meta IDs: cold-1; change ID: 00000000-0000-4000-8000-000000001083."
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0 0 0" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#202428; padding:12px 20px; text-align:center">
+                            <a href="https://maxx.example.com/activity/reports" style="color:#ffffff; text-decoration-line:none; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:700; text-decoration:none" target="_blank">
+                              "Open reports"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-top:1px solid #d8dde3; margin:24px 0 0 0; padding:12px 0 0 0" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p style="font-size:12px; line-height:18px; color:#5a6067; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                              "Generated only from the committed weekly report evidence snapshot."
+                            <p style="font-size:12px; line-height:18px; color:#5a6067; margin:5px 0 0 0; margin-top:5px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Diagnostic only — no recommendation, prescription, or money-action authority is created here."

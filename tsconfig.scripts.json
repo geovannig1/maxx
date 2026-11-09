@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  // Config for running scripts with tsx (doctor, setup, syncs, backfills, evals). Server modules start
+  // with `import 'server-only'`, a marker Next resolves itself; plain Node cannot. Scripts are server
+  // code by definition, so the marker maps to Next's server-layer no-op here. Do NOT add this mapping
+  // to tsconfig.json: Next must keep resolving the real marker so a client import fails the build.
+  // Overriding `paths` replaces the inherited map, so `@/*` is restated.
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "server-only": ["./node_modules/next/dist/compiled/server-only/empty.js"]
+    }
+  }
+}

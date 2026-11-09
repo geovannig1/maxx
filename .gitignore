@@ -1,0 +1,79 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# Build output
+/.next/
+/out/
+/build
+/coverage
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment: never commit secrets. The template is tracked on purpose.
+.env
+.env.*
+!.env.example
+
+# Keys and credentials in any form
+*.pem
+*.p12
+*.pfx
+*.key
+*.jks
+credentials.json
+service-account*.json
+.sentryclirc
+.npmrc
+# Authenticated browser state for end-to-end tests (live cookies)
+playwright/.auth/
+tests/e2e/.auth/
+storageState*.json
+
+# Deployment and local tool state
+.vercel
+.supabase-work/
+.supabase-work.lock/
+supabase/.temp/
+supabase/.branches/
+.diagnose-value-gate-cache.json
+.tools/
+
+# Test and evaluation output
+test-results/
+playwright-report/
+/reports/
+
+# Editor and OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs and caches
+*.log
+.eslintcache
+*.tgz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Agent and assistant runtime state (never part of the app)
+.claude/
+.claude-flow/
+.codex/
+.agents/
+.swarm/
+.superpowers/
+.worktrees/
+.playwright-mcp/
+graphify-out/
+agentdb.rvf*
+ruvector.db
+*.rvf
+*.rvf.lock
+MEMORY.md
+*.bak
+*.bak-*

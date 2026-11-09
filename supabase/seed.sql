@@ -1,0 +1,2 @@
+-- Local integration tests seed their own data (tests/db/integration/). This empty file just
+-- silences the CLI's "no files matched pattern: supabase/seed.sql" warning on reset.

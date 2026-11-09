@@ -1,0 +1,103 @@
+name: CI
+
+# Quality gate for every push and pull request. Nothing here needs a secret, so forks and
+# first-time contributors get the same signal as maintainers.
+#
+#   verify                lint, typecheck (app + MCP), unit tests, PGlite database tests, production build
+#   database-integration  real Postgres via the Supabase CLI: full migration replay with asserted
+#                         objects, multi-connection concurrency and permission proofs
+#   demo                  `npm run demo:check`: a clean checkout reaches a working dashboard on sample
+#                         data with no accounts, rendered in headless Chromium
+#
+# Branch protection on `main` should require both jobs. The local equivalent is `npm run gate`
+# (static) and `npm run gate:full` (with Docker); tests/local-gate-contract.test.ts pins the two
+# lists to each other so a step cannot be added here and forgotten locally.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # Match the recommended runtime. ICU data differs between Node majors, which changes
+          # compact currency formatting in rendered output.
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck (app)
+        run: npm run typecheck
+      - name: Typecheck (MCP)
+        run: npm run mcp:build
+      - name: Unit tests
+        run: npm run test
+      - name: Database RPC tests (PGlite, in-process)
+        run: npm run test:db
+      # The production build needs no secrets; keeping it here gates compile and prerender
+      # regressions on every pull request.
+      - name: Production build
+        run: npm run build
+
+  database-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1
+        with:
+          version: 2.109.1 # keep in lockstep with scripts/sb.sh
+      - name: Install
+        run: npm ci
+      - name: Start Supabase (applies all migrations)
+        run: supabase start
+      # `supabase start` can exit 0 while a migration fails. The replay asserts the objects the chain
+      # must have produced, so a pull request cannot merge on an exit code alone.
+      - name: Verify migration replay (errors + expected objects)
+        run: |
+          npm run verify:replay
+      - name: Real-Supabase integration proofs
+        run: npm run test:db:integration
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
+
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Install the Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Demo check (sample data, no accounts)
+        run: npm run demo:check

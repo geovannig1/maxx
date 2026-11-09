@@ -1,0 +1,38 @@
+# Maxx daily digest — 2026-08-12
+
+Glam & Co <script>alert(1)</script> "V2" it's
+
+## Business
+Business: mixed — Glam & Co <script>alert(1)</script> "V2" it's
+
+## Paid delivery
+Paid delivery: improving — cost per landing-page view improved beyond a diagnostic reporting threshold with no significant opposing signal.
+
+## Data confidence
+Data confidence: degraded — at least one required source, cohort check, blocker, or material-change reason is incomplete.
+
+## Spend context
+Reported-day spend: $82.50.
+Weekly budget comparison unavailable — no exact budget-effective interval was provided for the trailing seven-day window.
+
+## What changed
+- Glam & Co <script>alert(1)</script> "V2" it's: $82.50 — +34.2% versus the prior seven-day daily average.
+- Leads: 4 — +12.4% versus the prior seven-day daily average — within noise.
+- Value-bearing bookings (Acuity ledger): unavailable — no comparable prior seven-day daily average.
+- Meta-modelled bookings: 2 — -50.0% versus the prior seven-day daily average.
+- CTR (all): 1.83% — -5.4% versus the prior seven-day daily average — within noise.
+- Cost per lead: $20.63 — no comparable prior seven-day daily average.
+
+## Observed flags
+- Glam & Co <script>alert(1)</script> "V2" it's
+
+## Creative evidence
+- Glam & Co <script>alert(1)</script> "V2" it's
+
+## Deterministic read
+Glam & Co <script>alert(1)</script> "V2" it's
+
+## Governed actions
+- Glam & Co <script>alert(1)</script> "V2" it's
+
+_Deterministic evidence summary. Diagnostic only; no new action authority is created here._

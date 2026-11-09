@@ -1,0 +1,38 @@
+# Maxx daily digest — 2026-08-12
+
+Example Studio
+
+## Business
+Business: unavailable — the executive evidence snapshot was not available.
+
+## Paid delivery
+Paid delivery: unavailable — the executive evidence snapshot was not available.
+
+## Data confidence
+Data confidence: unavailable — the executive evidence snapshot was not available.
+
+## Spend context
+Reported-day spend: unavailable.
+Weekly budget comparison unavailable — no exact budget-effective interval was provided for the trailing seven-day window.
+
+## What changed
+- Amount Spent: unavailable — no comparable prior seven-day daily average.
+- Leads: unavailable — no comparable prior seven-day daily average.
+- Value-bearing bookings (Acuity ledger): unavailable — no comparable prior seven-day daily average.
+- Meta-modelled bookings: unavailable — no comparable prior seven-day daily average.
+- CTR (all): unavailable — no comparable prior seven-day daily average.
+- Cost per lead: unavailable — no comparable prior seven-day daily average.
+
+## Observed flags
+No observed flag was emitted.
+
+## Creative evidence
+
+
+## Deterministic read
+Business: unavailable — the executive evidence snapshot was not available. Paid delivery: unavailable — the executive evidence snapshot was not available. Data confidence: unavailable — the executive evidence snapshot was not available.
+
+## Governed actions
+
+
+_Deterministic evidence summary. Diagnostic only; no new action authority is created here._

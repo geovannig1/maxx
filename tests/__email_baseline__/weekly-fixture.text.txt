@@ -1,0 +1,66 @@
+# Maxx Weekly Executive Read
+
+2026-08-03–2026-08-09
+
+Diagnostic only — this email creates no action authority.
+
+## Weekly context
+
+- Outcome business totals: 18 active bookings; 18 value-bearing bookings; $5,400.00 amount paid on currently active bookings. Meta modelled attribution: $371.00 spend; 5 modelled bookings; $1,500.00 modelled booking value.
+- Prior outcome business totals: 15 active bookings; 15 value-bearing bookings; $4,500.00 amount paid on currently active bookings. Prior Meta modelled attribution: $363.00 spend; 4 modelled bookings; $1,200.00 modelled booking value.
+- 8 observed weeks — Outcome ledger active bookings: 112; Meta spend: $2,757.00.
+- Outcome business totals and Meta modelled attribution are separate. They are different populations and must not be reconciled as if they were the same ledger.
+
+## Setup
+
+- Setup evidence source: available; 2026-08-10T10:04:00.000Z.
+- Projection: available; complete: yes; blockers: none.
+- Cold/warm comparison: clean; role basis governed; cold cold-1; warm warm-1.
+- Configuration inventory: 1 campaigns; 2 ad sets. Detail is bounded to the first 2 campaigns and 4 ad sets by stable Meta ID.
+- Campaign Springfield bookings: objective OUTCOME_SALES; buying type AUCTION; budget control ABO; budget unavailable.
+- Ad set Cold prospecting [cold]: objective OUTCOME_SALES; optimization OFFSITE_CONVERSIONS / SCHEDULE; attribution [{"event_type":"CLICK_THROUGH","window_days":7},{"event_type":"VIEW_THROUGH","window_days":1}]; budget $32.00 daily; bid LOWEST_COST_WITHOUT_CAP ; learning LEARNING.
+- Ad set Warm retargeting [warm]: objective OUTCOME_SALES; optimization OFFSITE_CONVERSIONS / SCHEDULE; attribution [{"event_type":"CLICK_THROUGH","window_days":7},{"event_type":"VIEW_THROUGH","window_days":1}]; budget $21.00 daily; bid LOWEST_COST_WITHOUT_CAP ; learning ACTIVE.
+
+## Audiences
+
+- Cold/Warm Meta source: available; 2026-08-10T10:02:00.000Z.
+- Audience inventory: 2 configured ad sets; detail is bounded to the first 3 by stable Meta ID.
+- Cold prospecting [cold]: composition lookalike; custom audiences none; lookalikes Springfield lookalike 1%; exclusions none; expansion disabled; frozen no; health Springfield lookalike 1% ready 100000–120000.
+- Warm retargeting [warm]: composition retargeting_only; custom audiences Website visitors 180d; lookalikes none; exclusions none; expansion disabled; frozen no; health Website visitors 180d ready 4000–4500.
+- Cold/Warm comparison: blocked; window 2026-08-03–2026-08-09; blockers comparison_cell_edited_in_window, comparison_cell_learning, comparison_cell_learning_unknown, comparison_window_spans_material_change.
+- Cold prospecting [cold adset]: $228.00 spend; 40000 impressions; reach 28000; 600 link clicks; 450 landing-page views; 35 leads; 3 Meta-modelled bookings / $900.00; click/view/unknown split 2/1/0.
+- Warm retargeting [warm adset]: $143.00 spend; 40000 impressions; reach 28000; 600 link clicks; 450 landing-page views; 35 leads; 2 Meta-modelled bookings / $600.00; click/view/unknown split 1/1/0.
+
+## Placements
+
+- Meta placement source: available; 2026-08-10T10:02:00.000Z.
+- Placement configuration inventory: 2 ad sets; detail is bounded to the first 3 by stable Meta ID.
+- Cold prospecting: Advantage+ placements; selected automatic; Advantage+ evidence enabled.
+- Warm retargeting: Advantage+ placements; selected automatic; Advantage+ evidence enabled.
+- Meta placement window: 2026-08-03–2026-08-09; blockers none.
+- platform_position instagram_reels: $190.00 spend; 18000 impressions; 310 clicks; 18 leads; 3 Meta-modelled bookings.
+- publisher_platform instagram: $330.00 spend; 30000 impressions; 480 clicks; 30 leads; 4 Meta-modelled bookings.
+
+## Creative
+
+- Creative identity: 2 active wrappers; 2 Meta creative IDs; 2 distinct media; concept coverage complete.
+- Creative detail is bounded to the first 8 wrappers by stable Meta ad ID.
+- Cold studio reel: wrapper new_wrapper_media_reuse_not_observed; concept studio-tour; media video / not_observed_reused; latest-change relationship created_at_or_after; destination UTM present.
+- Warm proof carousel: wrapper new_wrapper_media_reuse_not_observed; concept social-proof; media carousel / not_observed_reused; latest-change relationship created_at_or_after; destination UTM present.
+
+## Tracking
+
+- Meta modelled attribution: $371.00 spend; 5 modelled bookings; $1,500.00 modelled booking value.
+- Prior Meta modelled attribution: $363.00 spend; 4 modelled bookings; $1,200.00 modelled booking value.
+- Tracking source: available; 2026-08-10T10:04:00.000Z.
+- CAPI source: available; 2026-08-10T10:04:00.000Z.
+- GA identity source: available; 2026-08-10T10:04:00.000Z.
+- Paid cohort source: unavailable; 2026-08-10T10:04:00.000Z; blockers: maturity_lag_not_met.
+- Paid-touch identity: 390 complete; 30 incomplete; 12 linked bookings.
+- CAPI: live; 18/18 eligible bookings sent; 1 failed.
+- GA identity: mixed_partial_coverage; 16/18 confirmation events identified.
+- Evidence blockers: paid_cohort:maturity_lag_not_met.
+
+## Material changes
+
+- 2026-08-06T15:00:00.000Z — Cold daily budget changed from $27 to $32. Source: ad_setup_decisions; categories: budget; affected Meta IDs: cold-1; change ID: 00000000-0000-4000-8000-000000001083.

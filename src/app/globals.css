@@ -1,0 +1,574 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./vendor/shadcn-tailwind.css";
+
+/* ═══════════════════════════════════════════════════════════════════
+   MAXX — Light design system ("Stripe-like clarity")
+   Owner decision 2026-07-02: light replaces the dark cockpit.
+   Variable NAMES are preserved from the old system so every component
+   referencing var(--*) migrates by redefinition, not rewrite.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Real CSS custom properties (NOT @theme inline — so they work in style={}) */
+:root {
+  --bg-base:        #F7F8FA; /* app canvas (cool neutral) */
+  --bg-surface:     #FFFFFF; /* cards, tables, panels */
+  --bg-elevated:    #FFFFFF; /* popovers/dropdowns — differ by shadow, not color */
+  --bg-overlay:     #FFFFFF; /* modals */
+  --bg-input:       #FFFFFF;
+  --bg-subtle:      #F3F4F6; /* table headers, wells, code blocks */
+
+  /* Sidebar — the second neutral layer: white on gray canvas */
+  --sidebar-bg:          #FFFFFF;
+  --sidebar-hover:       #F3F4F6;
+  --sidebar-active:      rgba(79,70,229,0.08);
+  --sidebar-text:        #4B5563;
+  --sidebar-text-active: #111827;
+  /* Was #9CA3AF — 2.54:1 on the white sidebar. These are the REVIEW / CREATIVE /
+     INTELLIGENCE / SYSTEM group headers, so the failure appeared on every page. */
+  --sidebar-label:       #656C7A;
+  --sidebar-border:      #E9EAEE;
+  --sidebar-indicator:   #4F46E5;
+
+  --border:         #E5E7EB;
+  --border-hover:   #D1D5DB;
+  --border-focus:   #4338CA;
+  /* Boundaries are non-text UI, so the bar is 3:1 — but on every ground, including
+     --bg-subtle wells where the previous #858F9D landed at 2.98. Now 3.14 at worst. */
+  --border-strong:  #818B99;
+
+  /* Ink — primary/secondary/tertiary are AA (≥4.5:1) on both --bg-base and white.
+     --text-disabled is 3.81:1: it clears the 3:1 non-text UI bar for icons and inert
+     controls, and is NOT sufficient for reading. Anything a person has to READ —
+     axis labels, a "—" that means no value — takes --text-tertiary instead. */
+  --text-primary:   #111827;
+  --text-secondary: #4B5563;
+  /* Was #6B7280, which is 4.83:1 on white but only 4.39:1 on --bg-subtle — and tertiary
+     ink lands in tinted wells constantly (date pills, chips, table headers). Inks must
+     clear the bar on EVERY ground they are painted on, not just white. */
+  --text-tertiary:  #656C7A;
+  --text-disabled:  #767F8D;
+
+  /* Accent = interactive/selected/brand ONLY, never decoration */
+  --accent:         #4F46E5;
+  --accent-dim:     rgba(79,70,229,0.08);
+  --accent-hover:   #4338CA;
+  /* Text/iconography sitting ON a saturated fill (accent, danger, success buttons). White is only
+     correct while those fills are dark; the dark theme lightens them, so this flips. Components must
+     read this token rather than hard-coding #FFFFFF, or every primary button loses contrast in dark. */
+  --on-accent:      #FFFFFF;
+
+  /* Status triples — text hits AA on white; bg/border are the tint pair */
+  --success:        #047857;
+  --success-bg:     #ECFDF5;
+  --success-border: #A7F3D0;
+  --warning:        #B45309;
+  --warning-bg:     #FFFBEB;
+  --warning-border: #FDE68A;
+  /* Was #DC2626 — 4.41:1 on its OWN --danger-bg tint, which is exactly where it is used.
+     The "data may be stale" banner was the least readable warning in the console. */
+  --danger:         #CC1F1F;
+  --danger-bg:      #FEF2F2;
+  --danger-border:  #FECACA;
+  --info:           #1D4ED8;
+  --info-bg:        #EFF6FF;
+  --info-border:    #BFDBFE;
+
+  /* ── Trust tiers (one source of truth for every trust chip/bar/cell) ── */
+  --trust-verified:     #047857; /* ≥95% bar — safe to state without caveat (= --success on purpose) */
+  --trust-high:         #4F46E5; /* confident, not yet verified */
+  --trust-moderate:     #B45309; /* usable, caveat it */
+  /* Was #EA580C, which is 3.35:1 on --bg-base — below AA. This ramp is semantic, not
+     decorative: --trust-low is also the colour of "mismatch", "missing" and high-severity
+     anomalies, and TrustBadge renders its failure reasons in it at 11px. The colour that
+     says a number cannot be trusted has to be readable. #C2410C is 4.87:1. */
+  --trust-low:          #C2410C; /* directional only */
+  --trust-insufficient: #656C7A; /* not enough signal — grey, never green */
+
+  /* ── Provenance markers (a MARK, orthogonal to status color — estimate ≠ warning) ── */
+  --source-actual:    #047857; /* authoritative/observed source marker (check glyph) */
+  --source-estimate:  #B45309; /* Meta estimate — amber ~ glyph; the VALUE stays neutral */
+  --paid-marker:      #4F46E5; /* paid channel dot (indigo/accent) */
+  --organic-marker:   #0D9488; /* organic channel dot (teal) */
+
+  --chart-1: #6366F1;
+  --chart-2: #059669;
+  --chart-3: #D97706;
+  --chart-4: #DC2626;
+  --chart-5: #7C3AED;
+
+  --shadow-card:  0 1px 2px rgba(16,24,40,0.05);
+  --shadow-panel: 0 4px 16px -4px rgba(16,24,40,0.10);
+
+  --r-xs:  3px;
+  --r-sm:  5px;
+  --r-md:  8px;
+  --r-lg:  10px;
+  --r-xl:  16px;
+  --radius: 0.5rem;
+
+  /* ── Density / spacing scale (calm rhythm) ── */
+  --card-pad-hero:  24px; /* Tier-1 hero card */
+  --card-pad:       20px; /* Tier-2 standard card */
+  --card-pad-tight: 14px; /* Tier-3 quiet block */
+  --stack-section:  24px; /* gap between major page sections */
+  --stack-card:     16px; /* gap between cards in a grid */
+  --stack-row:       8px; /* gap inside a card */
+
+  /* Interaction surfaces. These existed only as literals inside @layer base/components, which is why
+     no amount of redefining the palette could produce a dark theme — the base layer painted over it. */
+  --bg-row-hover:          #FAFAFB;
+  --scrollbar-thumb:       #D1D5DB;
+  --scrollbar-thumb-hover: #9CA3AF;
+  --selection-bg:          rgba(79,70,229,0.15);
+  --skeleton-base:         #F3F4F6;
+  --skeleton-shine:        #E9EAEE;
+}
+
+/* Tailwind theme tokens — used by Tailwind utility classes */
+@theme inline {
+  --color-background:          var(--bg-base);
+  --color-foreground:          var(--text-primary);
+  --color-card:                var(--bg-surface);
+  --color-card-foreground:     var(--text-primary);
+  --color-popover:             var(--bg-elevated);
+  --color-popover-foreground:  var(--text-primary);
+  --color-primary:             var(--accent);
+  --color-primary-foreground:  var(--bg-surface);
+  --color-secondary:           var(--bg-subtle);
+  --color-secondary-foreground:var(--text-primary);
+  --color-muted:               var(--bg-subtle);
+  --color-muted-foreground:    var(--text-tertiary);
+  --color-accent:              var(--accent-dim);
+  --color-accent-foreground:   var(--accent);
+  --color-destructive:         var(--danger);
+  --color-border:              var(--border);
+  --color-input:               var(--border);
+  --color-ring:                var(--border-focus);
+  --color-chart-1:             var(--chart-1);
+  --color-chart-2:             var(--chart-2);
+  --color-chart-3:             var(--chart-3);
+  --color-chart-4:             var(--chart-4);
+  --color-chart-5:             var(--chart-5);
+  --radius-sm: 0.3125rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --font-sans: var(--font-inter, 'Inter', system-ui, sans-serif);
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html {
+    background-color: var(--bg-base);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  ::-webkit-scrollbar              { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track        { background: transparent; }
+  ::-webkit-scrollbar-thumb        { background: var(--scrollbar-thumb); border-radius: 100px; }
+  ::-webkit-scrollbar-thumb:hover  { background: var(--scrollbar-thumb-hover); }
+
+  ::selection {
+    background: var(--selection-bg);
+    color: var(--text-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .skip-link {
+    position: fixed;
+    z-index: 100;
+    top: 0.5rem;
+    left: 0.5rem;
+    transform: translateY(-160%);
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.375rem;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-panel);
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+}
+
+@layer components {
+
+  /* ── Cards ──────────────────────────────────────── */
+  .card-base {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-card);
+  }
+  .card-elevated {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-panel);
+  }
+
+  /* ── Owner-first advanced surfaces ─────────────────────────── */
+  .owner-page {
+    width: 100%;
+    max-width: 1180px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack-section);
+  }
+  .owner-page-narrow {
+    max-width: 820px;
+  }
+  .owner-surface {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, transparent), transparent 120px),
+      var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-card);
+  }
+  .owner-surface-section {
+    padding: var(--card-pad);
+  }
+  .owner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: var(--stack-card);
+  }
+  .owner-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--r-lg);
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .owner-warning {
+    background: var(--warning-bg);
+    border-color: var(--warning-border);
+  }
+  .owner-button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: var(--r-md);
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .owner-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    width: fit-content;
+    max-width: 100%;
+    border-radius: var(--r-lg);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+  }
+  .owner-tab {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-md);
+    padding: 0 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+  }
+  .owner-tab-active {
+    background: var(--accent-dim);
+    border-color: var(--border-focus);
+    color: var(--accent);
+  }
+
+  /* ── Labels ─────────────────────────────────────── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  /* ── Numbers ────────────────────────────────────── */
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-value-lg {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+
+  /* ── Table ─────────────────────────────────────── */
+  .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .data-table th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tbody tr { transition: background 80ms; }
+  .data-table tbody tr:hover { background: var(--bg-row-hover); }
+
+  /* ── Skeleton ──────────────────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease infinite;
+    border-radius: 4px;
+  }
+
+  /* ── Pill badges (status triples; retire ad-hoc chips in favor of these) ── */
+  .pill-good    { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); border-radius: 100px; padding: 2px 8px; font-size: 11.5px; font-weight: 600; }
+  .pill-warn    { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); border-radius: 100px; padding: 2px 8px; font-size: 11.5px; font-weight: 600; }
+  .pill-bad     { background: var(--danger-bg);  color: var(--danger);  border: 1px solid var(--danger-border);  border-radius: 100px; padding: 2px 8px; font-size: 11.5px; font-weight: 600; }
+  .pill-neutral { background: var(--bg-subtle);  color: var(--text-secondary); border: 1px solid var(--border); border-radius: 100px; padding: 2px 8px; font-size: 11.5px; font-weight: 500; }
+
+  /* ── Pulse animation ─────────────────────────────── */
+  @keyframes maxx-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .maxx-pulse { animation: maxx-pulse 2s ease-in-out infinite; }
+}
+
+/* Motion is state feedback; when the user asks for less, give them less. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton   { animation: none; background: var(--skeleton-base); }
+  .maxx-pulse { animation: none; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════
+   DARK THEME
+
+   Only variables are redefined — no component, base or utility rule appears below. That is the whole
+   design: every color in the app resolves through the :root palette above, so a theme is a palette
+   swap and nothing else. Before this, @layer base and @theme inline restated the light values as
+   literals, so redefining the palette changed nothing and the theme was structurally unreachable.
+
+   Three states, because the viewer has three. An explicit choice stamps data-theme on <html>; the
+   default "system" setting stamps nothing, and only prefers-color-scheme separates light from dark
+   there. So: bare :root is the complete light palette; the media query is guarded with
+   :not([data-theme="light"]) so an explicit light choice beats a dark OS; and [data-theme="dark"]
+   repeats the swap so the toggle wins in both directions.
+
+   The semantic ramps are given explicit dark values rather than being darkened mechanically. The
+   --trust-* ramp and the *-bg / *-border tint pairs carry meaning — trust-insufficient must never read
+   as green, and a success tint must stay distinguishable from a warning tint on a dark ground.
+   ═══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-base:        #0E1117;
+    --bg-surface:     #161B22;
+    --bg-elevated:    #1C222B;
+    --bg-overlay:     #161B22;
+    --bg-input:       #0E1117;
+    --bg-subtle:      #1C222B;
+
+    --sidebar-bg:          #0E1117;
+    --sidebar-hover:       #1C222B;
+    --sidebar-active:      rgba(129,140,248,0.14);
+    --sidebar-text:        #9AA6B2;
+    --sidebar-text-active: #E6EDF3;
+    --sidebar-label:       #8A94A0;
+    --sidebar-border:      #2A313C;
+    --sidebar-indicator:   #818CF8;
+
+    --border:         #2A313C;
+    --border-hover:   #3A424F;
+    --border-focus:   rgba(129,140,248,0.65);
+    --border-strong:  #6B7482;
+
+    --text-primary:   #E6EDF3;
+    --text-secondary: #9AA6B2;
+    --text-tertiary:  #8A94A0;
+    --text-disabled:  #646D79;
+
+    --accent:         #818CF8;
+    --accent-dim:     rgba(129,140,248,0.14);
+    --accent-hover:   #A5B4FC;
+    --on-accent:      #0E1117;
+
+    --success:        #3FB950;
+    --success-bg:     rgba(63,185,80,0.12);
+    --success-border: rgba(63,185,80,0.35);
+    --warning:        #D29922;
+    --warning-bg:     rgba(210,153,34,0.12);
+    --warning-border: rgba(210,153,34,0.35);
+    --danger:         #F85149;
+    --danger-bg:      rgba(248,81,73,0.12);
+    --danger-border:  rgba(248,81,73,0.35);
+    --info:           #58A6FF;
+    --info-bg:        rgba(88,166,255,0.12);
+    --info-border:    rgba(88,166,255,0.35);
+
+    --trust-verified:     #3FB950;
+    --trust-high:         #818CF8;
+    --trust-moderate:     #D29922;
+    --trust-low:          #F0883E;
+    --trust-insufficient: #8A94A0;
+
+    --source-actual:    #3FB950;
+    --source-estimate:  #D29922;
+    --paid-marker:      #818CF8;
+    --organic-marker:   #2DD4BF;
+
+    --chart-1: #818CF8;
+    --chart-2: #3FB950;
+    --chart-3: #D29922;
+    --chart-4: #F85149;
+    --chart-5: #A78BFA;
+
+    --shadow-card:  0 1px 2px rgba(0,0,0,0.40);
+    --shadow-panel: 0 4px 16px -4px rgba(0,0,0,0.55);
+
+    --bg-row-hover:          #1C222B;
+    --scrollbar-thumb:       #3A424F;
+    --scrollbar-thumb-hover: #6B7482;
+    --selection-bg:          rgba(129,140,248,0.28);
+    --skeleton-base:         #1C222B;
+    --skeleton-shine:        #2A313C;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-base:        #0E1117;
+  --bg-surface:     #161B22;
+  --bg-elevated:    #1C222B;
+  --bg-overlay:     #161B22;
+  --bg-input:       #0E1117;
+  --bg-subtle:      #1C222B;
+
+  --sidebar-bg:          #0E1117;
+  --sidebar-hover:       #1C222B;
+  --sidebar-active:      rgba(129,140,248,0.14);
+  --sidebar-text:        #9AA6B2;
+  --sidebar-text-active: #E6EDF3;
+  --sidebar-label:       #8A94A0;
+  --sidebar-border:      #2A313C;
+  --sidebar-indicator:   #818CF8;
+
+  --border:         #2A313C;
+  --border-hover:   #3A424F;
+  --border-focus:   rgba(129,140,248,0.65);
+  --border-strong:  #6B7482;
+
+  --text-primary:   #E6EDF3;
+  --text-secondary: #9AA6B2;
+  --text-tertiary:  #8A94A0;
+  --text-disabled:  #646D79;
+
+  --accent:         #818CF8;
+  --accent-dim:     rgba(129,140,248,0.14);
+  --accent-hover:   #A5B4FC;
+  --on-accent:      #0E1117;
+
+  --success:        #3FB950;
+  --success-bg:     rgba(63,185,80,0.12);
+  --success-border: rgba(63,185,80,0.35);
+  --warning:        #D29922;
+  --warning-bg:     rgba(210,153,34,0.12);
+  --warning-border: rgba(210,153,34,0.35);
+  --danger:         #F85149;
+  --danger-bg:      rgba(248,81,73,0.12);
+  --danger-border:  rgba(248,81,73,0.35);
+  --info:           #58A6FF;
+  --info-bg:        rgba(88,166,255,0.12);
+  --info-border:    rgba(88,166,255,0.35);
+
+  --trust-verified:     #3FB950;
+  --trust-high:         #818CF8;
+  --trust-moderate:     #D29922;
+  --trust-low:          #F0883E;
+  --trust-insufficient: #8A94A0;
+
+  --source-actual:    #3FB950;
+  --source-estimate:  #D29922;
+  --paid-marker:      #818CF8;
+  --organic-marker:   #2DD4BF;
+
+  --chart-1: #818CF8;
+  --chart-2: #3FB950;
+  --chart-3: #D29922;
+  --chart-4: #F85149;
+  --chart-5: #A78BFA;
+
+  --shadow-card:  0 1px 2px rgba(0,0,0,0.40);
+  --shadow-panel: 0 4px 16px -4px rgba(0,0,0,0.55);
+
+  --bg-row-hover:          #1C222B;
+  --scrollbar-thumb:       #3A424F;
+  --scrollbar-thumb-hover: #6B7482;
+  --selection-bg:          rgba(129,140,248,0.28);
+  --skeleton-base:         #1C222B;
+  --skeleton-shine:        #2A313C;
+}
+
+/* `color-scheme` is deliberately NOT set here. next-themes writes it inline on <html> from its own
+   blocking pre-hydration script, and an inline style beats any stylesheet rule — CSS rules for it were
+   verified in the browser to never apply. One owner for that property, and it is the library. */

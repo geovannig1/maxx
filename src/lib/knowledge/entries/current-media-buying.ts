@@ -1,0 +1,112 @@
+import type { KnowledgeEntry } from '../corpus'
+
+const V = '2026-08-02'
+
+/** Current primary-source doctrine. These entries are deliberately conditional: platform defaults
+ * are starting points, while an approved CampaignPlan owns the account-specific choice. */
+export const CURRENT_MEDIA_BUYING_ENTRIES: readonly KnowledgeEntry[] = [
+  {
+    key: 'objective-outcome-alignment-current',
+    domain: 'structure_audience',
+    claim: 'Choose the Meta objective and performance goal that match the measurable business outcome; use Traffic when the desired action is genuinely hard to track, not as a substitute for a measurable lead or sale.',
+    detail: 'Meta uses the selected objective to find people likely to take that action. A cheaper upstream event can optimize delivery away from the downstream business outcome.',
+    source: { name: 'Meta for Business — Ad objectives and Traffic objective', url: 'https://www.facebook.com/business/ads/ad-objectives', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'advantage-audience-controls-suggestions-current',
+    domain: 'structure_audience',
+    claim: 'In Advantage+ audience, location, language, minimum age and custom-audience exclusions can be strict controls; other audience inputs are suggestions that Meta may expand beyond.',
+    detail: 'An audience label or interest list therefore does not prove who was exclusively eligible. Grade the configured controls and suggestions separately.',
+    source: { name: 'Meta for Business — Advantage+ audience', url: 'https://www.facebook.com/business/ads/meta-advantage-plus/audience', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'strict-retargeting-identity-current',
+    domain: 'structure_audience',
+    claim: 'A strict retargeting cohort must remain limited to the declared warm custom audiences; lookalikes or expansion beyond those audiences make it a mixed acquisition cohort.',
+    detail: 'This is an audience-identity rule, not a claim that strict retargeting is always the best structure. The intended job and exclusion policy must be explicit.',
+    source: { name: 'Meta for Business — Advantage+ audience', url: 'https://www.facebook.com/business/ads/meta-advantage-plus/audience', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'detailed-targeting-exclusions-removed-current',
+    domain: 'structure_audience',
+    claim: 'Detailed-targeting exclusions are no longer available for new ad sets and were removed from affected active Ads Manager campaigns beginning March 31, 2025.',
+    detail: 'Do not design a current audience strategy that depends on excluding interests, demographics or behaviors through the retired detailed-targeting-exclusion control. Use supported audience controls and custom-audience exclusions where appropriate.',
+    source: { name: 'Meta Help Center — About reaching new audiences', url: 'https://www.facebook.com/help/157306091096340', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'advantage-placements-conditional-default-current',
+    domain: 'structure_audience',
+    claim: 'Advantage+ placements are the default starting point because they give delivery more auction opportunities; exclude placements only for a documented business constraint or unsupported asset experience.',
+    detail: 'Manual placements are not inherently wrong, but their restriction and asset coverage must be explicit and testable rather than inherited as folklore.',
+    source: { name: 'Meta for Business — Advantage+ placements', url: 'https://www.facebook.com/business/ads/meta-advantage-plus/placements', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'simplify-comparable-jobs-current',
+    domain: 'structure_audience',
+    claim: 'Simplify campaigns and ad sets when they perform the same job and fragment the same optimization signal; do not merge materially different funnel jobs merely to chase learning status.',
+    detail: 'Consolidation is a means to reduce fragmentation, not a universal one-campaign prescription. The unit of comparison and audience identity must remain interpretable.',
+    source: { name: 'Meta for Business — Simplify your ad set structure', url: 'https://www.facebook.com/business/ads/ad-set-structure', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'budget-duration-conditional-current',
+    domain: 'budget_scaling',
+    claim: 'There is no universal correct budget; choose it from the business goal and allow enough scheduled budget for the delivery system to operate across at least seven days.',
+    detail: 'Meta describes daily budget as an average and says daily spend can vary while remaining within the weekly limit. The seven-day planning window is not statistical proof that an ad worked.',
+    source: { name: 'Meta for Business — Ad pricing and budgets', url: 'https://www.facebook.com/business/ads/pricing', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'bid-strategy-kpi-current',
+    domain: 'budget_scaling',
+    claim: 'Choose the bid strategy from the primary KPI and the trade-off between result volume and cost control; more cost control places more constraints on delivery.',
+    detail: 'Meta positions automated maximum-results bidding for volume and budget-spend priority, cost cap for a strict CPA priority, and bid cap as an advanced strategy that does not control reported CPA. Availability also depends on the objective.',
+    source: { name: 'Meta for Business — Meta Bid Strategy Guide', url: 'https://www.facebook.com/business/m/one-sheeters/facebook-bid-strategy-guide', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'capi-accepted-delivery-current',
+    domain: 'measurement',
+    claim: 'Conversions API complements browser events, but enabled code or a local sent timestamp does not prove Meta received an event; accepted delivery lineage and the declared deduplication identity are required.',
+    detail: 'Use browser and server signals together, preserve event identity, and distinguish attempted, accepted and rejected deliveries in measurement reporting.',
+    source: { name: 'Meta for Business — About Conversions API', url: 'https://www.facebook.com/business/help/AboutConversionsAPI', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'capi-browser-dedup-current',
+    domain: 'measurement',
+    claim: 'When the same conversion can arrive from both browser and server channels, the event identity contract must allow Meta to deduplicate it instead of counting two separate conversions.',
+    detail: 'The governed tracking contract must name the event identity fields and preserve them end to end. A duplicate or missing identity can create fake lift, fake ROAS, and wrong learning memories.',
+    source: { name: 'Meta for Developers — Conversions API parameters', url: 'https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/v25.0/', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'attribution-not-incrementality-current',
+    domain: 'measurement',
+    claim: 'Conversions API event matching and attribution are not, by themselves, incremental-impact measurement; Meta describes lift studies separately as a way to understand advertising impact.',
+    detail: 'A matched or attributed settled payment can support association and platform optimization. Maxx needs randomized assignment or a governed quasi-experimental comparison before calling the measured contribution causal.',
+    source: { name: 'Meta Business Help Center — About Conversions API', url: 'https://www.facebook.com/business/help/AboutConversionsAPI', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'breakdown-effect-current',
+    domain: 'structure_audience',
+    claim: 'A worse average CPA in a delivery breakdown does not prove that segment is incrementally bad; Meta warns that breakdown averages can be misinterpreted because delivery allocation is not a controlled comparison.',
+    detail: 'Breakdowns explain where spend delivered. They do not by themselves prove what would happen if a placement, platform, age band, gender, or device were excluded.',
+    source: { name: 'Meta for Business — About the breakdown effect', url: 'https://www.facebook.com/business/help/770303663944673', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+  {
+    key: 'learning-state-not-decision-sufficiency-current',
+    domain: 'learning_phase',
+    claim: 'Learning status describes delivery-system exploration; it is not a universal sample-size rule, a causal test, or proof of business effectiveness.',
+    detail: 'Keep delivery learning, measurement maturity and decision sufficiency as separate gates. A decision requires its own metric, comparison, uncertainty or loss threshold, and review rule.',
+    source: { name: 'Meta Business Help Center — About the learning phase', url: 'https://www.facebook.com/business/help/112167992830700', tier: 'meta_official', accessed: V },
+    account_relevance: 'Example-account note: re-derive the fit for your own account before relying on this entry.',
+  },
+]

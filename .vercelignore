@@ -1,0 +1,26 @@
+# Rebuilt on Vercel
+node_modules
+.next
+
+# Secrets live in the Vercel project settings, never in the upload
+.env
+.env.*
+
+# VCS and local tooling
+.git
+.claude
+.codex
+.agents
+.swarm
+tests/reporting-browser/assets
+
+# Local artifacts that never belong in an upload
+*.tsbuildinfo
+.supabase-work
+.supabase-work.lock
+reports
+.diagnose-value-gate-cache.json
+test-results
+playwright-report
+.worktrees
+graphify-out

@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily-sync",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/sync/midday",
+      "schedule": "0 17 * * *"
+    }
+  ]
+}

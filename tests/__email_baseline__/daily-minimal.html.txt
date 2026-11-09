@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta content="light" name="color-scheme">
+  <body style="background-color:#fafafa; margin:0; padding:0">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+      <tbody>
+        <tr>
+          <td style="background-color:#fafafa; color:#1a1a1a; font-family:Arial, Helvetica, sans-serif; margin:0; padding:16px 0">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px; background-color:#fafafa; padding:0 16px" width="100%">
+              <tbody>
+                <tr style="width:100%">
+                  <td>
+                    <p style="font-size:18px; line-height:24px; color:#1a1a1a; font-weight:700; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                      "Maxx Daily"
+                    <p style="font-size:13px; line-height:20px; color:#6b7280; margin:2px 0 0 0; margin-top:2px; margin-right:0; margin-bottom:0; margin-left:0">
+                      "2026-08-12"
+                    <p style="font-size:13px; line-height:20px; color:#6b7280; margin:2px 0 0 0; margin-top:2px; margin-right:0; margin-bottom:0; margin-left:0">
+                      "Example Studio"
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Business"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#f3f4f6; border-left:4px solid #6b7280; color:#1a1a1a; font-size:14px; line-height:21px; padding:12px 14px">
+                            <span style="font-weight:700">
+                              "unavailable"
+                            <br>
+                            "Business: unavailable — the executive evidence snapshot was not available."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Paid delivery"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#f3f4f6; border-left:4px solid #6b7280; color:#1a1a1a; font-size:14px; line-height:21px; padding:12px 14px">
+                            <span style="font-weight:700">
+                              "unavailable"
+                            <br>
+                            "Paid delivery: unavailable — the executive evidence snapshot was not available."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Data confidence"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#f3f4f6; border-left:4px solid #6b7280; color:#1a1a1a; font-size:14px; line-height:21px; padding:12px 14px">
+                            <span style="font-weight:700">
+                              "unavailable"
+                            <br>
+                            "Data confidence: unavailable — the executive evidence snapshot was not available."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Spend context"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="font-size:20px; font-weight:700; line-height:26px; padding-right:14px; vertical-align:middle; white-space:nowrap">
+                                    "unavailable"
+                                  <td style="color:#6b7280; font-size:13px; line-height:20px; vertical-align:middle">
+                                    "reported-day spend"
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:6px 0 0 0; margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Weekly budget comparison unavailable — no exact budget-effective interval was provided for the trailing seven-day window."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "What changed"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; color:#6b7280; font-size:11px; letter-spacing:0.06em; padding:0 0 6px 0; text-transform:uppercase; width:40%">
+                                    "Metric"
+                                  <td style="border-bottom:1px solid #e3e3e3; color:#6b7280; font-size:11px; letter-spacing:0.06em; padding:0 0 6px 10px; text-transform:uppercase; text-align:right; width:24%">
+                                    "Today"
+                                  <td style="border-bottom:1px solid #e3e3e3; color:#6b7280; font-size:11px; letter-spacing:0.06em; padding:0 0 6px 10px; text-transform:uppercase; text-align:right; width:36%">
+                                    "vs 7-day daily avg"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Amount Spent"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:24%">
+                                    "unavailable"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "no comparison"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Leads"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:24%">
+                                    "unavailable"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "no comparison"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Value-bearing bookings (Acuity ledger)"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:24%">
+                                    "unavailable"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "no comparison"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Meta-modelled bookings"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:24%">
+                                    "unavailable"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "no comparison"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "CTR (all)"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:24%">
+                                    "unavailable"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "no comparison"
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="table-layout:fixed" width="100%">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0; vertical-align:top; word-break:break-word; color:#1a1a1a; width:40%">
+                                    "Cost per lead"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:24%">
+                                    "unavailable"
+                                  <td style="border-bottom:1px solid #e3e3e3; font-size:14px; line-height:20px; padding:8px 0 8px 10px; vertical-align:top; word-break:break-word; text-align:right; color:#6b7280; font-weight:400; width:36%">
+                                    "no comparison"
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Observed flags"
+                    <p style="font-size:14px; line-height:21px; color:#1a1a1a; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                      "No observed flag was emitted."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Creative evidence"
+                    <p style="font-size:14px; line-height:21px; color:#1a1a1a; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                      "No creative evidence was available."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Deterministic read"
+                    <p style="font-size:14px; line-height:21px; color:#1a1a1a; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                      "Business: unavailable — the executive evidence snapshot was not available. Paid delivery: unavailable — the executive evidence snapshot was not available. Data confidence: unavailable — the executive evidence snapshot was not available."
+                    <p style="font-size:11px; line-height:16px; color:#6b7280; font-weight:700; letter-spacing:0.08em; margin:24px 0 6px 0; text-transform:uppercase; margin-top:24px; margin-right:0; margin-bottom:6px; margin-left:0">
+                      "Governed actions"
+                    <p style="font-size:14px; line-height:21px; color:#1a1a1a; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                      "No governed action is present."
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0 0 0" width="100%">
+                      <tbody style="width:100%">
+                        <tr style="width:100%">
+                          <td style="background-color:#1a1a1a; padding:12px 20px; text-align:center">
+                            <a href="https://example.com/dashboard" style="color:#fafafa; text-decoration-line:none; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:700; text-decoration:none" target="_blank">
+                              "Open the dashboard"
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-top:1px solid #e3e3e3; margin:24px 0 0 0; padding:12px 0 0 0" width="100%">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:0; margin-top:0; margin-bottom:0; margin-left:0; margin-right:0">
+                              "Report date 2026-08-12. Generated from committed report facts."
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:6px 0 0 0; margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Diagnostic only — no new action authority is created here."
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:6px 0 0 0; margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Three planes, never mixed: the outcome ledger is the business total, Meta AppointmentConfirmed is a modelled estimate, and GA4 is web confirmation-event telemetry. They measure different populations and are not expected to agree."
+                            <p style="font-size:12px; line-height:18px; color:#6b7280; margin:6px 0 0 0; margin-top:6px; margin-right:0; margin-bottom:0; margin-left:0">
+                              "Dates inside the attribution re-pull window are provisional and may still restate; today is usually incomplete rather than zero."

@@ -1,0 +1,39 @@
+# gitleaks configuration for this repository (used locally and by the Security workflow).
+# The default rules apply. Allowlists cover values that look like secrets but are public or
+# synthetic. Never add a real credential here; rotate it instead.
+title = "maxx"
+
+[extend]
+useDefault = true
+
+# Supabase CLI's two public local-development demo JWTs (issuer "supabase-demo"; anon and
+# service_role), anchored to the exact published values. Any other JWT is reported.
+[[allowlists]]
+description = "Supabase local demo keys (public, exact values)"
+regexTarget = "secret"
+regexes = [
+  '''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9\.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0$''',
+  '''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0\.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU$''',
+]
+
+# Named synthetic fixture values and one TypeScript type name the generic rule misreads. Each entry
+# is anchored to the WHOLE extracted secret, so it allows exactly that value and nothing else: no
+# path is exempt, and a real credential anywhere (tests included) is still reported.
+[[allowlists]]
+description = "exact synthetic fixture values and a type name"
+regexTarget = "secret"
+regexes = [
+  '''^abc123SECRETkey$''',
+  '''^test-only-secret-that-is-long-enough-for-hmac$''',
+  '''^paid-touch-test-secret-at-least-thirty-two-bytes$''',
+  '''^acuity-link-secret-at-least-thirty-two-bytes$''',
+  '''^cron-secret-fixture-at-least-32-bytes-long$''',
+  '''^ExecutiveCapiFactsV1$''',
+]
+
+[[allowlists]]
+description = "never scan dependencies or build output"
+paths = [
+  '''^node_modules/''',
+  '''^\.next/''',
+]
