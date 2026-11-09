@@ -66,7 +66,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1
+      - uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v1
         with:
           version: 2.109.1 # keep in lockstep with scripts/sb.sh
       - name: Install
