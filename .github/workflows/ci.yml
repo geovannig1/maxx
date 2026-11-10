@@ -27,7 +27,9 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Measured on hosted runners: 16-25 min for lint, two typechecks, ~8,600 unit tests, PGlite and the build;
+    # a 25-minute limit cancelled two runs mid-build. Keep roughly 2x the slowest passing run.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
