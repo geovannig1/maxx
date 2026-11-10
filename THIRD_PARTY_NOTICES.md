@@ -180,17 +180,18 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@babel/helpers` | 7.29.7 | MIT |
 | `@babel/parser` | 7.29.7 | MIT |
 | `@babel/runtime` | 7.29.2 | MIT |
+| `@babel/runtime` | 8.0.8 | MIT |
 | `@babel/template` | 7.29.7 | MIT |
 | `@babel/traverse` | 7.29.7 | MIT |
 | `@babel/types` | 7.29.7 | MIT |
-| `@base-ui/react` | 1.4.1 | MIT |
-| `@base-ui/utils` | 0.2.8 | MIT |
+| `@base-ui/react` | 1.9.0 | MIT |
+| `@base-ui/utils` | 0.5.0 | MIT |
 | `@date-fns/tz` | 1.4.1 | MIT |
 | `@emnapi/runtime` | 1.11.3 | MIT (optional) |
-| `@floating-ui/core` | 1.7.5 | MIT |
-| `@floating-ui/dom` | 1.7.6 | MIT |
-| `@floating-ui/react-dom` | 2.1.8 | MIT |
-| `@floating-ui/utils` | 0.2.11 | MIT |
+| `@floating-ui/core` | 1.8.0 | MIT |
+| `@floating-ui/dom` | 1.8.0 | MIT |
+| `@floating-ui/react-dom` | 2.1.9 | MIT |
+| `@floating-ui/utils` | 0.2.12 | MIT |
 | `@google-analytics/data` | 6.1.0 | Apache-2.0 |
 | `@grpc/grpc-js` | 1.14.6 | Apache-2.0 |
 | `@grpc/proto-loader` | 0.8.1 | Apache-2.0 |
@@ -230,16 +231,16 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@jridgewell/sourcemap-codec` | 1.5.5 | MIT |
 | `@jridgewell/trace-mapping` | 0.3.31 | MIT |
 | `@js-sdsl/ordered-map` | 4.4.2 | MIT |
-| `@modelcontextprotocol/sdk` | 1.32.1 | MIT |
-| `@next/env` | 16.4.2 | MIT |
-| `@next/swc-darwin-arm64` | 16.4.2 | MIT (optional) |
-| `@next/swc-darwin-x64` | 16.4.2 | MIT (optional) |
-| `@next/swc-linux-arm64-gnu` | 16.4.2 | MIT (optional) |
-| `@next/swc-linux-arm64-musl` | 16.4.2 | MIT (optional) |
-| `@next/swc-linux-x64-gnu` | 16.4.2 | MIT (optional) |
-| `@next/swc-linux-x64-musl` | 16.4.2 | MIT (optional) |
-| `@next/swc-win32-arm64-msvc` | 16.4.2 | MIT (optional) |
-| `@next/swc-win32-x64-msvc` | 16.4.2 | MIT (optional) |
+| `@modelcontextprotocol/sdk` | 1.32.2 | MIT |
+| `@next/env` | 16.4.3 | MIT |
+| `@next/swc-darwin-arm64` | 16.4.3 | MIT (optional) |
+| `@next/swc-darwin-x64` | 16.4.3 | MIT (optional) |
+| `@next/swc-linux-arm64-gnu` | 16.4.3 | MIT (optional) |
+| `@next/swc-linux-arm64-musl` | 16.4.3 | MIT (optional) |
+| `@next/swc-linux-x64-gnu` | 16.4.3 | MIT (optional) |
+| `@next/swc-linux-x64-musl` | 16.4.3 | MIT (optional) |
+| `@next/swc-win32-arm64-msvc` | 16.4.3 | MIT (optional) |
+| `@next/swc-win32-x64-msvc` | 16.4.3 | MIT (optional) |
 | `@opentelemetry/api` | 1.9.1 | Apache-2.0 |
 | `@opentelemetry/api-logs` | 0.220.0 | Apache-2.0 |
 | `@opentelemetry/core` | 2.12.0 | Apache-2.0 |
@@ -355,14 +356,14 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@stablelib/base64` | 1.0.1 | MIT |
 | `@standard-schema/spec` | 1.1.0 | MIT |
 | `@standard-schema/utils` | 0.3.0 | MIT |
-| `@supabase/auth-js` | 2.112.3 | MIT |
-| `@supabase/functions-js` | 2.112.3 | MIT |
+| `@supabase/auth-js` | 2.118.0 | MIT |
+| `@supabase/functions-js` | 2.118.0 | MIT |
 | `@supabase/phoenix` | 0.4.5 | MIT |
-| `@supabase/postgrest-js` | 2.112.3 | MIT |
-| `@supabase/realtime-js` | 2.112.3 | MIT |
-| `@supabase/ssr` | 0.12.4 | MIT |
-| `@supabase/storage-js` | 2.112.3 | MIT |
-| `@supabase/supabase-js` | 2.112.3 | MIT |
+| `@supabase/postgrest-js` | 2.118.0 | MIT |
+| `@supabase/realtime-js` | 2.118.0 | MIT |
+| `@supabase/ssr` | 0.12.7 | MIT |
+| `@supabase/storage-js` | 2.118.0 | MIT |
+| `@supabase/supabase-js` | 2.118.0 | MIT |
 | `@swc/helpers` | 0.5.23 | Apache-2.0 |
 | `@tabby_ai/hijri-converter` | 1.0.5 | MIT |
 | `@types/d3-array` | 3.2.2 | MIT |
@@ -467,7 +468,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `d3-time-format` | 4.1.0 | ISC |
 | `d3-timer` | 3.0.1 | ISC |
 | `data-uri-to-buffer` | 4.0.1 | MIT |
-| `date-fns` | 4.1.0 | MIT |
+| `date-fns` | 4.4.0 | MIT |
 | `date-fns-jalali` | 4.1.0-0 | MIT |
 | `debug` | 4.4.3 | MIT |
 | `decimal.js-light` | 2.5.1 | MIT |
@@ -513,7 +514,6 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `formdata-polyfill` | 4.0.10 | MIT |
 | `forwarded` | 0.2.0 | MIT |
 | `fresh` | 2.0.0 | MIT |
-| `fsevents` | 2.3.2 | MIT (optional) |
 | `fsevents` | 2.3.3 | MIT (optional) |
 | `function-bind` | 1.1.2 | MIT |
 | `gaxios` | 7.1.3 | Apache-2.0 |
@@ -544,8 +544,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `https-proxy-agent` | 7.0.6 | MIT |
 | `iceberg-js` | 0.8.1 | MIT |
 | `iconv-lite` | 0.7.3 | MIT |
-| `immer` | 10.2.0 | MIT |
-| `immer` | 11.1.8 | MIT |
+| `immer` | 11.2.9 | MIT |
 | `import-in-the-middle` | 3.6.0 | Apache-2.0 |
 | `inherits` | 2.0.4 | ISC |
 | `inline-style-parser` | 0.2.7 | MIT |
@@ -579,7 +578,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `lru-cache` | 11.5.1 | BlueOak-1.0.0 |
 | `lru-cache` | 11.5.3 | BlueOak-1.0.0 |
 | `lru-cache` | 5.1.1 | ISC |
-| `lucide-react` | 1.16.0 | ISC |
+| `lucide-react` | 1.62.0 | ISC |
 | `magic-string` | 0.30.21 | MIT |
 | `math-intrinsics` | 1.1.0 | MIT |
 | `mdast-util-from-markdown` | 2.0.3 | MIT |
@@ -624,13 +623,13 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `ms` | 2.1.3 | MIT |
 | `nanoid` | 3.3.18 | MIT |
 | `negotiator` | 1.0.0 | MIT |
-| `next` | 16.4.2 | MIT |
+| `next` | 16.4.3 | MIT |
 | `next-themes` | 0.4.6 | MIT |
 | `node-domexception` | 1.0.0 | MIT |
 | `node-fetch` | 2.7.0 | MIT |
 | `node-fetch` | 3.3.2 | MIT |
 | `node-releases` | 2.0.59 | MIT |
-| `nodemailer` | 10.1.7 | MIT-0 |
+| `nodemailer` | 10.2.1 | MIT-0 |
 | `object-assign` | 4.1.1 | MIT |
 | `object-hash` | 3.0.0 | MIT |
 | `object-inspect` | 1.13.4 | MIT |
@@ -659,14 +658,14 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `qs` | 6.16.1 | BSD-3-Clause |
 | `range-parser` | 1.2.1 | MIT |
 | `raw-body` | 3.0.2 | MIT |
-| `react` | 19.2.4 | MIT |
+| `react` | 19.3.1 | MIT |
 | `react-day-picker` | 9.14.0 | MIT |
-| `react-dom` | 19.2.4 | MIT |
+| `react-dom` | 19.3.1 | MIT |
 | `react-is` | 16.13.1 | MIT |
 | `react-markdown` | 10.1.0 | MIT |
 | `react-redux` | 9.2.0 | MIT |
 | `readable-stream` | 3.6.2 | MIT |
-| `recharts` | 3.8.1 | MIT |
+| `recharts` | 3.10.1 | MIT |
 | `redux` | 5.0.1 | MIT |
 | `redux-thunk` | 3.1.0 | MIT |
 | `remark-parse` | 11.0.0 | MIT |
@@ -674,14 +673,15 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `require-directory` | 2.1.1 | MIT |
 | `require-from-string` | 2.0.2 | MIT |
 | `require-in-the-middle` | 8.0.1 | MIT |
-| `reselect` | 5.1.1 | MIT |
+| `reselect` | 5.2.0 | MIT |
+| `reselect` | 5.3.0 | MIT |
 | `retry-request` | 8.0.3 | MIT |
 | `rimraf` | 6.1.4 | BlueOak-1.0.0 |
 | `rollup` | 4.62.2 | MIT |
 | `router` | 2.2.0 | MIT |
 | `safe-buffer` | 5.2.1 | MIT |
 | `safer-buffer` | 2.1.2 | MIT |
-| `scheduler` | 0.27.0 | MIT |
+| `scheduler` | 0.28.0 | MIT |
 | `schema-utils` | 4.8.3 | MIT |
 | `semver` | 6.3.1 | ISC |
 | `semver` | 7.8.5 | ISC (optional) |
@@ -695,7 +695,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `side-channel-list` | 1.0.1 | MIT |
 | `side-channel-map` | 1.0.1 | MIT |
 | `side-channel-weakmap` | 1.0.2 | MIT |
-| `sonner` | 2.0.7 | MIT |
+| `sonner` | 2.0.8 | MIT |
 | `source-map` | 0.6.1 | BSD-3-Clause |
 | `source-map-js` | 1.2.2 | BSD-3-Clause |
 | `source-map-support` | 0.5.21 | MIT |
@@ -714,7 +714,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `style-to-object` | 1.0.14 | MIT |
 | `styled-jsx` | 5.1.6 | MIT |
 | `supports-color` | 8.1.1 | MIT |
-| `tailwind-merge` | 3.6.0 | MIT |
+| `tailwind-merge` | 3.7.0 | MIT |
 | `tapable` | 2.3.3 | MIT |
 | `teeny-request` | 10.1.3 | Apache-2.0 |
 | `terser` | 5.51.2 | BSD-2-Clause |
@@ -738,7 +738,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `unist-util-visit-parents` | 6.0.2 | MIT |
 | `unpipe` | 1.0.0 | MIT |
 | `update-browserslist-db` | 1.3.4 | MIT |
-| `use-sync-external-store` | 1.6.0 | MIT |
+| `use-sync-external-store` | 1.7.0 | MIT |
 | `util-deprecate` | 1.0.2 | MIT |
 | `vary` | 1.1.2 | MIT |
 | `vfile` | 6.0.3 | MIT |
