@@ -14,10 +14,14 @@ updates:
       # deliberate runtime upgrade: newer types let code call APIs Node 24 does not have and still type-check.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
-      # 0.5.12 makes the file-backed close/reopen database tests time out or crash (0.5.4 passes). Remove this
-      # once a newer release is re-tested (see the release tracker).
+      # 0.5.10 and later make 4 file-backed close/reopen database tests time out or crash; 0.5.4-0.5.9 pass
+      # (bisected 2026-11-10). Remove once a newer release is re-tested (see the release tracker).
       - dependency-name: "@electric-sql/pglite"
-        versions: [">=0.5.12"]
+        versions: [">=0.5.10"]
+      # Wait for 11.11.0: it is the first release whose bundler plugin moves to glob ^14.0.3 and clears the
+      # build-time advisories (docs/security-model.md). Earlier 11.x would mean migrating twice. 11.11+ is allowed.
+      - dependency-name: "@sentry/nextjs"
+        versions: [">=11.0.0 <11.11.0"]
       # TypeScript majors are a planned migration: typescript-eslint does not support TypeScript 7 yet.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]

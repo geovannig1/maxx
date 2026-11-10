@@ -105,6 +105,23 @@ what changed and why in the body, and how it was verified.
 5. Fill in the pull request template: what changed, why, how it was verified, and what a reviewer
    should look at first.
 
+## Dependency updates
+
+- **Package-age rule:** adopt only versions published at least 14 days ago. Dependabot enforces it with a
+  14-day cooldown (`.github/dependabot.yml`), checks monthly, and groups all minor and patch updates into
+  one pull request. Exception: a Dependabot *security* update (which skips the cooldown) may be adopted
+  sooner when the advisory is high or critical and the vulnerable code is reachable at runtime; record why
+  in the pull request.
+- **Finish bot pull requests on their own branch.** If one needs a fix (for example a version Maxx cannot
+  use yet, or regenerated notices), push a commit to the Dependabot branch and merge that pull request;
+  do not re-create it as a new one. Close or merge open bot pull requests before merging anything else,
+  because every merge to `main` makes Dependabot rebase them and re-run CI.
+- **Versions Maxx cannot use** go in `ignore` in `.github/dependabot.yml` with the reason, not only in a
+  closing comment (closing a grouped pull request does not stop Dependabot proposing the version again).
+  Changing that file starts a Dependabot run immediately.
+- **Third-party notices:** run `npm run notices` after a dependency change. `npm run notices:check` is part
+  of `npm run release:check` and fails a release whose `THIRD_PARTY_NOTICES.md` is out of date.
+
 ## Proposing an outcome adapter or an ad platform
 
 Open an issue before writing code.
