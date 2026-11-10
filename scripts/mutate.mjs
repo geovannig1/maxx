@@ -19,6 +19,7 @@
  * USAGE
  *   node scripts/mutate.mjs                      # changed files vs origin/HEAD's merge-base
  *   node scripts/mutate.mjs --base HEAD~3        # changed files vs a ref
+ *   node scripts/mutate.mjs --timeout 600 <file> # per-run limit in seconds (default 900; a hang = caught)
  *   node scripts/mutate.mjs src/lib/maxx/chat.ts # explicit files, whole file
  *   node scripts/mutate.mjs --self-test          # prove the harness detects a planted survivor
  *
@@ -139,9 +140,13 @@ const OPERATORS = [
   {
     id: 'empty-string-literal',
     // A message nobody asserts on can be blanked. Catches "the detail says what it checked" claims.
+    // Module specifiers are not messages: `from ''` is rejected by tsc and can hang the suite's module
+    // resolver (one cost a 7-hour stall, then 15 minutes per import once runs were time-limited).
     apply: (line) => {
       const m = /'([^'\\]{12,})'/.exec(line)
-      return m && !line.trimStart().startsWith('//') ? line.replace(m[0], "''") : null
+      if (!m || line.trimStart().startsWith('//')) return null
+      if (/(?:\bfrom|\bimport|\brequire\(|\bimport\()\s*$/.test(line.slice(0, m.index))) return null
+      return line.replace(m[0], "''")
     },
   },
 ]
@@ -206,12 +211,37 @@ function buildMutations(file, only) {
   return { mutations, unreached }
 }
 
-/** True when the suite FAILED, i.e. the mutation was caught. `--bail` keeps caught mutations cheap. */
-function suiteRejects() {
-  const result = spawnSync('npx', ['vitest', 'run', '--bail=1', '--silent'], {
+/**
+ * Seconds one suite or typecheck run may take. A mutation can hang the run (measured: rewriting an
+ * import specifier to '' left a vitest worker at full CPU for 7 hours and stalled the sweep at 4/296),
+ * and a hang is the suite objecting, so a timeout counts as caught. The full unit suite takes ~4 min.
+ */
+// A flag, not an environment variable: every env name the repo reads must be in src/config/env.ts.
+const TIMEOUT_INDEX = process.argv.indexOf('--timeout')
+const TIMEOUT_VALUE = TIMEOUT_INDEX === -1 ? undefined : process.argv[TIMEOUT_INDEX + 1]
+const RUN_TIMEOUT_SECONDS = Number(TIMEOUT_VALUE) > 0 ? Number(TIMEOUT_VALUE) : 900
+
+// Runs the command as the leader of its own process group and kills the WHOLE group on timeout
+// (exit 124): killing only `npx` would orphan the vitest workers, still spinning. Perl because
+// spawnSync cannot kill a group and macOS has no `timeout`/`setsid`.
+const BOUNDED_RUNNER = 'my $t = shift; my $pid = fork; die "fork: $!" unless defined $pid;'
+  + ' if ($pid == 0) { setpgrp(0, 0); exec @ARGV or exit 127 }'
+  + ' local $SIG{ALRM} = sub { kill "KILL", -$pid; waitpid($pid, 0); exit 124 }; alarm $t;'
+  + ' waitpid($pid, 0); alarm 0; exit($? & 127 ? 128 + ($? & 127) : $? >> 8)'
+
+/** Runs a command under the time limit; `timedOut` is true when the limit killed it. */
+function runBounded(command, args, seconds = RUN_TIMEOUT_SECONDS) {
+  const result = spawnSync('perl', ['-e', BOUNDED_RUNNER, String(seconds), command, ...args], {
     cwd: ROOT, encoding: 'utf8', env: { ...process.env, CI: '1' },
   })
-  return result.status !== 0
+  return { status: result.status, timedOut: result.status === 124 }
+}
+
+/** True when the suite FAILED (or hung past the limit), i.e. the mutation was caught. `--bail` keeps caught mutations cheap. */
+function suiteRejects() {
+  const run = runBounded('npx', ['vitest', 'run', '--bail=1', '--silent'])
+  if (run.timedOut) console.log(`    (suite exceeded ${RUN_TIMEOUT_SECONDS}s and was stopped: counted as caught)`)
+  return run.status !== 0
 }
 
 /**
@@ -228,10 +258,7 @@ function suiteRejects() {
  * Only survivors pay this cost, so a sweep whose mutations are all behavioural runs no typechecks.
  */
 function typecheckRejects() {
-  const result = spawnSync('npx', ['tsc', '--noEmit'], {
-    cwd: ROOT, encoding: 'utf8', env: { ...process.env, CI: '1' },
-  })
-  return result.status !== 0
+  return runBounded('npx', ['tsc', '--noEmit']).status !== 0
 }
 
 /**
@@ -299,7 +326,7 @@ function main() {
 
   const baseIndex = argv.indexOf('--base')
   const base = baseIndex === -1 ? 'origin/HEAD' : argv[baseIndex + 1]
-  const explicit = argv.filter((a) => !a.startsWith('--') && a !== base)
+  const explicit = argv.filter((a) => !a.startsWith('--') && a !== base && a !== TIMEOUT_VALUE)
 
   let targets
   if (explicit.length > 0) {
@@ -436,7 +463,9 @@ function selfTest() {
       lineNo: typeLineNo,
       operator: 'self-test:type-position',
       original: '  current: CockpitRange',
-      mutated: '  current: !CockpitRange',
+      // An unknown type name: esbuild erases it unread, tsc rejects it (TS2304). The earlier anchor,
+      // `!CockpitRange`, stopped demonstrating the blind spot once esbuild began refusing to parse it.
+      mutated: '  current: NotACockpitRange',
     }
     applyMutation(typeMutation)
     let bySuite
@@ -458,12 +487,20 @@ function selfTest() {
   const dirty = git(['status', '--porcelain', '--', file]).trim()
   if (dirty !== '') failures.push(`working tree not restored: ${dirty}`)
 
+  // THE TIMEOUT PATH: a hung run must stop at the limit and take its children with it (the vitest
+  // workers outlived their parent once). A shell that backgrounds a long sleep stands in for vitest.
+  const started = Date.now()
+  const hung = runBounded('sh', ['-c', 'sleep 4711 & wait'], 1)
+  if (!hung.timedOut || Date.now() - started > 15_000) failures.push('timeout path is dead: a hung run was not stopped at the limit')
+  const orphans = spawnSync('pgrep', ['-f', 'sleep 4711'], { encoding: 'utf8' }).stdout.trim()
+  if (orphans !== '') failures.push(`timeout left the hung run's children alive: pids ${orphans.replace(/\n/g, ' ')}`)
+
   if (failures.length > 0) {
     console.error('SELF-TEST FAILED:'); for (const f of failures) console.error(`  - ${f}`)
     process.exit(2)
   }
   console.log('SELF-TEST PASSED: the harness detects a caught mutation, catches a type-only mutation'
-    + ' the suite cannot see, and restores the tree.')
+    + ' the suite cannot see, stops a hung run with its children, and restores the tree.')
 }
 
 main()

@@ -104,6 +104,11 @@ describe('tone: banned words, em dashes, hype, clickbait', () => {
     expect(rules(scoreCopyVariant({ ...GOOD, headline: 'Book NOW!!' }, opts))).toContain('hype_punctuation')
     expect(rules(scoreCopyVariant(GOOD, opts))).not.toContain('hype_punctuation')
   })
+  it('reads only a single shouted word as all caps, not short abbreviations side by side', () => {
+    // Mutation testing let the pattern span spaces ("NY LA" read as one shouted word) unnoticed.
+    expect(rules(scoreCopyVariant({ ...GOOD, headline: 'Daylight studios in NY LA' }, opts))).not.toContain('hype_punctuation')
+    expect(rules(scoreCopyVariant({ ...GOOD, headline: 'Daylight studios TODAY' }, opts))).toContain('hype_punctuation')
+  })
   it('flags clickbait', () => {
     expect(rules(scoreCopyVariant({ ...GOOD, headline: "You won't believe this studio" }, opts))).toContain('clickbait')
     expect(rules(scoreCopyVariant(GOOD, opts))).not.toContain('clickbait')
@@ -130,6 +135,21 @@ describe('unverified claims', () => {
     const score = scoreCopyVariant({ ...GOOD, description: 'Same-day booking guaranteed' }, opts)
     expect(score.findings.some((f) => f.rule === 'unverified_claim' && /requires verification/i.test(f.message))).toBe(true)
   })
+  // Each kind of claim gets its own guidance. Mutation testing swapped them and the suite stayed green,
+  // because the test above only asks whether ANY finding mentions "requires verification".
+  it('tells the owner to verify a listed claim and to remove or replace any other', () => {
+    const listed = scoreCopyVariant({ ...GOOD, description: 'Same-day booking guaranteed' }, opts).findings
+      .filter((f) => f.rule === 'unverified_claim' && /requires verification/.test(f.message))
+    expect(listed.length).toBeGreaterThan(0)
+    for (const f of listed) expect(f.fix).toBe('Remove it, or verify it and add it to the profile as a fact.')
+
+    const price = scoreCopyVariant({ ...GOOD, headline: 'Studio from $45/hr' }, opts).findings.filter((f) => f.rule === 'unverified_claim')
+    expect(price.length).toBeGreaterThan(0)
+    for (const f of price) {
+      expect(f.message).toMatch(/^Unverified .*not in the verified brand facts\.$/)
+      expect(f.fix).toBe('Remove it or replace it with a verified fact.')
+    }
+  })
 })
 
 describe('policy risk', () => {
@@ -142,6 +162,13 @@ describe('policy risk', () => {
     for (const headline of ['See the before and after', 'Guaranteed results in a day', 'Lose 10 lbs fast', 'Make money from home']) {
       expect(rules(scoreCopyVariant({ ...GOOD, headline }, opts)), headline).toContain('policy_risk')
     }
+  })
+  it('gives the fix that matches the policy risk', () => {
+    const fixes = (headline: string) => scoreCopyVariant({ ...GOOD, headline }, opts).findings
+      .filter((f) => f.rule === 'policy_risk').map((f) => f.fix)
+    expect(fixes('Are you overweight?')).toEqual(['Describe the offer, not the person ("for product shoots", not "are you...").'])
+    expect(fixes('Guaranteed results in a day')).toContain('Rephrase without promising or implying a personal outcome.')
+    expect(fixes('Guaranteed results in a day')).not.toContain('Describe the offer, not the person ("for product shoots", not "are you...").')
   })
   it('does not read a black backdrop as a personal attribute', () => {
     expect(rules(scoreCopyVariant({ ...GOOD, headline: 'Your black backdrop is ready' }, opts))).not.toContain('policy_risk')
