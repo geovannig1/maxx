@@ -1,29 +1,37 @@
 version: 2
+# Dependency policy (docs/security-model.md): adopt only versions published at least 14 days ago, and keep
+# PR traffic low. Changing this file starts a Dependabot run immediately, so change it deliberately.
+# Bot PRs are finished on their own branch (e.g. push `npm run notices`), not re-created as new PRs.
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
-    # Match the project's package-age rule: only versions published at least 14 days ago are adopted
-    # (docs/security-model.md). A shorter cooldown produced PRs that had to be closed unmerged.
+      interval: monthly # security updates do not wait for this schedule
     cooldown:
-      default-days: 14
+      default-days: 14 # the 14-day package-age rule (not applied to security updates)
     ignore:
-      # @types/node must match the Node runtime major (engines, .nvmrc and CI all use Node 24). Moving it is
-      # a deliberate runtime upgrade, not a routine bump: types for a newer Node let code call APIs that
-      # do not exist on Node 24 and still type-check.
+      # @types/node must match the Node runtime major (engines, .nvmrc and CI all use Node 24). Moving it is a
+      # deliberate runtime upgrade: newer types let code call APIs Node 24 does not have and still type-check.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # 0.5.12 makes the file-backed close/reopen database tests time out or crash (0.5.4 passes). Remove this
+      # once a newer release is re-tested (see the release tracker).
+      - dependency-name: "@electric-sql/pglite"
+        versions: [">=0.5.12"]
+      # TypeScript majors are a planned migration: typescript-eslint does not support TypeScript 7 yet.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
-      minor-and-patch:
+      npm-minor-patch:
+        applies-to: version-updates
         update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-    # Same 14-day rule for action releases (default-days is supported for GitHub Actions; semver-specific
-    # cooldown days are not).
+      interval: monthly
     cooldown:
-      default-days: 14
+      default-days: 14 # supported for GitHub Actions (semver-specific days are not)
+    groups:
+      actions:
+        patterns: ["*"] # one PR; keeps codeql-action init and analyze in step
 # Actions are pinned to commit SHAs with the tag in a trailing comment; Dependabot keeps both current.
