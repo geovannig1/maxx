@@ -103,4 +103,4 @@ self-host. Compared with that private tool:
 - Cross-site mutations are refused; the public paid-touch endpoint has per-client and global caps.
 - See [docs/security-model.md](docs/security-model.md) for the model and its accepted residuals.
 
-[1.0.0]: https://github.com/geovannig1/maxx/releases/tag/v1.0.0
+[1.0.0]: https://github.com/geovannig1/maxx-ai-media-buyer/releases/tag/v1.0.0
