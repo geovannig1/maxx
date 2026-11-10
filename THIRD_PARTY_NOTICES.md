@@ -382,7 +382,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@types/mdast` | 4.0.4 | MIT |
 | `@types/ms` | 2.1.0 | MIT |
 | `@types/node` | 24.19.2 | MIT |
-| `@types/react` | 19.2.14 | MIT |
+| `@types/react` | 19.3.0 | MIT |
 | `@types/unist` | 2.0.11 | MIT |
 | `@types/unist` | 3.0.3 | MIT |
 | `@types/use-sync-external-store` | 0.0.6 | MIT |
