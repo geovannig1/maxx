@@ -381,7 +381,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@types/json-schema` | 7.0.15 | MIT |
 | `@types/mdast` | 4.0.4 | MIT |
 | `@types/ms` | 2.1.0 | MIT |
-| `@types/node` | 26.6.5 | MIT |
+| `@types/node` | 24.19.2 | MIT |
 | `@types/react` | 19.2.14 | MIT |
 | `@types/unist` | 2.0.11 | MIT |
 | `@types/unist` | 3.0.3 | MIT |
@@ -727,7 +727,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `tw-animate-css` | 1.4.0 | MIT |
 | `type-fest` | 0.7.1 | (MIT OR CC0-1.0) |
 | `type-is` | 2.1.0 | MIT |
-| `undici-types` | 8.9.0 | MIT |
+| `undici-types` | 7.24.6 | MIT |
 | `unified` | 11.0.5 | MIT |
 | `unist-util-is` | 6.0.1 | MIT |
 | `unist-util-position` | 5.0.0 | MIT |

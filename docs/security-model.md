@@ -277,7 +277,7 @@ uploaded to Sentry, and deleted from the build.
   `AbortSignal`. The fixed releases (`glob` 14.0.2+, `minimatch` 11.0.1+, or `@sentry/nextjs`
   11.11.0, whose plugin requires `glob` `^14.0.3`) are outside the plugin's range or a major SDK
   upgrade, and were under 14 days old on 2026-11-07, so no override is applied.
-- **ESLint 10 runs ahead of three plugins' declared ranges.** `eslint-config-next` 16.4.3 bundles
+- **ESLint 10 runs ahead of three plugins' declared ranges.** `eslint-config-next` 16.4.3 depends on
   `eslint-plugin-import`, `eslint-plugin-jsx-a11y` and `eslint-plugin-react`, whose peer ranges stop at
   ESLint 9, so npm prints `ERESOLVE overriding peer dependency`. The rules were verified to run under
   ESLint 10 (2026-11-10): a probe file with deliberate violations was reported by `react/*`, `import/*`,

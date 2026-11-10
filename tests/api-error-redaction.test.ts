@@ -75,7 +75,7 @@ describe('owner API routes do not return raw database error text', () => {
   // so PATCH /api/changes/[id] passed on another route's `[api ...]` line while logging none itself.
   afterEach(() => { vi.restoreAllMocks() })
 
-  it.each(CASES)('$name returns a generic message and code, keeps its status, and logs the detail', async ({ status, run }) => {
+  it.each(CASES)('$name returns a generic message and code, keeps its status, and logs the detail', async ({ name, status, run }) => {
     const response = await run()
     const text = await response.text()
     expect(response.status).toBe(status)
@@ -86,7 +86,8 @@ describe('owner API routes do not return raw database error text', () => {
     expect(body.code).toMatch(/^[A-Z][A-Z0-9_]+$/)
     const logged = vi.mocked(console.error).mock.calls.map((call) => call.map(String).join(' ')).join('\n')
     expect(logged).toContain('secret_internal_table')
-    expect(logged).toMatch(/\[api [^\]]+\]/)
+    // This case's own route tag, not just any `[api …]` line.
+    expect(logged).toContain(`[api ${name}]`)
   })
 })
 
