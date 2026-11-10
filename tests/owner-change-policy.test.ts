@@ -79,6 +79,28 @@ describe('owner parameters', () => {
       .toMatchObject({ ok: false })
   })
 
+  // The copy's budget is optional: absent or blank means "keep Meta's default", a value must be a
+  // positive amount. Mutation testing found neither branch asserted (4 survivors on these two lines).
+  it('keeps a valid budget for a duplicate and treats a blank one as none', () => {
+    const structural = decision({ action_kind: 'structural' })
+    expect(normalizeOwnerParams('duplicate_adset', structural, { new_name: 'Copy', new_daily_budget: '45.504' }))
+      .toEqual({ ok: true, params: { new_name: 'Copy', new_daily_budget: 45.5 } })
+    expect(normalizeOwnerParams('duplicate_adset', structural, { new_name: 'Copy', new_daily_budget: 30 }))
+      .toEqual({ ok: true, params: { new_name: 'Copy', new_daily_budget: 30 } })
+    expect(normalizeOwnerParams('duplicate_adset', structural, { new_name: 'Copy', new_daily_budget: '' }))
+      .toEqual({ ok: true, params: { new_name: 'Copy', new_daily_budget: null } })
+  })
+
+  it.each([
+    ['zero', 0],
+    ['a negative amount', '-5'],
+    ['text', 'lots'],
+    ['whitespace', '   '],
+  ] as const)('refuses a duplicate budget of %s', (_label, budget) => {
+    expect(normalizeOwnerParams('duplicate_adset', decision({ action_kind: 'structural' }), { new_name: 'Copy', new_daily_budget: budget }))
+      .toEqual({ ok: false, code: 'INVALID_PARAMS', message: 'The copy\'s daily budget must be a positive amount, or left empty.' })
+  })
+
   it('requires the params to equal a mutation the engine did propose', () => {
     const proposed = decision({ proposed_mutation: { action_type: 'adjust_budget', new_daily_budget: 60 } })
     expect(normalizeOwnerParams('adjust_budget', proposed, { new_daily_budget: 61 })).toMatchObject({ ok: false })
@@ -98,6 +120,13 @@ describe('budget steps', () => {
     expect(maxBudgetChangePercent({ MAX_BUDGET_CHANGE_PERCENT: '25' })).toBe(25)
     expect(maxBudgetChangePercent({ MAX_BUDGET_CHANGE_PERCENT: 'x' })).toBe(50)
     expect(maxBudgetChangePercent({ MAX_BUDGET_CHANGE_PERCENT: '-5' })).toBe(50)
+    // Bounds of the accepted form (1 to 999999, whole numbers); anything else is the safe default.
+    // Mutation testing widened the digit limit and nothing objected.
+    expect(maxBudgetChangePercent({ MAX_BUDGET_CHANGE_PERCENT: '999999' })).toBe(999999)
+    expect(maxBudgetChangePercent({ MAX_BUDGET_CHANGE_PERCENT: '1000000' })).toBe(50)
+    expect(maxBudgetChangePercent({ MAX_BUDGET_CHANGE_PERCENT: '0' })).toBe(50)
+    expect(maxBudgetChangePercent({ MAX_BUDGET_CHANGE_PERCENT: '12.5' })).toBe(50)
+    expect(maxBudgetChangePercent({ MAX_BUDGET_CHANGE_PERCENT: ' 30 ' })).toBe(30)
   })
 })
 
@@ -153,6 +182,50 @@ describe('execution authority for an owner request', () => {
     ['a mismatched engine mutation', decision({ approval_state: 'approved', proposed_mutation: { action_type: 'adjust_budget', new_daily_budget: 31 } })],
   ])('refuses %s', (_label, row) => {
     expect(validateOwnerWriteAuthority(row, request, { rollback: false }).allowed).toBe(false)
+  })
+
+  // Mutation testing: no test sent a valid duplicate through this check, never reordered a proposed
+  // mutation's keys, and never read a refusal's reason (7 survivors).
+  const structural = decision({ approval_state: 'approved', action_kind: 'structural' })
+  const duplicate = (params: Record<string, unknown>) => ({ ...request, actionType: 'duplicate_adset' as const, params })
+
+  it('allows a well-formed duplicate with or without a budget', () => {
+    expect(validateOwnerWriteAuthority(structural, duplicate({ new_name: 'Copy', new_daily_budget: null }), { rollback: false }))
+      .toEqual({ allowed: true, reason: 'The owner-initiated write matches its approved ActionDecision.' })
+    expect(validateOwnerWriteAuthority(structural, duplicate({ new_name: 'Copy', new_daily_budget: 30 }), { rollback: false }).allowed).toBe(true)
+  })
+
+  it.each([
+    ['an extra key', { new_name: 'Copy', new_daily_budget: null, status: 'ACTIVE' }],
+    ['a zero budget', { new_name: 'Copy', new_daily_budget: 0 }],
+    ['a blank name', { new_name: '  ', new_daily_budget: null }],
+    ['no budget key at all', { new_name: 'Copy' }],
+  ])('refuses a duplicate with %s', (_label, params) => {
+    expect(validateOwnerWriteAuthority(structural, duplicate(params), { rollback: false }))
+      .toEqual({ allowed: false, reason: 'The write request contains missing or ungoverned mutation parameters.' })
+  })
+
+  it('matches a proposed mutation whatever order its keys were stored in', () => {
+    const reordered = decision({ approval_state: 'approved', action_kind: 'structural',
+      proposed_mutation: { new_daily_budget: 30, new_name: 'Copy', action_type: 'duplicate_adset' } })
+    expect(validateOwnerWriteAuthority(reordered, duplicate({ new_name: 'Copy', new_daily_budget: 30 }), { rollback: false }).allowed).toBe(true)
+    // Control: the same keys with a different value is still refused.
+    expect(validateOwnerWriteAuthority(reordered, duplicate({ new_name: 'Copy', new_daily_budget: 31 }), { rollback: false }))
+      .toEqual({ allowed: false, reason: 'The request does not match the mutation the ActionDecision proposed.' })
+  })
+
+  it('says why it refuses another target or a kind that does not authorize the action', () => {
+    expect(validateOwnerWriteAuthority(decision({ approval_state: 'approved', target_id: 'adset-2' }), request, { rollback: false }))
+      .toEqual({ allowed: false, reason: 'The ActionDecision target does not match the requested Meta entity.' })
+    expect(validateOwnerWriteAuthority(decision({ approval_state: 'approved', action_kind: 'structural' }), request, { rollback: false }))
+      .toEqual({ allowed: false, reason: 'The ActionDecision kind does not authorize this write action.' })
+  })
+
+  it('says why it refuses a missing decision or another account', () => {
+    expect(validateOwnerWriteAuthority(null, request, { rollback: false }))
+      .toEqual({ allowed: false, reason: 'No ActionDecision is linked to this write.' })
+    expect(validateOwnerWriteAuthority(decision({ approval_state: 'approved', ad_account_id: 'account-b' }), request, { rollback: false }))
+      .toEqual({ allowed: false, reason: 'The ActionDecision belongs to a different ad account.' })
   })
 
   it('accepts the inverse kind only for a rollback', () => {
