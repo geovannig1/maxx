@@ -29,7 +29,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/geovannig1/maxx/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/geovannig1/maxx/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/geovannig1/maxx-ai-media-buyer/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/geovannig1/maxx-ai-media-buyer/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
   <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white">
   <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white">
@@ -255,7 +255,7 @@ The rules: [docs/how-maxx-decides.md](docs/how-maxx-decides.md).
 No accounts, no secrets, sample data for a fictional business:
 
 ```bash
-git clone https://github.com/geovannig1/maxx.git
+git clone https://github.com/geovannig1/maxx-ai-media-buyer.git maxx
 cd maxx
 npm ci
 npm run demo
@@ -288,7 +288,7 @@ and keys for you; sign-in links then arrive in its Mailpit inbox at http://127.0
 
 ### Deploy to Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fgeovannig1%2Fmaxx&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,OWNER_EMAIL,CRON_SECRET,META_ACCESS_TOKEN,META_AD_ACCOUNT_ID&envDescription=Supabase%20project%2C%20owner%20email%2C%20a%2032%2B%20character%20cron%20secret%2C%20and%20a%20Meta%20System%20User%20token%20with%20ads_read%20for%20one%20ad%20account.%20Open%20%2Fsetup%20after%20deploying%20for%20the%20full%20checklist.&envLink=https%3A%2F%2Fgithub.com%2Fgeovannig1%2Fmaxx%2Fblob%2Fmain%2Fdocs%2Fconfiguration.md&project-name=maxx&repository-name=maxx)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fgeovannig1%2Fmaxx-ai-media-buyer&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,OWNER_EMAIL,CRON_SECRET,META_ACCESS_TOKEN,META_AD_ACCOUNT_ID&envDescription=Supabase%20project%2C%20owner%20email%2C%20a%2032%2B%20character%20cron%20secret%2C%20and%20a%20Meta%20System%20User%20token%20with%20ads_read%20for%20one%20ad%20account.%20Open%20%2Fsetup%20after%20deploying%20for%20the%20full%20checklist.&envLink=https%3A%2F%2Fgithub.com%2Fgeovannig1%2Fmaxx-ai-media-buyer%2Fblob%2Fmain%2Fdocs%2Fconfiguration.md&project-name=maxx&repository-name=maxx)
 
 The button asks for the required variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `OWNER_EMAIL`, `CRON_SECRET`, `META_ACCESS_TOKEN`, `META_AD_ACCOUNT_ID`).
 Apply the database schema to your Supabase project first (`npm run setup -- --apply-schema`, or

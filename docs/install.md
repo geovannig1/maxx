@@ -27,7 +27,7 @@ Want to look first? `npm run demo` runs the whole product on sample data with no
 ## 2. Clone and run setup
 
 ```bash
-git clone https://github.com/geovannig1/maxx.git
+git clone https://github.com/geovannig1/maxx-ai-media-buyer.git maxx
 cd maxx
 npm ci
 npm run setup

@@ -22,7 +22,7 @@ You need Node.js 24 and npm. Docker and the Supabase CLI are needed only for the
 tests.
 
 ```bash
-git clone https://github.com/geovannig1/maxx.git
+git clone https://github.com/geovannig1/maxx-ai-media-buyer.git maxx
 cd maxx
 npm ci
 npm run demo
