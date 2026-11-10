@@ -55,7 +55,7 @@
     "@base-ui/react": "^1.9.0",
     "@google-analytics/data": "^7.3.0",
     "@modelcontextprotocol/sdk": "^1.32.2",
-    "@sentry/nextjs": "^10.76.2",
+    "@sentry/nextjs": "^10.77.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.112.3",
     "class-variance-authority": "^0.7.1",
