@@ -2,7 +2,8 @@
 // Generates THIRD_PARTY_NOTICES.md: every production dependency in package-lock.json with its license,
 // plus the attribution notices Apache-2.0 asks redistributors to keep. Offline: it reads only
 // package-lock.json and node_modules. Run `npm run notices` after changing dependencies;
-// tests/third-party-notices.test.ts fails while the file is out of date.
+// `npm run notices:check` (part of `npm run release:check`) fails while the file is out of date. The check
+// is release-time, not part of `npm test`, so routine dependency PRs are not failed by it.
 //
 // Production = a lockfile package that npm does not mark `dev` or `devOptional` (the set
 // `npm ci --omit=dev` can install). The license is the lockfile's; when the package is installed, its
@@ -156,9 +157,23 @@ export function generateNotices(root) {
   return renderNotices(collectProductionPackages({ lock, readInstalled: readInstalledFrom(root) }))
 }
 
+/** true when the committed notices file equals a fresh generation for `root`. */
+export function noticesAreCurrent(root) {
+  const file = path.join(root, NOTICES_FILE)
+  return existsSync(file) && readFileSync(file, 'utf8') === generateNotices(root)
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 if (isMain) {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-  writeFileSync(path.join(root, NOTICES_FILE), generateNotices(root))
-  console.log(`wrote ${NOTICES_FILE}`)
+  if (process.argv.includes('--check')) {
+    if (!noticesAreCurrent(root)) {
+      console.error(`${NOTICES_FILE} is out of date: run npm run notices`)
+      process.exit(1)
+    }
+    console.log(`${NOTICES_FILE} is current`)
+  } else {
+    writeFileSync(path.join(root, NOTICES_FILE), generateNotices(root))
+    console.log(`wrote ${NOTICES_FILE}`)
+  }
 }

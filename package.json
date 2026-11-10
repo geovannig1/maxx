@@ -23,6 +23,7 @@
     "demo:check": "tsx --tsconfig tsconfig.scripts.json scripts/demo/check.ts",
     "env:docs": "tsx --tsconfig tsconfig.scripts.json scripts/generate-env-docs.ts",
     "notices": "node scripts/generate-third-party-notices.mjs",
+    "notices:check": "node scripts/generate-third-party-notices.mjs --check",
     "postinstall": "node scripts/postinstall.mjs",
     "build": "next build",
     "start": "next start",
@@ -40,7 +41,7 @@
     "typecheck": "tsc --noEmit",
     "gate": "scripts/gate-local.sh static",
     "gate:full": "scripts/gate-local.sh full",
-    "release:check": "bash scripts/assert-no-meta-writes.sh && npm run lint && npm run typecheck && npm run mcp:build && npm test && npm run test:db && npm run build",
+    "release:check": "bash scripts/assert-no-meta-writes.sh && npm run notices:check && npm run lint && npm run typecheck && npm run mcp:build && npm test && npm run test:db && npm run build",
     "mutate": "node scripts/mutate.mjs",
     "mutate:check": "node scripts/mutate.mjs --self-test",
     "preview:sample": "node tests/reporting-browser/server.mjs --preview",
@@ -75,7 +76,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.11",
+    "@electric-sql/pglite": "^0.5.9",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24",

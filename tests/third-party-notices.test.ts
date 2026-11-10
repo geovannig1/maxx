@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
-  NOTICES_FILE, collectProductionPackages, generateNotices, renderNotices,
+  NOTICES_FILE, collectProductionPackages, generateNotices, noticesAreCurrent, renderNotices,
 } from '../scripts/generate-third-party-notices.mjs'
 
-// THIRD_PARTY_NOTICES.md is generated from package-lock.json and node_modules. A
-// dependency change without `npm run notices` must fail here, and the Anthropic SDK family's Apache-2.0
-// notice (a tracked release item) must stay in it.
+// THIRD_PARTY_NOTICES.md is generated from package-lock.json and node_modules, and the Anthropic SDK
+// family's Apache-2.0 notice (a tracked release item) must stay in it. Whether the committed file is current
+// is checked at release time (`npm run notices:check`, part of `npm run release:check`), not here: as a unit
+// test it failed every dependency-update PR and stopped CI before the database tests and the build ran.
 
 const ROOT = path.resolve(__dirname, '..')
 
@@ -16,8 +18,20 @@ const lock = (packages: Record<string, Record<string, unknown>>) => ({ packages:
 const none = () => null
 
 describe('third-party notices', () => {
-  it('THIRD_PARTY_NOTICES.md is current (run npm run notices)', () => {
-    expect(readFileSync(path.join(ROOT, NOTICES_FILE), 'utf8'), 'run npm run notices').toBe(generateNotices(ROOT))
+  it('the release-time check reports a missing, current and stale notices file correctly', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'maxx-notices-'))
+    const writeLock = (version: string) => writeFileSync(path.join(dir, 'package-lock.json'),
+      JSON.stringify(lock({ 'node_modules/a': { version, license: 'MIT' } })))
+    try {
+      writeLock('1.0.0')
+      expect(noticesAreCurrent(dir)).toBe(false) // no notices file yet
+      writeFileSync(path.join(dir, NOTICES_FILE), generateNotices(dir))
+      expect(noticesAreCurrent(dir)).toBe(true)
+      writeLock('1.0.1') // a dependency changed without `npm run notices`
+      expect(noticesAreCurrent(dir)).toBe(false)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
   })
 
   it('carries the Apache-2.0 notice for every Anthropic SDK package Maxx depends on', () => {
