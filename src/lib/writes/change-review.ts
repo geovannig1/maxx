@@ -20,12 +20,16 @@ export const WRITES_OFF_MESSAGE = 'Approved — writes are off; turn on WRITE_MO
 
 const writeModeEnabled = () => process.env.WRITE_MODE_ENABLED === 'true'
 
+// The only caller is this route; its database detail is logged in the shared `[api <route>] <code>:` form
+// (src/lib/security/api-error.ts) so server logs name the route like every other owner API.
+const ROUTE = 'PATCH /api/changes/[id]'
+
 function reviewError(error: { message?: string }): ReviewResult {
   const text = error.message ?? ''
   if (/change_request_expired/.test(text)) {
     return { http: 409, body: { status: 'EXPIRED', error: 'This request has expired. It can be rejected but not approved; propose it again from a current decision.' } }
   }
-  console.error('[CHANGE REVIEW] review RPC failed:', text)
+  console.error(`[api ${ROUTE}] CHANGE_REVIEW_REJECTED:`, text)
   return { http: 409, body: { status: 'REVIEW_REJECTED', code: 'CHANGE_REVIEW_REJECTED', error: 'The review could not be recorded for this request.' } }
 }
 
@@ -66,7 +70,7 @@ export async function reviewChangeRequest(input: {
   const { data, error } = await db.from('change_requests').select('id, status, campaign_plan_version_id')
     .eq('id', input.id).eq('ad_account_id', input.accountId).maybeSingle()
   if (error) {
-    console.error('[CHANGE REVIEW] change request read failed:', error.message)
+    console.error(`[api ${ROUTE}] CHANGE_REQUEST_READ_FAILED:`, error.message)
     return { http: 500, body: { error: 'The change request could not be read.', code: 'CHANGE_REQUEST_READ_FAILED' } }
   }
   if (!data) return { http: 404, body: { error: 'Change request not found' } }

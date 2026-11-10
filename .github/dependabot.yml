@@ -5,8 +5,16 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    # Match the project's package-age rule: only versions published at least 14 days ago are adopted
+    # (docs/security-model.md). A shorter cooldown produced PRs that had to be closed unmerged.
     cooldown:
-      default-days: 7
+      default-days: 14
+    ignore:
+      # @types/node must match the Node runtime major (engines, .nvmrc and CI all use Node 24). Moving it is
+      # a deliberate runtime upgrade, not a routine bump: types for a newer Node let code call APIs that
+      # do not exist on Node 24 and still type-check.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       minor-and-patch:
         update-types: [minor, patch]
@@ -14,4 +22,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Same 14-day rule for action releases (default-days is supported for GitHub Actions; semver-specific
+    # cooldown days are not).
+    cooldown:
+      default-days: 14
 # Actions are pinned to commit SHAs with the tag in a trailing comment; Dependabot keeps both current.

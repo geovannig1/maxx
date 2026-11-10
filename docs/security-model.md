@@ -277,10 +277,12 @@ uploaded to Sentry, and deleted from the build.
   `AbortSignal`. The fixed releases (`glob` 14.0.2+, `minimatch` 11.0.1+, or `@sentry/nextjs`
   11.11.0, whose plugin requires `glob` `^14.0.3`) are outside the plugin's range or a major SDK
   upgrade, and were under 14 days old on 2026-11-07, so no override is applied.
-- **ESLint 9 prints an npm deprecation notice.** npm marks every 9.x release, including the
-  maintenance line (9.39.5), "no longer supported"; only ESLint 10 clears it, and that major
-  upgrade needs its own lint-rule verification with `eslint-config-next`. ESLint is a development
-  tool: it is not in the build output or the deployed server. The upgrade is deferred, not applied.
+- **ESLint 10 runs ahead of three plugins' declared ranges.** `eslint-config-next` 16.4.3 depends on
+  `eslint-plugin-import`, `eslint-plugin-jsx-a11y` and `eslint-plugin-react`, whose peer ranges stop at
+  ESLint 9, so npm prints `ERESOLVE overriding peer dependency`. The rules were verified to run under
+  ESLint 10 (2026-11-10): a probe file with deliberate violations was reported by `react/*`, `import/*`,
+  `jsx-a11y/*` and `@next/next/*` rules. ESLint is a development tool: it is not in the build output or
+  the deployed server. Re-check when `eslint-config-next` declares ESLint 10.
 - **Maintainers reviewing third-party pull requests** should do so in a checkout with no
   `.env.local`: `npm run gate` runs the production build, which loads that file, so a malicious
   change to a build-time module could read it. The build and tests need no secrets.
