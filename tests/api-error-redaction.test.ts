@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Owner-only routes returned raw Supabase `error.message` text (table, column, constraint and SQL
 // detail) to the browser. A failing DB call must yield a generic message plus a stable code, keep the
@@ -71,6 +71,9 @@ describe('owner API routes do not return raw database error text', () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
     vi.spyOn(console, 'warn').mockImplementation(() => undefined)
   })
+  // Each case must find its OWN route's log line. Under Vitest 4 the spy's calls accumulated across cases,
+  // so PATCH /api/changes/[id] passed on another route's `[api ...]` line while logging none itself.
+  afterEach(() => { vi.restoreAllMocks() })
 
   it.each(CASES)('$name returns a generic message and code, keeps its status, and logs the detail', async ({ status, run }) => {
     const response = await run()

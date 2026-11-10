@@ -77,7 +77,8 @@ describe('pinnedHttpsTransport (the default transport) at the socket level', () 
     const hello = new Promise<Buffer>((resolve) => {
       server = createServer((socket) => {
         socket.once('data', (chunk) => {
-          resolve(chunk)
+          // No encoding is set, so chunks are Buffers; @types/node 26 types them as string | Buffer.
+          resolve(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
           socket.destroy()
         })
       })

@@ -10,12 +10,12 @@ optional packages are listed even though only the one matching your system is in
 Files vendored into the repository are listed in the README: `docs/meta-knowledge/` (MIT) and
 `src/app/vendor/shadcn-tailwind.css` (MIT).
 
-626 packages. Licenses:
+624 packages. Licenses:
 
 | License | Packages |
 |---|---:|
-| MIT | 421 |
-| Apache-2.0 | 111 |
+| MIT | 416 |
+| Apache-2.0 | 114 |
 | ISC | 31 |
 | BSD-3-Clause | 17 |
 | BlueOak-1.0.0 | 12 |
@@ -192,7 +192,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@floating-ui/dom` | 1.8.0 | MIT |
 | `@floating-ui/react-dom` | 2.1.9 | MIT |
 | `@floating-ui/utils` | 0.2.12 | MIT |
-| `@google-analytics/data` | 6.1.0 | Apache-2.0 |
+| `@google-analytics/data` | 7.3.0 | Apache-2.0 |
 | `@grpc/grpc-js` | 1.14.6 | Apache-2.0 |
 | `@grpc/proto-loader` | 0.8.1 | Apache-2.0 |
 | `@hono/node-server` | 2.1.6 | MIT |
@@ -228,7 +228,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@jridgewell/remapping` | 2.3.5 | MIT |
 | `@jridgewell/resolve-uri` | 3.1.2 | MIT |
 | `@jridgewell/source-map` | 0.3.11 | MIT |
-| `@jridgewell/sourcemap-codec` | 1.5.5 | MIT |
+| `@jridgewell/sourcemap-codec` | 1.6.0 | MIT |
 | `@jridgewell/trace-mapping` | 0.3.31 | MIT |
 | `@js-sdsl/ordered-map` | 4.4.2 | MIT |
 | `@modelcontextprotocol/sdk` | 1.32.2 | MIT |
@@ -257,7 +257,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@protobufjs/float` | 1.0.2 | BSD-3-Clause |
 | `@protobufjs/path` | 1.1.2 | BSD-3-Clause |
 | `@protobufjs/pool` | 1.1.0 | BSD-3-Clause |
-| `@protobufjs/utf8` | 1.1.1 | BSD-3-Clause |
+| `@protobufjs/utf8` | 1.1.2 | BSD-3-Clause |
 | `@reduxjs/toolkit` | 2.11.2 | MIT |
 | `@rollup/plugin-commonjs` | 28.0.1 | MIT |
 | `@rollup/pluginutils` | 5.4.0 | MIT |
@@ -365,7 +365,6 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@supabase/storage-js` | 2.118.0 | MIT |
 | `@supabase/supabase-js` | 2.118.0 | MIT |
 | `@swc/helpers` | 0.5.23 | Apache-2.0 |
-| `@tabby_ai/hijri-converter` | 1.0.5 | MIT |
 | `@types/d3-array` | 3.2.2 | MIT |
 | `@types/d3-color` | 3.1.3 | MIT |
 | `@types/d3-ease` | 3.0.2 | MIT |
@@ -382,7 +381,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@types/json-schema` | 7.0.15 | MIT |
 | `@types/mdast` | 4.0.4 | MIT |
 | `@types/ms` | 2.1.0 | MIT |
-| `@types/node` | 24.19.2 | MIT |
+| `@types/node` | 26.6.5 | MIT |
 | `@types/react` | 19.2.14 | MIT |
 | `@types/unist` | 2.0.11 | MIT |
 | `@types/unist` | 3.0.3 | MIT |
@@ -469,7 +468,6 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `d3-timer` | 3.0.1 | ISC |
 | `data-uri-to-buffer` | 4.0.1 | MIT |
 | `date-fns` | 4.4.0 | MIT |
-| `date-fns-jalali` | 4.1.0-0 | MIT |
 | `debug` | 4.4.3 | MIT |
 | `decimal.js-light` | 2.5.1 | MIT |
 | `decode-named-character-reference` | 1.3.0 | MIT |
@@ -488,9 +486,9 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `enhanced-resolve` | 5.26.1 | MIT |
 | `es-define-property` | 1.0.1 | MIT |
 | `es-errors` | 1.3.0 | MIT |
-| `es-module-lexer` | 2.1.0 | MIT |
+| `es-module-lexer` | 2.3.2 | MIT |
 | `es-module-lexer` | 3.0.4 | MIT |
-| `es-object-atoms` | 1.1.1 | MIT |
+| `es-object-atoms` | 1.1.2 | MIT |
 | `es-toolkit` | 1.46.1 | MIT |
 | `escalade` | 3.2.0 | MIT |
 | `escape-html` | 1.0.3 | MIT |
@@ -518,7 +516,9 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `function-bind` | 1.1.2 | MIT |
 | `gaxios` | 7.1.3 | Apache-2.0 |
 | `gaxios` | 7.1.5 | Apache-2.0 |
+| `gaxios` | 8.3.2 | Apache-2.0 |
 | `gcp-metadata` | 8.1.3 | Apache-2.0 |
+| `gcp-metadata` | 9.2.2 | Apache-2.0 |
 | `gensync` | 1.0.0-beta.2 | MIT |
 | `get-caller-file` | 2.0.5 | ISC |
 | `get-intrinsic` | 1.3.0 | MIT |
@@ -526,8 +526,10 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `glob` | 13.0.6 | BlueOak-1.0.0 |
 | `glob` | 14.0.4 | BlueOak-1.0.0 |
 | `google-auth-library` | 10.5.0 | Apache-2.0 |
-| `google-gax` | 5.0.7 | Apache-2.0 |
+| `google-auth-library` | 11.3.1 | Apache-2.0 |
+| `google-gax` | 6.13.0 | Apache-2.0 |
 | `google-logging-utils` | 1.1.3 | Apache-2.0 |
+| `google-logging-utils` | 2.1.0 | Apache-2.0 |
 | `gopd` | 1.2.0 | MIT |
 | `graceful-fs` | 4.2.11 | ISC |
 | `gtoken` | 8.0.0 | MIT |
@@ -539,7 +541,6 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `hono` | 4.13.13 | MIT |
 | `html-url-attributes` | 3.0.1 | MIT |
 | `http-errors` | 2.0.1 | MIT |
-| `http-proxy-agent` | 7.0.2 | MIT |
 | `https-proxy-agent` | 5.0.1 | MIT |
 | `https-proxy-agent` | 7.0.6 | MIT |
 | `iceberg-js` | 0.8.1 | MIT |
@@ -651,15 +652,15 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `postcss` | 8.5.25 | MIT |
 | `progress` | 2.0.3 | MIT |
 | `property-information` | 7.1.0 | MIT |
-| `proto3-json-serializer` | 3.0.4 | Apache-2.0 |
-| `protobufjs` | 7.6.5 | BSD-3-Clause |
+| `proto3-json-serializer` | 4.1.0 | Apache-2.0 |
+| `protobufjs` | 7.6.6 | BSD-3-Clause |
 | `proxy-addr` | 2.0.8 | MIT |
 | `proxy-from-env` | 1.1.0 | MIT |
 | `qs` | 6.16.1 | BSD-3-Clause |
 | `range-parser` | 1.2.1 | MIT |
 | `raw-body` | 3.0.2 | MIT |
 | `react` | 19.3.1 | MIT |
-| `react-day-picker` | 9.14.0 | MIT |
+| `react-day-picker` | 10.0.2 | MIT |
 | `react-dom` | 19.3.1 | MIT |
 | `react-is` | 16.13.1 | MIT |
 | `react-markdown` | 10.1.0 | MIT |
@@ -675,7 +676,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `require-in-the-middle` | 8.0.1 | MIT |
 | `reselect` | 5.2.0 | MIT |
 | `reselect` | 5.3.0 | MIT |
-| `retry-request` | 8.0.3 | MIT |
+| `retry-request` | 9.1.0 | MIT |
 | `rimraf` | 6.1.4 | BlueOak-1.0.0 |
 | `rollup` | 4.62.2 | MIT |
 | `router` | 2.2.0 | MIT |
@@ -703,20 +704,17 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `stacktrace-parser` | 0.1.11 | MIT |
 | `standardwebhooks` | 1.0.0 | MIT |
 | `statuses` | 2.0.2 | MIT |
-| `stream-events` | 1.0.5 | MIT |
 | `stream-shift` | 1.0.3 | MIT |
 | `string_decoder` | 1.3.0 | MIT |
 | `string-width` | 4.2.3 | MIT |
 | `stringify-entities` | 4.0.4 | MIT |
 | `strip-ansi` | 6.0.1 | MIT |
-| `stubs` | 3.0.0 | MIT |
 | `style-to-js` | 1.1.21 | MIT |
 | `style-to-object` | 1.0.14 | MIT |
 | `styled-jsx` | 5.1.6 | MIT |
 | `supports-color` | 8.1.1 | MIT |
 | `tailwind-merge` | 3.7.0 | MIT |
 | `tapable` | 2.3.3 | MIT |
-| `teeny-request` | 10.1.3 | Apache-2.0 |
 | `terser` | 5.51.2 | BSD-2-Clause |
 | `tiny-invariant` | 1.3.3 | MIT |
 | `toidentifier` | 1.0.1 | MIT |
@@ -729,7 +727,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `tw-animate-css` | 1.4.0 | MIT |
 | `type-fest` | 0.7.1 | (MIT OR CC0-1.0) |
 | `type-is` | 2.1.0 | MIT |
-| `undici-types` | 7.24.6 | MIT |
+| `undici-types` | 8.9.0 | MIT |
 | `unified` | 11.0.5 | MIT |
 | `unist-util-is` | 6.0.1 | MIT |
 | `unist-util-position` | 5.0.0 | MIT |
@@ -755,7 +753,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `wrappy` | 1.0.2 | ISC |
 | `y18n` | 5.0.8 | ISC |
 | `yallist` | 3.1.1 | ISC |
-| `yargs` | 17.7.2 | MIT |
+| `yargs` | 17.7.3 | MIT |
 | `yargs-parser` | 21.1.1 | ISC |
 | `yocto-queue` | 0.1.0 | MIT |
 | `zod` | 4.6.7 | MIT |
