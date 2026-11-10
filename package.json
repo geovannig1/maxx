@@ -85,7 +85,7 @@
     "@types/react-dom": "^19",
     "@vitest/mocker": "^4.1.12",
     "dotenv": "^17.2.3",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "16.4.3",
     "pg": "^8.23.1",
     "tailwindcss": "^4",
