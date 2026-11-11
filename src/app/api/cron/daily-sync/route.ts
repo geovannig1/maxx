@@ -5,7 +5,9 @@ import { createStepErrorRecorder } from '@/lib/cron/step-errors'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { runVisionAnalysisForPending } from '@/lib/creative/vision-analyzer'
 import { isAiEnabled } from '@/lib/ai'
-import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
+import { requireCapability } from '@/lib/platforms/registry'
+import { adPlatformForAccount, type PlatformAccount } from '@/lib/platforms/account-platform'
+import type { AdPlatform } from '@/lib/platforms/types'
 import { runTestMonitor } from '@/lib/tests/monitor'
 import { runSignalsFetcher } from '@/lib/signals/fetcher'
 import { checkTrackingHealth } from '@/lib/tracking/health-monitor'
@@ -87,14 +89,15 @@ function isMonday(): boolean {
   return nyWeekday() === 1
 }
 
-async function getAdAccountDbId(metaAccountId: string): Promise<string | null> {
+async function getAdAccountRow(metaAccountId: string): Promise<{ id: string; platform?: unknown } | null> {
   const db = getAdminClient()
   const { data } = await db
     .from('ad_accounts')
-    .select('id')
+    .select('id, platform')
     .eq('account_id', metaAccountId)
     .maybeSingle()
-  return (data as { id: string } | null)?.id ?? null
+  const row = data as ({ id?: string } & PlatformAccount) | null
+  return row?.id ? { id: row.id, platform: row.platform } : null
 }
 
 async function deliverCommittedWeeklyExecutive(input: {
@@ -325,9 +328,18 @@ export async function GET(req: Request) {
   }
 
   // Resolve the DB UUID for subsequent steps
-  const adAccountDbId = await getAdAccountDbId(accountId)
-  if (!adAccountDbId) {
+  const accountRow = await getAdAccountRow(accountId)
+  if (!accountRow) {
     return Response.json({ error: 'Could not resolve ad account DB ID', steps }, { status: 500 })
+  }
+  const adAccountDbId = accountRow.id
+  // The account's own platform serves every later platform step; an unknown one stops the run.
+  let platform: AdPlatform
+  try {
+    platform = adPlatformForAccount(accountRow)
+  } catch (error) {
+    steps.ad_platform = stepFailed('ad_platform', error)
+    return Response.json({ error: 'The ad account platform is not supported.', code: 'AD_PLATFORM_UNSUPPORTED', steps }, { status: 500 })
   }
 
   const today = nyToday()
@@ -470,14 +482,14 @@ export async function GET(req: Request) {
       // Supplemental segment coverage for the Segments page. These dimensions are not inputs to the
       // committed executive placement evidence contract.
       for (const breakdown of ['age', 'gender', 'device_platform', 'region'] as const) {
-        const rows = await requireCapability(getAdPlatform('meta'), 'breakdowns').fetch({
+        const rows = await requireCapability(platform, 'breakdowns').fetch({
           accountId,
           level: 'adset',
           since: breakdownDate,
           until: breakdownDate,
           breakdowns: [breakdown],
         })
-        totalUpserted += await requireCapability(getAdPlatform('meta'), 'breakdowns').upsert(adAccountDbId, breakdownDate, rows)
+        totalUpserted += await requireCapability(platform, 'breakdowns').upsert(adAccountDbId, breakdownDate, rows)
       }
       steps.breakdowns = { upserted: totalUpserted }
     } else {
@@ -528,7 +540,7 @@ export async function GET(req: Request) {
       let competitorAdsTotal = 0
       for (const comp of (competitors ?? []) as Array<{ id: string; name: string; facebook_page_id: string }>) {
         try {
-          const count = await requireCapability(getAdPlatform('meta'), 'adLibrary').fetchCompetitorAds(comp.id, comp.facebook_page_id)
+          const count = await requireCapability(platform, 'adLibrary').fetchCompetitorAds(comp.id, comp.facebook_page_id)
           competitorAdsTotal += count
         } catch (e) {
           console.warn(`[Cron] Competitor sync failed for ${comp.name}:`, e instanceof Error ? e.message : e)
@@ -688,8 +700,8 @@ export async function GET(req: Request) {
     try {
       const dpSince = nyDaysAgo(30)
       const dpUntil = nyDaysAgo(1)
-      const dpRows = await requireCapability(getAdPlatform('meta'), 'daypart').fetch({ accountId, since: dpSince, until: dpUntil })
-      const dpUpserted = await requireCapability(getAdPlatform('meta'), 'daypart').upsert(adAccountDbId, dpSince, dpUntil, dpRows)
+      const dpRows = await requireCapability(platform, 'daypart').fetch({ accountId, since: dpSince, until: dpUntil })
+      const dpUpserted = await requireCapability(platform, 'daypart').upsert(adAccountDbId, dpSince, dpUntil, dpRows)
       steps.daypart = { fetched: dpRows.length, upserted: dpUpserted }
     } catch (err) {
       steps.daypart = stepFailed('daypart', err)

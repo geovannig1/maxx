@@ -10,11 +10,11 @@ optional packages are listed even though only the one matching your system is in
 Files vendored into the repository are listed in the README: `docs/meta-knowledge/` (MIT) and
 `src/app/vendor/shadcn-tailwind.css` (MIT).
 
-624 packages. Licenses:
+622 packages. Licenses:
 
 | License | Packages |
 |---|---:|
-| MIT | 416 |
+| MIT | 414 |
 | Apache-2.0 | 114 |
 | ISC | 31 |
 | BSD-3-Clause | 17 |
@@ -60,7 +60,7 @@ limitations under the License.
 
 Reproduced as Apache-2.0 section 4(d) requires.
 
-### import-in-the-middle 3.6.0
+### import-in-the-middle 3.5.3
 
 ```
 import-in-the-middle is licensed for use as follows:
@@ -186,7 +186,6 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@babel/types` | 7.29.7 | MIT |
 | `@base-ui/react` | 1.9.0 | MIT |
 | `@base-ui/utils` | 0.5.0 | MIT |
-| `@date-fns/tz` | 1.4.1 | MIT |
 | `@emnapi/runtime` | 1.11.3 | MIT (optional) |
 | `@floating-ui/core` | 1.8.0 | MIT |
 | `@floating-ui/dom` | 1.8.0 | MIT |
@@ -248,7 +247,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@opentelemetry/resources` | 2.12.0 | Apache-2.0 |
 | `@opentelemetry/sdk-trace` | 2.12.0 | Apache-2.0 |
 | `@opentelemetry/sdk-trace-base` | 2.12.0 | Apache-2.0 |
-| `@opentelemetry/semantic-conventions` | 1.45.0 | Apache-2.0 |
+| `@opentelemetry/semantic-conventions` | 1.43.0 | Apache-2.0 |
 | `@protobufjs/aspromise` | 1.1.2 | BSD-3-Clause |
 | `@protobufjs/base64` | 1.1.2 | BSD-3-Clause |
 | `@protobufjs/codegen` | 2.0.5 | BSD-3-Clause |
@@ -286,9 +285,9 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@rollup/rollup-win32-ia32-msvc` | 4.62.2 | MIT (optional) |
 | `@rollup/rollup-win32-x64-gnu` | 4.62.2 | MIT (optional) |
 | `@rollup/rollup-win32-x64-msvc` | 4.62.2 | MIT (optional) |
-| `@sentry/browser` | 10.76.2 | MIT |
-| `@sentry/browser-utils` | 10.76.2 | MIT |
-| `@sentry/bundler-plugins` | 10.76.2 | MIT |
+| `@sentry/browser` | 10.77.1 | MIT |
+| `@sentry/browser-utils` | 10.77.1 | MIT |
+| `@sentry/bundler-plugins` | 10.77.1 | MIT |
 | `@sentry/bundler-plugins` | 10.78.0 | MIT |
 | `@sentry/cli` | 2.58.6 | FSL-1.1-MIT |
 | `@sentry/cli-darwin` | 2.58.6 | FSL-1.1-MIT (optional) |
@@ -300,18 +299,18 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `@sentry/cli-win32-i686` | 2.58.6 | FSL-1.1-MIT (optional) |
 | `@sentry/cli-win32-x64` | 2.58.6 | FSL-1.1-MIT (optional) |
 | `@sentry/conventions` | 0.16.0 | MIT |
-| `@sentry/core` | 10.76.2 | MIT |
+| `@sentry/core` | 10.77.1 | MIT |
 | `@sentry/core` | 10.78.0 | MIT |
-| `@sentry/feedback` | 10.76.2 | MIT |
-| `@sentry/nextjs` | 10.76.2 | MIT |
-| `@sentry/node` | 10.76.2 | MIT |
-| `@sentry/node-core` | 10.76.2 | MIT |
-| `@sentry/opentelemetry` | 10.76.2 | MIT |
-| `@sentry/react` | 10.76.2 | MIT |
-| `@sentry/replay` | 10.76.2 | MIT |
-| `@sentry/replay-canvas` | 10.76.2 | MIT |
-| `@sentry/server-utils` | 10.76.2 | MIT |
-| `@sentry/vercel-edge` | 10.76.2 | MIT |
+| `@sentry/feedback` | 10.77.1 | MIT |
+| `@sentry/nextjs` | 10.77.1 | MIT |
+| `@sentry/node` | 10.77.1 | MIT |
+| `@sentry/node-core` | 10.77.1 | MIT |
+| `@sentry/opentelemetry` | 10.77.1 | MIT |
+| `@sentry/react` | 10.77.1 | MIT |
+| `@sentry/replay` | 10.77.1 | MIT |
+| `@sentry/replay-canvas` | 10.77.1 | MIT |
+| `@sentry/server-utils` | 10.77.1 | MIT |
+| `@sentry/vercel-edge` | 10.77.1 | MIT |
 | `@sentry/webpack-plugin` | 5.4.1 | MIT |
 | `@smithy/abort-controller` | 2.2.0 | Apache-2.0 |
 | `@smithy/core` | 3.36.2 | Apache-2.0 |
@@ -546,7 +545,7 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `iceberg-js` | 0.8.1 | MIT |
 | `iconv-lite` | 0.7.3 | MIT |
 | `immer` | 11.2.9 | MIT |
-| `import-in-the-middle` | 3.6.0 | Apache-2.0 |
+| `import-in-the-middle` | 3.5.3 | Apache-2.0 |
 | `inherits` | 2.0.4 | ISC |
 | `inline-style-parser` | 0.2.7 | MIT |
 | `internmap` | 2.0.3 | ISC |
@@ -660,7 +659,6 @@ Not plain permissive licenses. Read each before redistributing a build.
 | `range-parser` | 1.2.1 | MIT |
 | `raw-body` | 3.0.2 | MIT |
 | `react` | 19.3.1 | MIT |
-| `react-day-picker` | 10.0.2 | MIT |
 | `react-dom` | 19.3.1 | MIT |
 | `react-is` | 16.13.1 | MIT |
 | `react-markdown` | 10.1.0 | MIT |

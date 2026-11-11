@@ -85,12 +85,19 @@ describe('secret dialog markup', () => {
     expect(WEBHOOK_SIGNATURE_FORMAT).toMatch(/^t=<unix seconds>,v1=<hex HMAC-SHA256\(secret, t \+ "\." \+ raw body\)>$/)
   })
 
-  it('asks for confirmation before rotating, warns the old secret stops at once, and focuses Cancel first', () => {
+  it('asks for confirmation before rotating, explains the grace window, and focuses Cancel first', () => {
     const html = view({ kind: 'confirm-rotate' })
     expect(html).toMatch(/<dialog[^>]*role="alertdialog"/)
     expect(html).toMatch(/<dialog[^>]*aria-labelledby="webhook-rotate-title"/)
     expect(html).toMatch(/<dialog[^>]*aria-describedby="webhook-rotate-warning"/)
-    expect(html).toMatch(/id="webhook-rotate-warning"[^>]*>[^<]*old secret stops working immediately/i)
+    expect(html).toMatch(/id="webhook-rotate-warning"[^>]*>[^<]*old secret keeps working for the time you choose/i)
+    expect(html).toMatch(/[Cc]hoose (&quot;|")Immediately(&quot;|") if the secret may have leaked/)
+    // A labelled choice of window, defaulting to one hour; "Immediately" stops the old secret at once.
+    expect(html).toMatch(/<label[^>]*for="webhook-rotate-grace"/)
+    expect(html).toMatch(/<select[^>]*id="webhook-rotate-grace"/)
+    expect(html).toMatch(/<option value="0"[^>]*>Immediately<\/option>/)
+    expect(html).toMatch(/<option value="60" selected=""[^>]*>1 hour<\/option>/)
+    expect(html).toMatch(/<option value="1440"[^>]*>24 hours<\/option>/)
     expect(html).toContain('Online shop')
     // Cancel comes first, so the dialog's initial focus is the safe choice.
     expect(html.indexOf('>Cancel<')).toBeGreaterThan(-1)
@@ -139,13 +146,30 @@ describe('owner-only route requests', () => {
     expect(init.cache).toBe('no-store')
   })
 
-  it('rotates by id and reads the new secret', async () => {
-    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(200, { source_id: SOURCE_ID, secret: SECRET }))
-    const result = await requestRotateWebhookSecret({ id: SOURCE_ID, label: 'Online shop' }, fetchImpl)
-    expect(result).toEqual({ ok: true, reveal: { ...reveal, action: 'rotated' } })
+  it('rotates by id with the chosen grace window and reads the new secret and when the old one stops', async () => {
+    const until = '2026-11-10T19:00:00.000Z'
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(200, { source_id: SOURCE_ID, secret: SECRET, previous_secret_valid_until: until }))
+    const result = await requestRotateWebhookSecret({ id: SOURCE_ID, label: 'Online shop' }, 60, fetchImpl)
+    expect(result).toEqual({ ok: true, reveal: { ...reveal, action: 'rotated', previousSecretValidUntil: until } })
     const [url, init] = fetchImpl.mock.calls[0] as [string, RequestInit]
     expect(url).toBe(`/api/outcomes/webhook-sources/${SOURCE_ID}/rotate`)
     expect(init.method).toBe('POST')
+    expect(JSON.parse(String(init.body))).toEqual({ grace_minutes: 60 })
+
+    // Immediately: the route says the old secret has already stopped; an unusable instant reads the same way.
+    for (const value of [null, 'not-a-date']) {
+      const stopped = await requestRotateWebhookSecret({ id: SOURCE_ID, label: 'Online shop' }, 0,
+        vi.fn().mockResolvedValue(jsonResponse(200, { source_id: SOURCE_ID, secret: SECRET, previous_secret_valid_until: value })))
+      expect(stopped).toEqual({ ok: true, reveal: { ...reveal, action: 'rotated', previousSecretValidUntil: null } })
+    }
+  })
+
+  it('the rotated secret dialog says until when the old secret keeps working, or that it has stopped', () => {
+    const open = view({ kind: 'revealed', reveal: { ...reveal, action: 'rotated', previousSecretValidUntil: '2026-11-10T19:00:00.000Z' } })
+    expect(open).toMatch(/old secret keeps working until 2026-11-10 19:00 UTC/i)
+    const stopped = view({ kind: 'revealed', reveal: { ...reveal, action: 'rotated', previousSecretValidUntil: null } })
+    expect(stopped).toMatch(/old secret has stopped working/i)
+    expect(view({ kind: 'revealed', reveal })).not.toMatch(/old secret/i)
   })
 
   it('controls: a refusal, a malformed body or a network failure is a plain message, never a reveal', async () => {
@@ -162,7 +186,7 @@ describe('owner-only route requests', () => {
       expect(!result.ok && result.message).toMatch(message)
       expect(JSON.stringify(result)).not.toContain(SECRET)
     }
-    const rotated = await requestRotateWebhookSecret({ id: SOURCE_ID, label: 'Shop' }, vi.fn(async () => jsonResponse(404, { error: 'Not found', code: 'NOT_FOUND' })))
+    const rotated = await requestRotateWebhookSecret({ id: SOURCE_ID, label: 'Shop' }, 60, vi.fn(async () => jsonResponse(404, { error: 'Not found', code: 'NOT_FOUND' })))
     expect(rotated).toEqual({ ok: false, message: 'Not found' })
   })
 
@@ -173,7 +197,11 @@ describe('owner-only route requests', () => {
   })
 })
 
-const page = vi.hoisted(() => ({ sources: [] as Array<Record<string, unknown>> }))
+const page = vi.hoisted(() => ({ sources: [] as Array<Record<string, unknown>>, grace: {} as Record<string, string> | Error }))
+vi.mock('@/lib/outcomes/adapters/webhook/sources', async (original) => ({
+  ...await original<typeof import('@/lib/outcomes/adapters/webhook/sources')>(),
+  readWebhookSecretGrace: async () => { if (page.grace instanceof Error) throw page.grace; return page.grace },
+}))
 vi.mock('@/lib/auth/page-owner', () => ({ requireOwner: async () => undefined }))
 vi.mock('@/lib/supabase/admin', () => ({ getAdminClient: () => ({}) }))
 vi.mock('@/lib/accounts/active-account', () => ({ resolveOnlyActiveAccount: async () => ({ ok: true, account: { id: 'account-1' } }) }))
@@ -198,5 +226,23 @@ describe('outcome sources page', () => {
     expect(html).not.toContain('<dialog')
     // The old console instructions are gone from the screen.
     expect(html).not.toContain('/api/outcomes/webhook-sources')
+    expect(html).not.toMatch(/old secret/i)
+  })
+
+  it('shows until when a rotated source still accepts its old secret, and stays up when that cannot be read', async () => {
+    page.sources = [
+      { id: SOURCE_ID, kind: 'webhook', label: 'Online shop', enabled: true, created_at: '2026-11-01T00:00:00Z', last_success_at: null },
+    ]
+    page.grace = { [SOURCE_ID]: '2026-11-10T19:00:00.000Z' }
+    const { default: OutcomeSourcesPage } = await import('@/app/(dashboard)/settings/outcomes/page')
+    const html = renderToStaticMarkup(await OutcomeSourcesPage())
+    expect(html).toMatch(/Old secret still accepted until 2026-11-10 19:00 UTC/)
+    expect(html).not.toMatch(/[0-9a-f]{64}/)
+
+    page.grace = new Error('database unavailable')
+    const degraded = renderToStaticMarkup(await OutcomeSourcesPage())
+    expect(degraded).toContain(`POST /api/outcomes/webhook/${SOURCE_ID}`)
+    expect(degraded).not.toMatch(/Old secret still accepted/)
+    page.grace = {}
   })
 })

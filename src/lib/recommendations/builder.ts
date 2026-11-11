@@ -68,8 +68,8 @@ export interface BuildRecommendationInput {
 
 // Plain-language upside/downside per action type (populates the honesty fields; read-only types get null).
 const UPSIDE_DOWNSIDE: Partial<Record<RecommendationType, { up: string; down: string }>> = {
-  scale: { up: 'May create more causal incremental contribution dollars if marginal contribution remains positive.', down: `Marginal contribution can turn negative even while ${OW.many}, CPA or platform ROAS look healthy.` },
-  scale_proposal: { up: 'May create more causal incremental contribution dollars if marginal contribution remains positive.', down: `Marginal contribution can turn negative even while ${OW.many}, CPA or platform ROAS look healthy.` },
+  scale: { up: 'May create more causal incremental contribution if marginal contribution remains positive.', down: `Marginal contribution can turn negative even while ${OW.many}, CPA or platform ROAS look healthy.` },
+  scale_proposal: { up: 'May create more causal incremental contribution if marginal contribution remains positive.', down: `Marginal contribution can turn negative even while ${OW.many}, CPA or platform ROAS look healthy.` },
   reduce_budget: { up: 'May stop causally measured negative contribution from compounding.', down: 'May forgo incremental contribution if the measured loss is noise or no longer describes the current setup.' },
   pause: { up: 'Stops further spend on a unit with a causally measured, mature contribution loss.', down: 'May forgo incremental contribution if the loss is not durable or the setup changed.' },
   activate: { up: 'May restore causal incremental contribution from a currently inactive unit.', down: 'The prior contribution result may not transport to the reactivated setup or auction.' },

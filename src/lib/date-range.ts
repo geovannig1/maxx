@@ -1,9 +1,8 @@
 import { accountTimezone } from '@/config/business-config'
 import { differenceInCalendarDays } from 'date-fns'
 
-// Pure date-range helpers — usable from BOTH server components and client components. (The picker UI
-// lives in components/ui/date-range-picker.tsx, which is 'use client'; keeping these here means a
-// SERVER component can call resolveDatePreset/DATE_PRESETS without crossing the client boundary.)
+// Pure date-range helpers — usable from BOTH server components and client components, so a SERVER
+// component can call resolveDatePreset/DATE_PRESETS without crossing a client boundary.
 //
 // Presets resolve to an explicit {from, to} (data runs THROUGH YESTERDAY, since today is partial) plus
 // a `days` count for low-data gating. MTD/QTD/YTD need real calendar math, so this returns date ranges.

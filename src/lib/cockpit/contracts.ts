@@ -172,8 +172,11 @@ export const MEASUREMENT_KINDS = [
   'associated_noncausal', 'causal_estimate',
 ] as const
 
+/** A claim id, and each input claim id: one rule, shared by MetricClaimSchema and reidentifyMetricClaim. */
+const ClaimIdSchema = z.string().trim().min(1).max(240)
+
 export const MetricClaimSchema = z.object({
-  claimId: z.string().trim().min(1).max(240),
+  claimId: ClaimIdSchema,
   metricKey: z.string().trim().min(1).max(120),
   label: z.string().trim().min(1).max(120),
   value: z.union([z.number().finite(), z.string().trim().min(1), z.null()]),
@@ -224,7 +227,7 @@ export const MetricClaimSchema = z.object({
     policyVersion: z.string().trim().min(1).max(120),
   }).strict(),
   measurementKind: z.enum(MEASUREMENT_KINDS),
-  inputClaimIds: z.array(z.string().trim().min(1).max(240)),
+  inputClaimIds: z.array(ClaimIdSchema),
 }).strict().superRefine((claim, context) => {
   if (claim.availability.state === 'available' && claim.value === null) {
     context.addIssue({ code: 'custom', message: 'available claims require a value', path: ['value'] })
@@ -258,9 +261,60 @@ function deepFreeze<T>(value: T): T {
   return value
 }
 
+// Frozen claim objects already validated: a frozen object cannot change, so its validated claim is
+// reused. createMetricClaim's claims, the claims a document parse returned, and the frozen claims of an
+// expanded compact packet (src/lib/reporting/compact-json.ts) are recorded here.
+const validatedFrozenClaims = new WeakMap<object, MetricClaim>()
+
+/**
+ * MetricClaimSchema for a claim that may occur many times in one document (a report packet): each
+ * distinct FROZEN claim object is validated once, and every later occurrence, in this or a later parse,
+ * reuses that result. Anything not frozen is validated in full every time, exactly as MetricClaimSchema.
+ * Success, output (frozen when reused) and issues (same codes, messages and paths) are those of
+ * MetricClaimSchema (tests/reporting-claim-validation-once.test.ts).
+ */
+export const DocumentMetricClaimSchema: z.ZodType<MetricClaim, unknown> = z.unknown().transform((value, context) => {
+  const frozen = value !== null && typeof value === 'object' && Object.isFrozen(value)
+  if (frozen) {
+    const cached = validatedFrozenClaims.get(value)
+    if (cached) return cached
+  }
+  const result = MetricClaimSchema.safeParse(value)
+  if (!result.success) {
+    for (const issue of result.error.issues) context.issues.push({ ...issue, input: value } as never)
+    return z.NEVER
+  }
+  if (!frozen) return result.data
+  const claim = deepFreeze(result.data)
+  validatedFrozenClaims.set(value, claim)
+  validatedFrozenClaims.set(claim, claim)
+  return claim
+})
+
 /** The only supported constructor: validates the complete claim, then freezes it recursively. */
 export function createMetricClaim(input: MetricClaimInput): MetricClaim {
-  return deepFreeze(MetricClaimSchema.parse(input))
+  const claim = deepFreeze(MetricClaimSchema.parse(input))
+  validatedFrozenClaims.set(claim, claim)
+  return claim
+}
+
+const ClaimIdentitySchema = z.object({ claimId: ClaimIdSchema, inputClaimIds: z.array(ClaimIdSchema) }).superRefine((claim, context) => {
+  if (new Set(claim.inputClaimIds).size !== claim.inputClaimIds.length) {
+    context.addIssue({ code: 'custom', message: 'input claim IDs must be unique', path: ['inputClaimIds'] })
+  }
+})
+
+/**
+ * A validated claim under a new id and input ids, everything else unchanged. Equivalent to
+ * createMetricClaim({ ...claim, claimId, inputClaimIds }) for a claim createMetricClaim produced: the
+ * other fields already passed the schema and no rule but input-id uniqueness reads the ids, so only
+ * the changed fields are validated (the same field rules and the same uniqueness rule).
+ */
+export function reidentifyMetricClaim(claim: MetricClaim, claimId: string, inputClaimIds: readonly string[]): MetricClaim {
+  const ids = ClaimIdentitySchema.parse({ claimId, inputClaimIds: [...inputClaimIds] })
+  const reidentified = deepFreeze({ ...claim, claimId: ids.claimId, inputClaimIds: ids.inputClaimIds })
+  validatedFrozenClaims.set(reidentified, reidentified)
+  return reidentified
 }
 
 /**

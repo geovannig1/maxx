@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { OutcomeSourceRef } from '@/lib/outcomes/source-health'
 import {
-  collectedValueNote, outcomeArrivalLine, pushOnlyOutcomeArrival, reportOutcomeArrival, reportOutcomesReady, reportSourceCompleteness,
+  collectedValueNote, outcomeArrivalLine, pushOnlyOutcomeArrival, reportMoneyCompleteness, reportOutcomeArrival, reportOutcomesReady,
+  reportSourceCompleteness,
 } from '@/lib/outcomes/report-gate'
 
 // money_basis.revenue_complete measures collected-value coverage (every active outcome in the window
@@ -57,6 +58,24 @@ describe('source completeness on reports', () => {
     expect(collectedValueNote(W, 'mixed', reportOutcomeArrival([RECONCILED, WEBHOOK]))).toContain('Reconciled + As received')
     expect(collectedValueNote(W, 'reconciled', null)).toBe('active bookings only')
     expect(collectedValueNote(W, undefined, null)).toBe('active bookings only')
+  })
+})
+
+describe('revenue_complete claims only what the sources can prove', () => {
+  it('is false on an as-received or mixed report even with every collected value recorded', () => {
+    for (const completeness of ['as_received', 'mixed'] as const) {
+      expect(reportMoneyCompleteness({ sourceAvailable: true, collectedValueCovered: true, completeness }), completeness)
+        .toEqual({ revenue_complete: false, collected_value_coverage_complete: true })
+    }
+  })
+
+  it('is true only for reconciled sources with full coverage (controls)', () => {
+    expect(reportMoneyCompleteness({ sourceAvailable: true, collectedValueCovered: true, completeness: 'reconciled' }))
+      .toEqual({ revenue_complete: true, collected_value_coverage_complete: true })
+    expect(reportMoneyCompleteness({ sourceAvailable: true, collectedValueCovered: false, completeness: 'reconciled' }))
+      .toEqual({ revenue_complete: false, collected_value_coverage_complete: false })
+    expect(reportMoneyCompleteness({ sourceAvailable: false, collectedValueCovered: true, completeness: 'reconciled' }))
+      .toEqual({ revenue_complete: false, collected_value_coverage_complete: false })
   })
 })
 

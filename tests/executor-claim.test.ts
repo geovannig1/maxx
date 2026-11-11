@@ -58,7 +58,7 @@ describe('executeApprovedChange — atomic claim conflicts', () => {
       if (q.table === 'action_decisions' && q.op === 'select') {
         return { data: { id: 'DEC-1', ad_account_id: 'acct-1', action_kind: 'pause', target_level: 'ad', target_id: 'ad-9', authority_tier: 'execution_eligible', policy_version: ACTION_DECISION_POLICY_FLOOR, approval_state: 'approved', proposed_mutation: { action_type: 'pause_ad', status: 'PAUSED' }, causal_contribution_estimate_id: 'estimate-1' }, error: null }
       }
-      if (q.table === 'ad_accounts' && q.op === 'select') return { data: { account_id: 'act_12345', is_active: true }, error: null }
+      if (q.table === 'ad_accounts' && q.op === 'select') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta' }, error: null }
       if (q.table === 'ads' && q.op === 'select') return { data: { id: 'local-ad-9' }, error: null }
       if (q.table === 'action_log' && q.op === 'insert') {
         return { data: null, error: { message: 'duplicate key value violates unique constraint "idx_action_log_idempotency"' } }

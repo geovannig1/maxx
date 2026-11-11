@@ -46,9 +46,15 @@ describe('expert_insight_judge_attempts', () => {
   })
 
   it('rejects a kind that is not transient and a count below one', async () => {
-    await expect(recordTransientFailure(client, ACCOUNT, TITLE, 1, 'network' as never)).rejects.toThrow(/write failed/)
+    await expect(recordTransientFailure(client, ACCOUNT, TITLE, 1, 'bad_request' as never)).rejects.toThrow(/write failed/)
     await expect(recordTransientFailure(client, ACCOUNT, TITLE, 0, 'server')).rejects.toThrow(/write failed/)
     expect(await readTransientFailures(client, ACCOUNT, TITLE)).toBe(0)
+  })
+
+  it('accepts a network failure as a transient kind', async () => {
+    await recordTransientFailure(client, ACCOUNT, TITLE, 1, 'network')
+    const { rows } = await db.query<{ last_failure_kind: string }>('SELECT last_failure_kind FROM public.expert_insight_judge_attempts')
+    expect(rows).toEqual([{ last_failure_kind: 'network' }])
   })
 
   it('is removed with its account', async () => {

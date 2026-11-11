@@ -1,7 +1,6 @@
 import 'server-only'
 import type { getAdminClient } from '@/lib/supabase/admin'
-import { getAdPlatform } from '@/lib/platforms/registry'
-import type { CampaignCreator } from '@/lib/platforms/types'
+import type { AdPlatform, CampaignCreator } from '@/lib/platforms/types'
 import {
   adBody, adSetBody, campaignBody, creativeBody, hasExactMarker, markerSeed, objectMarker, type GraphBody,
 } from '@/lib/platforms/meta/campaign-payloads'
@@ -77,8 +76,9 @@ export function simulatedCreator(changeRequestId: string): CampaignCreator {
   }
 }
 
-export function liveCreator(): CampaignCreator | null {
-  const creator = getAdPlatform('meta').campaignCreation
+/** The account platform's campaign creator, when it has one and it is configured. */
+export function liveCreator(platform: AdPlatform): CampaignCreator | null {
+  const creator = platform.campaignCreation
   return creator && creator.isConfigured() ? creator : null
 }
 

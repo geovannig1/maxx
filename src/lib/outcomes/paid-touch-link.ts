@@ -18,7 +18,13 @@ import {
  *      account and was not expired when the outcome occurred, the touch precedes the outcome, the
  *      origin is the website, and an outcome is linked once (the same token again is a no-op; another
  *      token is refused).
- *   2. Every evaluated delivery records the independent eligibility input and link evaluation, the
+ *   2. A delivery with no token but paid-click evidence (an fbclid with paid-social UTMs) falls back to
+ *      `link_outcome_paid_touch_fbclid_fallback`, the reference adapter's rule: the most recent
+ *      identity-complete paid touch of THIS account with that exact fbclid, observed at or before the
+ *      outcome, on an outcome whose website origin was observed. Anything else fails closed: no touch,
+ *      a later touch, another account's touch, a staff or unknown origin. A token that fails
+ *      verification is terminal and never falls back (docs/outcomes.md).
+ *   3. Every evaluated delivery records the independent eligibility input and link evaluation, the
  *      linker side of the paid completeness manifest. A delivery without a token counts as NOT linked
  *      (never left out of the denominator), and one with paid-click evidence it cannot link keeps the
  *      linker incomplete.
@@ -80,16 +86,36 @@ type Decision =
   | { status: 'linked'; link: LinkRow }
   | { status: 'absent' | 'rejected' | 'not_configured' | 'error'; reason: string }
 
+/** Tokenless paid click: link by its exact fbclid (the RPC enforces account, timing and origin). A
+ *  refusal is not an error; the delivery stays unlinked with its paid evidence (fail closed). */
+async function decideByFbclid(
+  db: SupabaseClient,
+  input: { adAccountId: string; outcomeId: string; fbclid: string },
+): Promise<Decision> {
+  const { error } = await db.rpc('link_outcome_paid_touch_fbclid_fallback', {
+    p_ad_account_id: input.adAccountId,
+    p_outcome_id: input.outcomeId,
+    p_fbclid: input.fbclid,
+    p_policy_version: POLICY_VERSION,
+  })
+  if (error) return { status: 'absent', reason: 'no_paid_evidence' }
+  const link = await readLink(db, input.adAccountId, input.outcomeId)
+  if (!link || link.token_id !== null) return { status: 'error', reason: 'invalid_rpc_response' }
+  return { status: 'linked', link }
+}
+
 async function decide(
   db: SupabaseClient,
-  input: { adAccountId: string; outcomeId: string; token: string | null; secret: string | null },
+  input: { adAccountId: string; outcomeId: string; token: string | null; secret: string | null; fbclid: string | null },
 ): Promise<Decision> {
   if (!input.token) {
     // Links are immutable: a later delivery that does not repeat the token (a refund from another
     // system, say) keeps the outcome linked by the token that was verified before.
     const existing = await readLink(db, input.adAccountId, input.outcomeId)
     if (existing) return { status: 'linked', link: existing }
-    return input.secret ? { status: 'absent', reason: 'no_paid_evidence' } : { status: 'not_configured', reason: 'linker_not_configured' }
+    if (!input.secret) return { status: 'not_configured', reason: 'linker_not_configured' }
+    if (input.fbclid) return decideByFbclid(db, { adAccountId: input.adAccountId, outcomeId: input.outcomeId, fbclid: input.fbclid })
+    return { status: 'absent', reason: 'no_paid_evidence' }
   }
   if (!input.secret) return { status: 'not_configured', reason: 'linker_not_configured' }
   const verified = verifyPaidTouchToken(input.token, input.secret)
@@ -119,7 +145,10 @@ export async function linkOutcomePaidTouch(
   const secret = tokenSecret(env)
   let decision: Decision
   try {
-    decision = await decide(db, { adAccountId: input.adAccountId, outcomeId: input.outcomeId, token: input.token, secret })
+    decision = await decide(db, {
+      adAccountId: input.adAccountId, outcomeId: input.outcomeId, token: input.token, secret,
+      fbclid: paidClickEvidence(input.outcome) ? input.outcome.attribution.fbclid : null,
+    })
   } catch {
     decision = { status: 'error', reason: 'link_exception' }
   }

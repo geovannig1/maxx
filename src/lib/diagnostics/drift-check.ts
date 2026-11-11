@@ -1,8 +1,9 @@
 import { getAdminClient } from '@/lib/supabase/admin'
 import { nyDaysAgo } from '@/lib/utils/date-utils'
-import { getAdPlatform } from '@/lib/platforms/registry'
+import { adPlatformForAccount } from '@/lib/platforms/account-platform'
+import type { AdPlatform } from '@/lib/platforms/types'
 import { insertAlertsDeduped } from '@/lib/alerts/insert'
-import { findAppointmentConfirmedResults } from '@/lib/sync/upsert-insights'
+import { findOutcomeEventResults } from '@/lib/sync/upsert-insights'
 import { formatMoney, formatMoneyAmount, roundMoney } from '@/lib/utils/format-currency'
 
 // DATA-DRIFT GUARDRAIL.
@@ -121,15 +122,22 @@ export async function runDriftCheck(
   }
 
   const db = getAdminClient()
-  const { data: acct } = await db.from('ad_accounts').select('account_id').eq('id', adAccountDbId).maybeSingle()
+  const { data: acct } = await db.from('ad_accounts').select('account_id, platform').eq('id', adAccountDbId).maybeSingle()
   const metaAccountId = (acct?.account_id as string | undefined) ?? null
   if (!metaAccountId) return { ...empty, reason: 'No ad account row / Meta account id.' }
+  let platform: AdPlatform
+  try {
+    platform = adPlatformForAccount(acct)
+  } catch (err) {
+    return { ...empty, reason: err instanceof Error ? err.message : String(err) }
+  }
 
   // LIVE truth: account-level per-day spend straight from Meta, right now.
   let liveByDay: Map<string, number>
   try {
-    const rows = await getAdPlatform('meta').insights.fetchInsights({ accountId: metaAccountId, level: 'account', since, until })
-    liveByDay = new Map(rows.map((r) => [r.date_start, Number(r.spend ?? 0)]))
+    const rows = (await platform.insights.fetchInsights({ accountId: metaAccountId, level: 'account', since, until }))
+      .map((row) => platform.records.insight(row))
+    liveByDay = new Map(rows.map((r) => [r.dateStart, r.spend ?? 0]))
   } catch (err) {
     return { ...empty, reason: `Live Meta fetch failed: ${err instanceof Error ? err.message : String(err)}` }
   }
@@ -140,11 +148,11 @@ export async function runDriftCheck(
   let liveBookingsByDay: Map<string, number> | null = null
   if (opts.includeBookings === true) {
     try {
-      const campRows = await getAdPlatform('meta').insights.fetchInsights({ accountId: metaAccountId, level: 'campaign', since, until })
+      const campRows = await platform.insights.fetchInsights({ accountId: metaAccountId, level: 'campaign', since, until })
       liveBookingsByDay = new Map()
       for (const r of campRows) {
         const day = r.date_start
-        liveBookingsByDay.set(day, (liveBookingsByDay.get(day) ?? 0) + findAppointmentConfirmedResults(r.results))
+        liveBookingsByDay.set(day, (liveBookingsByDay.get(day) ?? 0) + findOutcomeEventResults(r.results))
       }
     } catch {
       liveBookingsByDay = null // degrade: spend layers still run; bookings layer reports unavailable via note

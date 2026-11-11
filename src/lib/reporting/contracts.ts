@@ -1,10 +1,11 @@
 import { z } from 'zod'
-import { MetricClaimSchema } from '@/lib/cockpit/contracts'
+import { DocumentMetricClaimSchema } from '@/lib/cockpit/contracts'
 import { ReportCreativeIdentitySchema } from './creative-identity'
 import { ReportCreativeAssignmentEvidenceSchema } from './creative-assignment-contract'
 import { ReportAudienceEvidenceSchema } from './audience-evidence'
 import { ReportBudgetEvidenceSchema } from './budget-evidence'
 import { isIanaTimeZone, isIsoCurrency } from '@/config/business-config'
+import { isSampleMediaPath } from './sample-media'
 
 export const ReportingDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => {
   const time = Date.parse(`${value}T00:00:00Z`)
@@ -35,7 +36,8 @@ export type ReportingContext = z.infer<typeof ReportingContextSchema>
 
 export const ReportMetricSchema = z.object({
   key: z.string().min(1), label: z.string().min(1), definition: z.string().min(1),
-  event: z.string().nullable(), current: MetricClaimSchema, previous: MetricClaimSchema.nullable(),
+  // Each distinct frozen claim (an expanded compact packet shares them) is validated once.
+  event: z.string().nullable(), current: DocumentMetricClaimSchema, previous: DocumentMetricClaimSchema.nullable(),
 }).strict()
 export const ReportMetricMapSchema = z.record(z.string(), ReportMetricSchema).superRefine((metrics, check) => {
   for (const [key, metric] of Object.entries(metrics)) {
@@ -46,13 +48,17 @@ export type ReportMetric = z.infer<typeof ReportMetricSchema>
 export type ReportMetricMap = z.infer<typeof ReportMetricMapSchema>
 
 const httpsUrl = z.string().url().refine(value => {
+  // zod still runs this refinement after .url() rejects the value, and `new URL` would then throw.
+  if (!URL.canParse(value)) return false
   const url = new URL(value)
   return url.protocol === 'https:' && !url.username && !url.password
 }).nullable()
+// An image may also be a demo sample served from the page's own origin (./sample-media.ts).
+const creativeImageUrl = z.union([httpsUrl, z.string().refine(isSampleMediaPath)])
 
 export const ReportCreativeSchema = z.object({
   id: z.string(), name: z.string().nullable(), format: z.enum(['image', 'video', 'carousel', 'unknown']),
-  thumbnailUrl: httpsUrl, imageUrl: httpsUrl, videoUrl: httpsUrl,
+  thumbnailUrl: creativeImageUrl, imageUrl: creativeImageUrl, videoUrl: httpsUrl,
   durationSeconds: z.number().finite().nonnegative().nullable(),
   body: z.string().nullable(), headline: z.string().nullable(), destination: httpsUrl,
   identity: ReportCreativeIdentitySchema.optional(),

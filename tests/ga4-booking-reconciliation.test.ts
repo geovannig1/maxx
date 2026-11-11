@@ -210,7 +210,7 @@ describe('reconcileGa4Bookings — GA attributes, the ledger decides', () => {
     expect(r.scope).toBe('mixed_partial_coverage')
     expect(exactPaidEvidence(r, isPaid)).toBeNull()
     expect(r.unjoinedWebsiteBookings).toEqual([511])
-    expect(r.scopeReason).toMatch(/WEBSITE-origin outcome-bearing appointment\(s\) produced no GA event/)
+    expect(r.scopeReason).toMatch(/WEBSITE-origin value-bearing outcome\(s\) produced no GA event/)
   })
 
   it('[9d] a STAFF/MANUAL booking with no GA event does NOT block exactness — it never had a session', () => {
@@ -376,7 +376,7 @@ describe('rendered block — every number states its source and scope', () => {
   it('names the ledger as the source and separates booked value from recorded payment', () => {
     const r = reconcileGa4Bookings([appt({ id: 1, price: 300, amount_paid: 150 })], gaOk([ev({ appointmentId: 1 })]))
     const text = renderGa4ReconciliationBlock(r).join('\n')
-    expect(text).toMatch(/SOURCE: outcome ledger\. GA4 contributes no count and no dollar/)
+    expect(text).toMatch(/SOURCE: outcome ledger\. GA4 contributes no count and no money/)
     expect(text).toMatch(/scheduled charged price.*separate from checkout revenue/)
     expect(text).toMatch(/Recorded collected value: \$150\.00/)
     expect(text).toMatch(/amount_paid collected at checkout after discounts/)

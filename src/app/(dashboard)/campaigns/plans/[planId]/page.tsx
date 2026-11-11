@@ -5,7 +5,7 @@ import { requireOwner } from '@/lib/auth/page-owner'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { resolveOnlyActiveAccount } from '@/lib/accounts/active-account'
 import { isDemoMode } from '@/config/demo'
-import { getAdPlatform } from '@/lib/platforms/registry'
+import { loadAccountPlatform } from '@/lib/platforms/account-platform'
 import { getPlan } from '@/lib/campaigns/plan-repository'
 import { loadPlanContext } from '@/lib/campaigns/plan-context'
 import { PLAN_STATUS_LABEL } from '@/lib/campaigns/plan-spec'
@@ -34,7 +34,11 @@ export default async function CampaignPlanPage({ params }: { params: Promise<{ p
   const account = await resolveOnlyActiveAccount(db)
   const context = account.ok ? await loadPlanContext(db, account.account.id).catch(() => null) : null
   const audiences = context?.ok ? context.context.draft.audiences.map((a) => ({ id: a.id, name: a.name, approximateCount: a.approximateCount })) : []
-  const minorPerMajor = getAdPlatform('meta').budgetUnits.toMinor(1, version.currency)
+  // The account platform's budget units (ad_accounts.platform), read from the plan context when it loaded.
+  const platform = context?.ok ? context.context.account.platform
+    : account.ok ? await loadAccountPlatform(db, account.account.id).catch(() => null) : null
+  if (!platform) return <p role="alert" className="text-[13px]" style={{ color: 'var(--danger)' }}>This plan could not be read (ACCOUNT_PLATFORM_UNAVAILABLE).</p>
+  const minorPerMajor = platform.budgetUnits.toMinor(1, version.currency)
   const writeMode = isDemoMode() ? 'demo' as const : process.env.WRITE_MODE_ENABLED === 'true' ? 'on' as const : 'off' as const
   const request = changeRequests.find((r) => r.campaign_plan_version_id === version.id && !r.rollback_of)
   const created = objects.filter((o) => o.plan_version_id === version.id && o.meta_id)

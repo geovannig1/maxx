@@ -4,11 +4,14 @@ import { decisiveCpaVsTarget } from '@/lib/learning/model'
 import { formatMoney, formatMoneyAmount, roundMoney } from '@/lib/utils/format-currency'
 import { SPEND_FLOORS } from '@/config/spend-floors'
 import { isCausalContributionMetric } from '@/lib/economics/causal-metric'
+import { outcomeWords } from '@/config/outcome-nouns'
 
 // Recompute distilled "what works" patterns across every avenue: targeting (audience/age/gender/placement),
 // ad settings (optimization goal, bid strategy), spend level, time-of-day, and recommendation win-rates.
 
 const WINDOW = 30
+// What this business calls its outcomes (NEXT_PUBLIC_OUTCOME_NOUN).
+const OW = outcomeWords()
 // Override-aware (active range = defaults + Performance-Targets overrides).
 const targetCpa = () => getTargetRange('cpa').healthy
 const maxCpa = () => getTargetRange('cpa').watch
@@ -64,7 +67,7 @@ export function judge(agg: Agg): Omit<PatternRow, 'dimension' | 'segment' | 'win
   let verdict: string
   let recommendation: string
   if (agg.bookings === 0) {
-    if (agg.spend >= SPEND_FLOORS.modelledZeroOutcome) { verdict = 'weak'; recommendation = `MODELLED data records ${formatMoney(agg.spend, { maximumFractionDigits: 0 })} spend with zero modelled bookings — diagnostic only, with no budget direction.` }
+    if (agg.spend >= SPEND_FLOORS.modelledZeroOutcome) { verdict = 'weak'; recommendation = `MODELLED data records ${formatMoney(agg.spend, { maximumFractionDigits: 0 })} spend with zero modelled ${OW.many} — diagnostic only, with no budget direction.` }
     else { verdict = 'insufficient'; recommendation = 'The sample is too small for a performance judgment.' }
   } else if (target === null || max === null) {
     // No owner CPA target: the modelled CPA is reported, never judged.
@@ -78,7 +81,7 @@ export function judge(agg: Agg): Omit<PatternRow, 'dimension' | 'segment' | 'win
   } else if (cpa !== null && cpa <= max) {
     verdict = 'mixed'
     recommendation = cpa <= target
-      ? `Point MODELLED CPA ${formatMoney(cpa, { maximumFractionDigits: 0 })} beats target but on only ${agg.bookings} modelled booking(s); this is not yet a decisive win.`
+      ? `Point MODELLED CPA ${formatMoney(cpa, { maximumFractionDigits: 0 })} beats target but on only ${agg.bookings} modelled ${OW.one}(s); this is not yet a decisive win.`
       : `MODELLED CPA is within the acceptable range (${formatMoney(cpa, { maximumFractionDigits: 0 })}); its direction remains unresolved.`
   } else {
     verdict = 'weak'; recommendation = `Above max on MODELLED CPA (${cpa === null ? 'unavailable' : formatMoney(cpa, { maximumFractionDigits: 0 })}) — a diagnostic signal about this segment, NOT a budget instruction.`
@@ -94,12 +97,14 @@ export function judge(agg: Agg): Omit<PatternRow, 'dimension' | 'segment' | 'win
   }
 }
 
-function spendBand(total: number): string {
-  if (total < 100) return '<$100 (30d)'
-  if (total < 300) return '$100-300 (30d)'
-  if (total < 600) return '$300-600 (30d)'
-  if (total < 1200) return '$600-1200 (30d)'
-  return '$1200+ (30d)'
+/** PURE. The 30-day spend band of an ad set, in the account currency ("<$100 (30d)", "€100–€300 (30d)"). */
+export function spendBand(total: number): string {
+  const money = (n: number) => formatMoneyAmount(n)
+  if (total < 100) return `<${money(100)} (30d)`
+  if (total < 300) return `${money(100)}–${money(300)} (30d)`
+  if (total < 600) return `${money(300)}–${money(600)} (30d)`
+  if (total < 1200) return `${money(600)}–${money(1200)} (30d)`
+  return `${money(1200)}+ (30d)`
 }
 
 export async function recomputeLearnedPatterns(

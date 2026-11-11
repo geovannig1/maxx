@@ -130,8 +130,8 @@ openssl rand -hex 32
 |---|---|---|
 | `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API keys | The app fails its database reads until the new key is deployed. Rotating the project's JWT signing secret also ends every session. |
 | `CRON_SECRET` | Your host's environment (32+ characters) | Scheduled jobs answer 401 until the host and the scheduler use the same new value. |
-| `PAID_TOUCH_TOKEN_SECRET` | Your host's environment (32+ bytes) | Tokens signed with the old secret no longer verify, so visitors captured before the switch are not linked. |
-| Webhook source secrets | **Rotate secret** on `/settings/outcomes` (route `POST /api/outcomes/webhook-sources/<source_id>/rotate`; [outcomes.md](outcomes.md#2-rotate-the-secret)) | **No grace period**: the old secret stops verifying immediately; deliveries signed with it get 404 and must be re-sent. |
+| `PAID_TOUCH_TOKEN_SECRET` | Your host's environment (32+ bytes) | New tokens are signed with the new secret. To keep tokens already handed to visitors linkable, set `PAID_TOUCH_TOKEN_PREVIOUS_SECRET` to the old value and `PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL` to when it should stop (an ISO 8601 instant at most 7 days ahead); see the grace period below. Without them, tokens signed with the old secret no longer verify. |
+| Webhook source secrets | **Rotate secret** on `/settings/outcomes` (route `POST /api/outcomes/webhook-sources/<source_id>/rotate`; [outcomes.md](outcomes.md#2-rotate-the-secret)) | The old secret keeps verifying for the grace period you choose (default 1 hour, at most 24 hours, or **Immediately**); the source's row shows until when. After it, deliveries signed with the old secret get 404 and must be re-sent. |
 | `META_ACCESS_TOKEN` | Business Settings → System Users: generate a new token, then revoke the old one | Syncs fail until the new token is deployed. |
 | `META_APP_SECRET` | The Meta app's Basic settings (reset the app secret) | With "Require App Secret" on, every Graph call fails until the new secret is deployed. |
 | `META_CAPI_ACCESS_TOKEN` | Events Manager → the dataset's settings | Conversions fail and are retried by the daily sync within its window. |
@@ -142,7 +142,25 @@ openssl rand -hex 32
 | `CREATIFY_API_KEY` | Creatify | Video generation fails until deployed. |
 | `GMAIL_SMTP_APP_PASSWORD`, `RESEND_API_KEY` | Google account App Passwords, or Resend | Emails fail and are retried on the next run. |
 | `SENTRY_AUTH_TOKEN` | Sentry → auth tokens (build time only) | Source-map upload fails on the next build. |
-| `SUPABASE_DB_URL` password | Supabase → Project Settings → Database | Used only by setup and your own scripts; never stored by Maxx. |
+| `SUPABASE_DB_URL` password | Supabase → Project Settings → Database | Used only by setup, the doctor's migration check and your own scripts; never stored by Maxx. |
+
+### Grace period when rotating
+
+Two secrets can be rotated without refusing work that was signed before the switch. The old secret
+keeps **verifying** for a short, bounded window; nothing new is ever signed with it, and it is never
+returned by any API or shown on any screen.
+
+- **Webhook source secrets**: chosen per rotation on `/settings/outcomes`: Immediately, 15 minutes,
+  1 hour (the default) or 24 hours (the route accepts 0 to 1440 minutes; the database refuses more than
+  24 hours). While the window is open the source's row says *Old secret still accepted until …*.
+  Rotating again inside the window keeps only the secret that rotation replaced.
+- **`PAID_TOUCH_TOKEN_SECRET`**: set the new value, and set `PAID_TOUCH_TOKEN_PREVIOUS_SECRET` to the old
+  one with `PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL` (for example `2026-11-17T18:00:00Z`). Tokens your
+  visitors already hold still link until then. The end may be at most 7 days ahead; a later, missing or
+  unreadable end turns the window off (the old secret verifies nothing). Remove both once it has passed.
+
+On a suspected leak, use no grace period: **Immediately** for a webhook source, and no
+`PAID_TOUCH_TOKEN_PREVIOUS_SECRET` for the paid-touch secret.
 
 If the owner changes, create the new user, set `OWNER_EMAIL` and `OWNER_USER_ID`, redeploy, then
 delete the old user in Supabase.
@@ -167,24 +185,25 @@ npm run demo -- --port 4000
 npm run demo:check
 ```
 
-`npm run demo` starts four loopback servers (a sample backend over an in-memory database with the
-shipped schema and a fictional seed, the app with Meta and AI off, a sample-media server for the
-creatives' image, and a gateway that signs you in as the fictional owner) at http://127.0.0.1:3000.
+`npm run demo` starts three loopback servers (a sample backend over an in-memory database with the
+shipped schema and a fictional seed, the app with Meta and AI off, and a gateway that signs you in as
+the fictional owner and serves the sample creatives' images from its own origin) at http://127.0.0.1:3000.
 Open that exact address: the gateway redirects http://localhost:3000 pages to it (the app accepts saves
-only from that origin) and refuses a save sent to another host name. It uses ports 3000 to 3003; `--port` moves the gateway and the other three follow it (`--port 4000`
-uses 4000 to 4003). When one of them is busy it stops before starting anything and names the port.
+only from that origin) and refuses a save sent to another host name. It uses ports 3000 to 3002; `--port` moves the gateway and the other two follow it (`--port 4000`
+uses 4000 to 4002). When one of them is busy it stops before starting anything and names the port.
 It sets every variable itself, so a real `.env.local` is never read, it never contacts Meta or an AI
 provider (approvals run a simulated executor; a sync request is refused), and it refuses to start on Vercel or in production. `npm run demo:check` starts its own
-demo on ports 3300 to 3303 (`npm run demo:check -- --port 4300` moves it), checks the pages, the
+demo on ports 3300 to 3302 (`npm run demo:check -- --port 4300` moves it), checks the pages, the
 charts and the CSP in a headless browser, and stops it.
 
 ## Scaling notes
 
 - **One owner, one ad account per install.** For several businesses or accounts, run several
   installs, each with its own Supabase project.
-- **Report size:** report build time grows linearly with campaigns and days (measurements below), but
-  the serialized report packet is large: at 50 campaigns × 90 days it exceeds the 64 MB limit for a
-  saved report. A compact, versioned packet format is in progress.
+- **Report size:** report build time grows linearly with campaigns and days, and reports are stored
+  and sent in the compact packet format (packetVersion 2): at 50 campaigns × 90 days with ad sets and
+  ads the packet is 16.2 MB (2.9 MB gzip) instead of 219 MB, under the 64 MB limit for a saved report.
+  Validation still expands it in full on the server and in the browser. Measurements are below.
 - **Function time:** the daily sync runs on a serverless function with a time limit; optional AI
   steps are skipped, with the reason recorded, when time is short.
 - **Request limits:** webhook sources accept 600 signed deliveries per minute each; CSV imports are

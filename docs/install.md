@@ -108,6 +108,14 @@ confirmation on), checks that the project is reachable and that the schema is ap
 npm run doctor -- --only=supabase
 ```
 
+The schema check sees tables, so it cannot tell whether a migration that only changes a function ran.
+To compare every file in `supabase/migrations` with the database's migration history, give the doctor
+the connection string for that one run (it is not saved or printed):
+
+```bash
+SUPABASE_DB_URL="<connection string>" npm run doctor -- --only=supabase
+```
+
 **Local alternative:** run everything on your machine with Docker instead of a hosted project:
 
 ```bash
@@ -222,7 +230,8 @@ reference.
   examples in Node.js, Python and curl: [outcomes.md](outcomes.md#signed-webhook). To also send
   website outcomes to Meta's Conversions API, set `OUTCOME_CONVERSIONS_SEND` (`test` with
   `META_TEST_EVENT_CODE` first, then `true`).
-- **Acuity Scheduling (example adapter):** set `ACUITY_USER_ID` and `ACUITY_API_KEY`, then in Acuity →
+- **Acuity Scheduling (example adapter):** the `ACUITY_*` variables configure only this adapter; skip
+  them if you do not use Acuity. Set `ACUITY_USER_ID` and `ACUITY_API_KEY`, then in Acuity →
   Integrations → Webhooks add `https://<your-domain>/api/webhooks/acuity` for appointment
   scheduled, rescheduled, canceled and changed (optionally with `?secret=` and the value of
   `ACUITY_WEBHOOK_SECRET`). Load history with:
@@ -326,7 +335,9 @@ yours:
 
 - **GA4:** create a service account, grant it Viewer on the property, put the JSON key on one line in
   `GA4_SERVICE_ACCOUNT_JSON` and set `GA4_PROPERTY_ID`. `GA4_BOOKING_EVENT` names the event that marks
-  an outcome on your website. The website report's Intent and Lead event cards count the events named
+  an outcome on your website, whatever your outcome is (a purchase, a lead, a booking): the name
+  comes from the scheduling business Maxx was first built for. Its default, `appointment_confirmed`,
+  fits only that case; set it to the event your site sends when an outcome is confirmed. The website report's Intent and Lead event cards count the events named
   in `GA4_INTENT_EVENTS` and `GA4_LEAD_EVENTS` (comma-separated; defaults `begin_checkout` and
   `generate_lead`, GA4's recommended events); set them to the events your site actually sends. GA4 is
   web telemetry; it is never counted as a business outcome.
@@ -370,7 +381,7 @@ the stack after changing it); a hosted project allows 2 an hour until you config
 
 **A port is already in use.** `npm run dev` uses 3000 (`npm run dev -- --port 3005` moves it; add the
 new origin, for example `http://localhost:3005/**`, to the Redirect URLs). `npm run demo` uses 3000 to
-3003 and names a busy port (`npm run demo -- --port 4000`). The local Supabase stack uses 54321 to
+3002 and names a busy port (`npm run demo -- --port 4000`). The local Supabase stack uses 54321 to
 54324 and 54327; another local Supabase project on the same ports must be stopped first.
 
 **The Supabase CLI fails to start the stack.** Start Docker and try again. The CLI is fetched by

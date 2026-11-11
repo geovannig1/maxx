@@ -196,8 +196,13 @@ describe('generateWeeklyReport evidence-bound publication', () => {
     })
     expect(plain.report_json).not.toHaveProperty('outcome_arrival')
     expect(pushOnly.report_json.outcome_arrival).toEqual(arrival)
-    // the money basis differs only in the explicit source completeness it now states.
-    expect(pushOnly.report_json.money_basis).toEqual({ ...(plain.report_json.money_basis as Record<string, unknown>), source_completeness: 'as_received' })
+    // the money basis differs only in the source completeness it states and in revenue_complete, which a
+    // push-only source cannot prove; the collected-value coverage stays the same.
+    expect(pushOnly.report_json.money_basis).toEqual({
+      ...(plain.report_json.money_basis as Record<string, unknown>), source_completeness: 'as_received', revenue_complete: false,
+    })
+    expect((plain.report_json.money_basis as Record<string, unknown>).revenue_complete)
+      .toBe((plain.report_json.money_basis as Record<string, unknown>).collected_value_coverage_complete)
     expect((plain.report_json.money_basis as Record<string, unknown>).source_completeness).toBe('reconciled')
     expect(pushOnly.full_report_md).toContain('As imported')
     expect(plain.full_report_md).not.toContain('As imported')

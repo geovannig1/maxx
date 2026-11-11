@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { SourceBadge } from '@/components/ui/badges'
 import { verdictTone, type AccountVerdict as Verdict } from '@/lib/dashboard/verdict'
 import { outcomeNoun } from '@/config/outcome-nouns'
+import { formatMoney } from '@/lib/utils/format-currency'
 
 // The Tier-1 HERO of the redesigned Today page (design-system §3.1). Answers "what should I care about
 // today?" before any chart: a trust-toned account verdict + the outcome-source active-appointment amount + the
@@ -49,7 +50,7 @@ export function AccountVerdict({
               <span className="section-label">Amount paid · active {outcomeNoun()}</span>
             </div>
             <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
-              ${Math.round(revenue.value).toLocaleString()}
+              {formatMoney(revenue.value, { maximumFractionDigits: 0 })}
             </div>
             <div className="text-[11.5px] mt-1" style={{ color: 'var(--text-tertiary)' }}>{revenue.bookings} value-bearing {outcomeNoun({ count: revenue.bookings })} · active {outcomeNoun()} only</div>
           </div>

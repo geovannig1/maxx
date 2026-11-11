@@ -1,6 +1,7 @@
 import 'server-only'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
+import { adPlatformForAccount } from '@/lib/platforms/account-platform'
 import type { BudgetRow } from '@/lib/platforms/types'
 import { MAXX_OWNER_PROFIT_POLICY } from '@/lib/economics/profit-policy'
 import { formatMoney, roundMoney } from '@/lib/utils/format-currency'
@@ -21,10 +22,15 @@ import {
 // binding of a Meta target to the selected account. Split out of executor.ts with no behavior change;
 // executor.ts re-exports the public names.
 
-// Meta reads and writes go through the platform registry; every gate stays in the callers.
-export const metaWrites = () => requireCapability(getAdPlatform('meta'), 'writes')
-export const fromMetaMinorUnits = (minor: number, currency?: string) => getAdPlatform('meta').budgetUnits.fromMinor(minor, currency)
-export const toMetaMinorUnits = (amount: number, currency?: string) => getAdPlatform('meta').budgetUnits.toMinor(amount, currency)
+// The governed write path is Meta's: it validates Meta entity and account ids and Meta snapshots
+// (meta-live-state.ts). Its one platform binding is below; resolveWriteTargetContext refuses an account
+// whose own platform (ad_accounts.platform) is any other, before any read or write. A second platform
+// needs its own write path first. Every gate stays in the callers.
+const GOVERNED_WRITE_PLATFORM = 'meta'
+const writePlatform = () => getAdPlatform(GOVERNED_WRITE_PLATFORM)
+export const metaWrites = () => requireCapability(writePlatform(), 'writes')
+export const fromMetaMinorUnits = (minor: number, currency?: string) => writePlatform().budgetUnits.fromMinor(minor, currency)
+export const toMetaMinorUnits = (amount: number, currency?: string) => writePlatform().budgetUnits.toMinor(amount, currency)
 
 // Daily-budget hard bounds — enforced at propose time AND re-checked before any Meta call, for every
 // action that sets a budget (adjust_budget and duplicate_adset's optional budget override).
@@ -140,18 +146,23 @@ export async function resolveWriteTargetContext(
 
   const { data: account, error: accountError } = await db
     .from('ad_accounts')
-    .select('account_id, is_active, currency')
+    .select('account_id, is_active, currency, platform')
     .eq('id', adAccountDbId)
     .maybeSingle()
   if (accountError) {
     return { ok: false, status: 'PRECONDITION_UNAVAILABLE', message: 'The owning Meta account could not be read.' }
+  }
+  let accountPlatform: ReturnType<typeof adPlatformForAccount> | null = null
+  try { accountPlatform = account ? adPlatformForAccount(account) : null } catch { accountPlatform = null }
+  if (account && accountPlatform?.id !== GOVERNED_WRITE_PLATFORM) {
+    return { ok: false, status: 'PRECONDITION_UNAVAILABLE', message: 'Governed changes support Meta ad accounts only; this account belongs to another or an unknown ad platform.' }
   }
   const metaAccountId = normalizeMetaAccountId(account?.account_id)
   if (!metaAccountId || account?.is_active !== true) {
     return { ok: false, status: 'OWNERSHIP_UNVERIFIED', message: 'The owning Meta account is missing, inactive, or invalid.' }
   }
   if (writeCarriesMoney(actionType, params)) {
-    const mismatch = currencyMismatch(account?.currency)
+    const mismatch = currencyMismatch(account?.currency, writePlatform().budgetUnits)
     if (mismatch) return { ok: false, status: 'CURRENCY_MISMATCH', message: mismatch }
   }
 

@@ -66,7 +66,7 @@ async function waitForApp(url: string, timeoutMs = 120_000): Promise<void> {
 
 const usd = (value: number) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: Number.isInteger(value) ? 0 : 2 })
 
-async function browserCheck(url: string, sampleImageUrl: string | null, calendar: DemoCalendar): Promise<string> {
+async function browserCheck(url: string, sampleImageUrl: string, calendar: DemoCalendar): Promise<string> {
   // The figures the sample account holds for the default range (./sample/demo-account.ts).
   const sample = demoReportingData(calendar.range, calendar)
   const booked = usd(sample.business.data!.metrics.booked_value.current.value as number)
@@ -74,8 +74,8 @@ async function browserCheck(url: string, sampleImageUrl: string | null, calendar
   const { chromium } = await import('@playwright/test')
   const browser = await chromium.launch({ headless: true })
   try {
-    // The sample image is served over loopback HTTPS with a throwaway self-signed certificate (./media.ts).
-    const page = await browser.newPage({ ignoreHTTPSErrors: true })
+    // An ordinary browser: no certificate exceptions. The sample creatives must render as a user sees them.
+    const page = await browser.newPage()
     const errors: string[] = []
     const console_: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
@@ -111,11 +111,9 @@ async function browserCheck(url: string, sampleImageUrl: string | null, calendar
     if (page_.includes('daily evidence unavailable')) throw new Error('an overview chart says its daily evidence is unavailable')
     const mer = await page.locator('[aria-label="Daily MER values"] [role="listitem"]').allInnerTexts()
     if (mer.length !== days || mer.some((cell) => !/\d×/.test(cell))) throw new Error(`Daily MER is not filled: ${mer.slice(0, 5).join(' | ')}`)
-    // The sample creatives' image is a local asset: it must actually render, not just avoid the CSP.
-    if (sampleImageUrl) {
-      await page.waitForFunction((src) => [...document.images].some((image) => image.src === src && image.complete && image.naturalWidth > 0),
-        sampleImageUrl, { timeout: 120_000 })
-    }
+    // The sample creatives' image is served on the page's own origin: it must actually render, not just avoid the CSP.
+    await page.waitForFunction((src) => [...document.images].some((image) => image.src === src && image.complete && image.naturalWidth > 0),
+      sampleImageUrl, { timeout: 120_000 })
     // The browser's own fetch sets Origin and Sec-Fetch-Site itself: this is the request a click sends.
     const scoredInPage = await page.evaluate(async () => {
       const reply = await fetch('/api/creative/copy/score', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: 'Book a bright room by the hour.' }) })
@@ -123,7 +121,7 @@ async function browserCheck(url: string, sampleImageUrl: string | null, calendar
     })
     if (scoredInPage.status !== 200 || !scoredInPage.text.includes('"score"')) throw new Error(`the page's own POST /api/creative/copy/score returned ${scoredInPage.status}: ${scoredInPage.text.slice(0, 120)}`)
     const scripts = await page.locator('script').evaluateAll((nodes) => nodes.map((node) => ({ nonce: (node as HTMLScriptElement).nonce, src: (node as HTMLScriptElement).src })))
-    // Every CSP violation fails the check: the sample creatives are served locally (see ./media.ts).
+    // Every CSP violation fails the check: the sample creatives are served on the page's origin (see ./media.ts).
     const violations = console_.filter((line) => line.includes('CSP violation:'))
     console.log(`browser console (${console_.length} messages):${console_.map((line) => `\n  ${line.slice(0, 300)}`).join('')}`)
     if (errors.length > 0) throw new Error(`Browser errors: ${errors.join('; ')}`)
@@ -132,7 +130,7 @@ async function browserCheck(url: string, sampleImageUrl: string | null, calendar
     if (violations.length > 0) throw new Error(`CSP violations: ${violations.join('; ')}`)
     // Scripts added at runtime by an already-trusted script run under 'strict-dynamic' without a nonce.
     const stamped = scripts.filter((script) => script.nonce).length
-    return `dashboard rendered and hydrated under a nonce CSP: Trust reads "${await trust.innerText()}"; Business results show ${booked} booked value, Advertising results show ${spend} spend; both overview charts and the daily MER filled for ${days} days; ${stamped} of ${scripts.length} script elements carry the nonce; ${sampleImageUrl ? `sample creative image rendered from ${sampleImageUrl}; ` : 'sample creatives without an image (no openssl); '}the page's own POST /api/creative/copy/score scored (200); no CSP violation, no browser errors`
+    return `dashboard rendered and hydrated under a nonce CSP: Trust reads "${await trust.innerText()}"; Business results show ${booked} booked value, Advertising results show ${spend} spend; both overview charts and the daily MER filled for ${days} days; ${stamped} of ${scripts.length} script elements carry the nonce; sample creative image rendered from ${sampleImageUrl} without a certificate exception; the page's own POST /api/creative/copy/score scored (200); no CSP violation, no browser errors`
   } finally {
     await browser.close()
   }

@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { createServer, type Server } from 'node:net'
 import { demoPorts, assertDemoPortsFree } from '../scripts/demo/ports'
 
-// `npm run demo` binds four loopback ports: the gateway on --port and the app, sample backend and
-// sample media on the next three. A busy one must stop the demo before anything starts, naming the
+// `npm run demo` binds three loopback ports: the gateway on --port and the app and sample backend on
+// the next two. A busy one must stop the demo before anything starts, naming the
 // port and the way out, instead of a half-started demo with a cryptic EADDRINUSE.
 
 const servers: Server[] = []
@@ -16,8 +16,8 @@ function listen(): Promise<number> {
 }
 
 describe('demo ports', () => {
-  it('uses the given port and the next three', () => {
-    expect(demoPorts(3000)).toEqual({ gateway: 3000, app: 3001, backend: 3002, media: 3003 })
+  it('uses the given port and the next two', () => {
+    expect(demoPorts(3000)).toEqual({ gateway: 3000, app: 3001, backend: 3002 })
   })
 
   it('fails fast naming a busy port and suggesting --port', async () => {

@@ -100,7 +100,7 @@ The rules:
 - **No upstream text can smuggle advice.** Producers submit structured observations; if an
   observation is phrased as an instruction ("pause this", "increase budget"), the text is withheld
   and replaced with a note.
-- **A budget ceiling bounds every money recommendation** (`DAILY_BUDGET_CEILING_USD`, the owner's
+- **A budget ceiling bounds every money recommendation** (`DAILY_BUDGET_CEILING`, the owner's
   account-total daily ceiling).
 
 ## 4. Changes to the ad account

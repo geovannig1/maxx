@@ -139,7 +139,7 @@ export function reconcilePlaneConflict(i: PlaneConflictInput): PlaneConflictResu
   if (!available) {
     note = 'GA paid-channel event value is unavailable for this window, so the two planes cannot be compared. NEITHER is business truth: the outcome ledger is. The Meta figure is a modelled estimate.'
   } else if (!comparable) {
-    note = 'GA paid-channel event value is $0 for this window (e.g. every confirmation carried no value) — a variance % is undefined against zero. This says nothing about business revenue, which comes from the outcome ledger.'
+    note = 'GA paid-channel event value is zero for this window (e.g. every confirmation carried no value) — a variance % is undefined against zero. This says nothing about business revenue, which comes from the outcome ledger.'
   } else if (direction === 'aligned') {
     note = `Meta's modelled estimate and GA telemetry agree within ${Math.abs(variancePct!).toFixed(1)}%. Two estimates agreeing is a weak positive signal, NOT a verified money figure — neither plane has appointment identity.`
   } else if (direction === 'meta_over') {

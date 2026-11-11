@@ -4,6 +4,8 @@ import { resolveReportingRange } from '../../src/lib/reporting/range'
 import { compactReportingPacket } from '../../src/lib/reporting/packet-format'
 import { forwardHmrUpgrades } from './hmr-upgrade'
 import { canonicalOriginReply } from './canonical-origin'
+import { SAMPLE_MEDIA_HEADERS, sampleImageFor, sampleMediaBody } from './media'
+import { SAMPLE_MEDIA_PREFIX } from '../../src/lib/reporting/sample-media'
 
 // The demo's front door (127.0.0.1 only). It signs the browser in as the fictional demo owner, serves
 // the reporting API from the sample account (./sample/demo-account.ts: fictional native rows run
@@ -31,8 +33,6 @@ export interface GatewayOptions {
   appPort: number
   sessionCookie: string
   calendar: DemoCalendar
-  /** The sample creatives' images (./media.ts); absent means the creatives carry no image. */
-  imageFor?: (index: number) => string
 }
 
 function sendJson(response: ServerResponse, value: unknown, status = 200) {
@@ -47,10 +47,21 @@ function reporting(url: URL, response: ServerResponse, options: GatewayOptions) 
     const { from, to } = options.calendar.range
     const range = resolveReportingRange({ from: url.searchParams.get('from') ?? from, to: url.searchParams.get('to') ?? to })
     // Same packetVersion 2 form as the real API's JSON reply; the browser expands it.
-    sendJson(response, compactReportingPacket({ ...demoPacket(section, { from: range.from, to: range.to }, options.calendar, options.imageFor), notes: [SAMPLE_NOTE] }))
+    sendJson(response, compactReportingPacket({ ...demoPacket(section, { from: range.from, to: range.to }, options.calendar, sampleImageFor), notes: [SAMPLE_NOTE] }))
   } catch {
     sendJson(response, { error: 'Choose valid report dates.' }, 400)
   }
+}
+
+/** The sample creatives' images (./media.ts), on the gateway's own origin; never proxied to the app. */
+function sampleMedia(pathname: string, method: string, response: ServerResponse) {
+  const body = sampleMediaBody(pathname)
+  if (!body) {
+    response.writeHead(404, { 'Cache-Control': 'no-store' })
+    return response.end()
+  }
+  response.writeHead(200, { ...SAMPLE_MEDIA_HEADERS, 'Content-Length': body.length })
+  response.end(method === 'HEAD' ? undefined : body)
 }
 
 const cookieName = (cookie: string) => cookie.slice(0, cookie.indexOf('='))
@@ -93,6 +104,7 @@ export function startGateway(options: GatewayOptions): Promise<Server> {
       return response.end()
     }
     if (url.pathname === '/api/reporting') return reporting(url, response, options)
+    if (url.pathname.startsWith(SAMPLE_MEDIA_PREFIX)) return sampleMedia(url.pathname, method, response)
     proxy(request, response, options, hasCookie)
   })
   // Next dev sends React debug data over HMR; without the upgrade the page never hydrates.

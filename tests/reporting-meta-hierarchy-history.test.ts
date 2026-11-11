@@ -8,10 +8,12 @@ import { filterEntities } from '@/components/reporting/MetricTable'
 import type { MetaReport, ReportSection, ReportingContext } from '@/lib/reporting/contracts'
 import type { MetaRow } from '@/lib/reporting/meta-metrics'
 // Measured 2026-11-07 (scripts/bench/reporting-packet.ts, docs/operations.md): ~0.3 s to build this
-// packet in-process, ~1 s for the whole test alone and a few seconds under the full parallel suite.
-// The budget is well over 5x that so CI noise cannot fail it, yet far below the old ~15 s cost; the
-// operation-count guard in tests/reporting-meta-scaling.test.ts catches a scaling regression.
-const STRESS_TEST_TIMEOUT_MS = 15_000
+// packet in-process; 2026-11-10 at load average ~18-25: 0.6-1.4 s for the whole test alone (read ~0.4 s,
+// validation ~0.3 s, 21 MB stringify ~0.1 s, all asserted work). A 15 s budget still timed out once in the
+// full gate while other suites shared the machine, because CPU starvation, not this code, set the time.
+// Wall time is therefore only a hang bound here: the operation-count guard in
+// tests/reporting-meta-scaling.test.ts is what catches a scaling regression, deterministically.
+const STRESS_TEST_TIMEOUT_MS = 60_000
 const { get, history } = vi.hoisted(() => ({ get: vi.fn(), history: vi.fn() }))
 vi.mock('@/lib/platforms/meta/client', () => ({ metaGet: get }))
 vi.mock('@/lib/reporting/creative-assignment-reader', () => ({ readReportCreativeAssignmentEvidence: history }))

@@ -5,6 +5,8 @@ import { emitAlert } from '@/lib/monitoring/alerts'
 import { normalizeMetaAccountId } from '@/lib/writes/meta-live-state'
 import { campaignPlanSpecSchema, type CampaignPlanSpec } from './plan-spec'
 import { loadPlanContext } from './plan-context'
+import { loadAccountPlatform } from '@/lib/platforms/account-platform'
+import type { AdPlatform } from '@/lib/platforms/types'
 import { evaluatePlan, hashSpec } from './plan-repository'
 import {
   CreationStepError, createPlanObjects, createdByRequest, liveCreator, loadObjectRows, markerSeed, objectSummary, simulatedCreator, verifyPlanObjects,
@@ -76,7 +78,7 @@ export async function executeCampaignPlanChange(changeRequestId: string, actor: 
   if (!validation.ok) {
     return { status: 'REVALIDATION_FAILED', message: 'The plan no longer validates against the account. Nothing was sent to Meta.', validation: validation.issues.filter((i) => i.severity === 'blocker') }
   }
-  const creator = simulate ? simulatedCreator(request.id) : liveCreator()
+  const creator = simulate ? simulatedCreator(request.id) : liveCreator(loaded.context.account.platform)
   if (!creator) return { status: 'PRECONDITION_UNAVAILABLE', message: 'Meta write credentials are unavailable. Nothing was created.' }
   const metaAccount = normalizeMetaAccountId(loaded.context.account.metaAccountId)
   if (!metaAccount) return dbError('account read', null)
@@ -132,7 +134,11 @@ async function archivePlanObjects(db: Db, cr: PlanRequestRow, actor: string, acc
   if (ids.length === 0 || ids.some((id) => !recorded.has(id) || recorded.get(id)?.object_kind === 'creative')) {
     return { status: 'INTEGRITY_MISMATCH', message: 'The rollback names an object the creation did not record. Nothing was archived.' }
   }
-  const creator = simulate ? simulatedCreator(cr.id) : liveCreator()
+  let platform: AdPlatform | null = null
+  if (!simulate) {
+    try { platform = await loadAccountPlatform(db, accountId) } catch { return dbError('account platform read', null) }
+  }
+  const creator = simulate ? simulatedCreator(cr.id) : platform && liveCreator(platform)
   if (!creator) return { status: 'PRECONDITION_UNAVAILABLE', message: 'Meta write credentials are unavailable. Nothing was archived.' }
   const claimed = await claim(db, cr, accountId, actor)
   if (!('id' in claimed)) return claimed

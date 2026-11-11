@@ -9,7 +9,7 @@ import { evaluateTrackingHealth, pixelFiresOutcomeEvent } from '@/lib/tracking/h
 
 afterEach(() => vi.unstubAllEnvs())
 
-const delivering = { isFiring: true, appointmentLast7: 0, appointmentPrev7: 4, deliveryLast7: 120, volumeDropPct: null, pixelFiringSiteWide: false }
+const delivering = { isFiring: true, outcomeEventsLast7: 0, outcomeEventsPrev7: 4, deliveryLast7: 120, volumeDropPct: null, pixelFiringSiteWide: false }
 
 describe('configurable Meta outcome event', () => {
   it('defaults to AppointmentConfirmed and reads a configured name', () => {
@@ -40,6 +40,21 @@ describe('configurable Meta outcome event', () => {
     expect(text).not.toContain('AppointmentConfirmed')
   })
 
+  it('interpolates the configured event in every tracking-health issue (dormant and site-wide-firing too)', () => {
+    vi.stubEnv('NEXT_PUBLIC_META_OUTCOME_EVENT', 'Lead')
+    const cases = [
+      { ...delivering, deliveryLast7: 0 },
+      { ...delivering, pixelFiringSiteWide: true },
+      { ...delivering, outcomeEventsLast7: 1, outcomeEventsPrev7: 10, volumeDropPct: -90 },
+    ]
+    for (const signals of cases) {
+      const text = evaluateTrackingHealth(signals).issues.join(' ')
+      expect(text).toContain('Lead')
+      expect(text).not.toContain('${')
+      expect(text).not.toContain('AppointmentConfirmed')
+    }
+  })
+
   it('is in the environment registry and the generated configuration docs', () => {
     const spec = ENV_VARS.find((v) => v.name === 'NEXT_PUBLIC_META_OUTCOME_EVENT')
     expect(spec).toMatchObject({ default: 'AppointmentConfirmed' })
@@ -61,12 +76,12 @@ describe('Meta insight readers match the configured outcome event', () => {
   it('counts Results for the configured event read at module load, not the default (control)', async () => {
     vi.resetModules()
     vi.stubEnv('NEXT_PUBLIC_META_OUTCOME_EVENT', 'Purchase')
-    const { readAppointmentConfirmedResult } = await import('@/lib/sync/insight-outcome-readers')
+    const { readOutcomeEventResult } = await import('@/lib/sync/insight-outcome-readers')
     const results = [
       { indicator: 'actions:offsite_conversion.fb_pixel_purchase', values: [{ value: '3', attribution_windows: ['default'] }] },
       { indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed', values: [{ value: '9', attribution_windows: ['default'] }] },
     ]
-    expect(readAppointmentConfirmedResult(results as never).value).toBe(3)
+    expect(readOutcomeEventResult(results as never).value).toBe(3)
     vi.resetModules()
   })
 })

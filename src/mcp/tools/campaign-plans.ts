@@ -28,7 +28,7 @@ export async function previewCampaignPlan(args: Record<string, unknown>): Promis
   const drafted = buildTemplatePlan(parsed.data, loaded.context.draft)
   const { validation, readiness } = evaluatePlan(drafted.spec, loaded.context)
   return {
-    persisted: false, source: 'template', spec: drafted.spec, summary: planSummary(drafted.spec, loaded.context.account.currency),
+    persisted: false, source: 'template', spec: drafted.spec, summary: planSummary(drafted.spec, loaded.context.account),
     validation: validation.issues, readiness, notes: drafted.notes,
     note: 'A preview only: nothing was stored and nothing was sent to Meta. Draft and submit it in the Maxx console.',
   }

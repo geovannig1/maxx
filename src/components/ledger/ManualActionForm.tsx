@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { SETTING_LABELS } from '@/lib/recommendations/manifest'
 import { READ_ONLY_APPLY_NOTE } from '@/lib/ui/proposal'
+import { formatMoney } from '@/lib/utils/format-currency'
 
 // Manual action capture (Ad Decision Ledger). Write mode is OFF, so real changes happen
 // manually in Meta Ads Manager — this form RECORDS what the human did ("I launched this", "I changed the
@@ -113,11 +114,11 @@ export function ManualActionForm() {
         </div>
         <div>
           <label style={labelStyle}>Previous value (optional)</label>
-          <input value={previousValue} onChange={(e) => setPreviousValue(e.target.value)} placeholder="e.g. $30/day" style={inputStyle} />
+          <input value={previousValue} onChange={(e) => setPreviousValue(e.target.value)} placeholder={`e.g. ${formatMoney(30, { maximumFractionDigits: 0 })}/day`} style={inputStyle} />
         </div>
         <div>
           <label style={labelStyle}>New value (what you set/launched)</label>
-          <input value={newValue} onChange={(e) => setNewValue(e.target.value)} placeholder="e.g. $45/day" style={inputStyle} />
+          <input value={newValue} onChange={(e) => setNewValue(e.target.value)} placeholder={`e.g. ${formatMoney(45, { maximumFractionDigits: 0 })}/day`} style={inputStyle} />
         </div>
       </div>
       <div style={{ marginTop: '10px' }}>

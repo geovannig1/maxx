@@ -18,10 +18,12 @@ import { websiteReportingFixture } from './website-fixture'
 import { creativeReportingFixture, creativeMediaOrigin, creativeMediaMode } from './creative-fixture'
 import { referenceReportingFixture } from './reference-fixture'
 import { resolveReportingRange } from '../../src/lib/reporting/range'
+import { compactReportingPacket } from '../../src/lib/reporting/packet-format'
+import type { ReportingPacket } from '../../src/lib/reporting/contracts'
 import { forwardHmrUpgrades } from '../../scripts/demo/hmr-upgrade'
 
 const APP_PORT = 3147
-const PREVIEW_PORT = 3149
+const PREVIEW_PORT = Number(process.env.MAXX_TEST_PREVIEW_PORT ?? 3149)
 
 function sendJson(response: ServerResponse, value: unknown, status = 200) {
   response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' })
@@ -79,10 +81,11 @@ const server = createServer((request, response) => {
         : scenario === 'customer-followup' ? customerFollowupReportingFixture()
         : scenario?.startsWith('customers') ? customerReportingFixture(range.from, range.to, scenario === 'customers-stable' ? 'stable' : scenario === 'customers-missing' ? 'missing' : 'movement')
         : scenario === 'executive' || scenario === 'review' ? executiveFixture(range.from, range.to, scenario === 'review') : null
-      sendJson(response, {
+      // The same packetVersion 2 form as the real API's JSON reply; the browser expands it.
+      sendJson(response, compactReportingPacket({
         ...(data ? { section, context: data.context, result: data[section as 'meta' | 'business' | 'website' | 'measurement'] } : fixturePacket(section, range.from, range.to)),
         notes: ['Sample-data preview: fictional metrics, not Example Studio results.'],
-      })
+      } as ReportingPacket))
     } catch { sendJson(response, { error: 'Choose valid report dates.' }, 400) }
     return
   }

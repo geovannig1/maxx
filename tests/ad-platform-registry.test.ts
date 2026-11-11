@@ -17,12 +17,17 @@ const m = vi.hoisted(() => {
     'readMetaReport', 'buildMetaOutcomeEvent', 'metaTestEventCode', 'resolveMetaSendCredentials',
     'metaSupportsCurrency', 'toMetaMinorUnits', 'fromMetaMinorUnits',
     'metaCreateObject', 'metaFindMarked', 'metaReadObject', 'metaSetStatus',
+    'metaCampaignRecord', 'metaAdSetRecord', 'metaAdRecord', 'metaCreativeRecord', 'metaInsightRecord',
   ] as const
   return Object.fromEntries(names.map((n) => [n, vi.fn(() => ({ from: n }))])) as
     Record<(typeof names)[number], ReturnType<typeof vi.fn>>
 })
 
 vi.mock('@/lib/platforms/meta/fetch-accounts', () => ({ fetchAdAccount: m.fetchAdAccount }))
+vi.mock('@/lib/platforms/meta/records', () => ({
+  metaCampaignRecord: m.metaCampaignRecord, metaAdSetRecord: m.metaAdSetRecord, metaAdRecord: m.metaAdRecord,
+  metaCreativeRecord: m.metaCreativeRecord, metaInsightRecord: m.metaInsightRecord,
+}))
 vi.mock('@/lib/platforms/meta/fetch-campaigns', () => ({ fetchCampaigns: m.fetchCampaigns }))
 vi.mock('@/lib/platforms/meta/fetch-adsets', () => ({ fetchAdSets: m.fetchAdSets }))
 vi.mock('@/lib/platforms/meta/fetch-ads', () => ({ fetchAds: m.fetchAds }))
@@ -93,6 +98,7 @@ const minimal: AdPlatform = {
   label: 'Minimal test platform',
   isApiError: meta.isApiError,
   budgetUnits: meta.budgetUnits,
+  records: meta.records,
   entities: meta.entities,
   insights: meta.insights,
 }
@@ -130,6 +136,11 @@ const DELEGATES: Call[] = [
   ['campaignCreation', 'read', 'metaReadObject', ['120001', 'status']],
   ['campaignCreation', 'setStatus', 'metaSetStatus', ['120001', 'ARCHIVED']],
   ['budgetUnits', 'supports', 'metaSupportsCurrency', ['TWD']],
+  ['records', 'campaign', 'metaCampaignRecord', [{ id: '101' }]],
+  ['records', 'adSet', 'metaAdSetRecord', [{ id: '201' }]],
+  ['records', 'ad', 'metaAdRecord', [{ id: '301' }]],
+  ['records', 'creative', 'metaCreativeRecord', [{ id: '401' }]],
+  ['records', 'insight', 'metaInsightRecord', [{ date_start: '2026-11-01' }]],
   ['budgetUnits', 'toMinor', 'toMetaMinorUnits', [12.5, 'BHD']],
   ['budgetUnits', 'fromMinor', 'fromMetaMinorUnits', [1250, 'BHD']],
   ['adLibrary', 'fetchCompetitorAds', 'fetchCompetitorAds', ['competitor-1', 'page-1']],

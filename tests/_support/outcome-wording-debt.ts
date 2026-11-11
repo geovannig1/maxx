@@ -1,13 +1,14 @@
-// Shrink-only debt for tests/currency-text-boundary.test.ts rule 2: files whose string literals still
+// Exact debt for tests/currency-text-boundary.test.ts rule 2: files whose string literals still
 // carry a literal booking/appointment word, and how many. Recorded at 1030 in 143 files; 518 in
 // 96 files after the v1 release, which converted user- and model-facing text (MCP instructions and tool
 // descriptions, report prompts, digests, alerts, reviews, recommendations) to the noun helper and made the
 // allowlist explicit (Meta event names, module specifiers, database contracts; see currency-text-scan.ts);
-// 463 in 93 files after a later pass converted the reasoning playbooks and the report metric labels.
-// Of the remainder, about 330 are wording in modules not yet converted (largest: the business-intelligence
-// metrics and GA4 reconciliation), about 73 are the "booked value" metric name, and about 57 are code inside
-// template-literal expressions that the scanner counts as text. A count may only fall; remove a file when it
-// reaches zero.
+// 453 in 92 files after a later pass converted the reasoning playbooks and the report metric labels;
+// 423 in 88 files after the v1.1 currency pass converted the tracking-health, learning-outcome, website
+// metric and GA4 reconciliation diagnostics. Most of the remainder is wording in modules not yet converted
+// (largest: the business-intelligence metrics and the GA4 reconciliation block), the "booked value" metric
+// name, and code inside template-literal expressions that the scanner counts as text. Each count is exact
+// and OUTCOME_WORDING_CEILING is their sum: a conversion lowers both, and a file reaching zero is removed.
 export const OUTCOME_WORDING_DEBT: Readonly<Record<string, number>> = {
   'src/lib/alerts/detector.ts': 6,
   'src/lib/analytics/campaign-roas.ts': 7,
@@ -29,14 +30,12 @@ export const OUTCOME_WORDING_DEBT: Readonly<Record<string, number>> = {
   'src/lib/eval/golden-questions.ts': 5,
   'src/lib/eval/hypothetical-campaign-plan.ts': 5,
   'src/lib/flags/rules.ts': 4,
-  'src/lib/ga4/booking-reconciliation.ts': 36,
+  'src/lib/ga4/booking-reconciliation.ts': 25,
   'src/lib/ga4/client.ts': 4,
   'src/lib/knowledge/entries/local-service-booking.ts': 7,
   'src/lib/knowledge/entries/platform-mechanics.ts': 1,
   'src/lib/knowledge/entries/strategy-measurement.ts': 9,
-  'src/lib/learning/ledger-outcomes.ts': 2,
-  'src/lib/learning/outcomes.ts': 6,
-  'src/lib/learning/patterns.ts': 4,
+  'src/lib/learning/patterns.ts': 2,
   'src/lib/maxx/chat-governance.ts': 1,
   'src/lib/metrics/aggregate.ts': 1,
   'src/lib/metrics/catalog.ts': 1,
@@ -86,13 +85,10 @@ export const OUTCOME_WORDING_DEBT: Readonly<Record<string, number>> = {
   'src/lib/reporting/review/performance.ts': 1,
   'src/lib/reporting/review/website-population.ts': 1,
   'src/lib/reporting/validation.ts': 2,
-  'src/lib/reporting/website-metrics.ts': 4,
-  'src/lib/signals/fetcher.ts': 1,
   'src/lib/sync/orchestrator.ts': 3,
   'src/lib/targets/target-ranges.ts': 2,
   'src/lib/targets/vertical-benchmarks.ts': 3,
   'src/lib/tracking/forward-coverage.ts': 4,
-  'src/lib/tracking/health-monitor.ts': 5,
   'src/lib/tracking/utm-validator.ts': 8,
   'src/lib/trust/trust.ts': 5,
   'src/mcp/instructions.ts': 3,
@@ -102,3 +98,6 @@ export const OUTCOME_WORDING_DEBT: Readonly<Record<string, number>> = {
   'src/mcp/tools/tool-definitions-primary.ts': 2,
   'src/mcp/tools/tool-definitions-secondary.ts': 2,
 }
+
+/** The sum of OUTCOME_WORDING_DEBT: the most literal outcome words src/lib and src/mcp may carry. Lower it with every conversion. */
+export const OUTCOME_WORDING_CEILING = 422

@@ -42,7 +42,7 @@ export function PaceBar({ spend, dailyBudget, days, daysDelivering }: { spend: n
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
-        <span style={{ color: 'var(--text-secondary)' }}>${spend.toFixed(0)} of ~${p.expected.toFixed(0)} expected</span>
+        <span style={{ color: 'var(--text-secondary)' }}>{formatMoney(spend, { maximumFractionDigits: 0 })} of ~{formatMoney(p.expected, { maximumFractionDigits: 0 })} expected</span>
         <span style={{ color }}>{p.pct.toFixed(0)}% · {STATUS_LABEL[p.status]}</span>
       </div>
       <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-overlay)' }}>

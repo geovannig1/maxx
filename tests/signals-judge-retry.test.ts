@@ -153,6 +153,24 @@ describe('signals judge transient failures', () => {
     expect(db.attempts).toEqual([])
   })
 
+  it('a connection failure (reset, DNS) leaves the item for the next run, bounded by the cap', async () => {
+    const model = stubFetch((_request, index) => {
+      if (index < 2) throw Object.assign(new TypeError('fetch failed'), { cause: Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' }) })
+      return jsonResponse(anthropicText(JSON.stringify(VERDICT)))
+    })
+    const { runSignalsFetcher } = await import('@/lib/signals/fetcher')
+
+    await runSignalsFetcher('acct')
+    expect(db.insights).toEqual([])
+    expect(db.attempts).toMatchObject([{ title: TITLE, transient_failures: 1, last_failure_kind: 'network' }])
+
+    const second = await runSignalsFetcher('acct')
+    expect(model.requests.length).toBeGreaterThanOrEqual(3)
+    expect(second).toMatchObject({ analyzed: 1, applied: 1 })
+    expect(db.insights[0]).toMatchObject({ title: TITLE, applies_to_account: true })
+    expect(db.attempts).toEqual([])
+  })
+
   it('a client error (400) is not transient', async () => {
     stubFetch(() => providerError(400))
     const { runSignalsFetcher } = await import('@/lib/signals/fetcher')
@@ -164,8 +182,31 @@ describe('signals judge transient failures', () => {
   })
 })
 
+describe('signals judge business context', () => {
+  const promptOf = (body: Record<string, unknown> | null) => JSON.stringify([body?.system, body?.messages])
+
+  it('states no example-profile fact when the business profile is unconfigured', async () => {
+    const model = stubFetch(() => jsonResponse(anthropicText(JSON.stringify(VERDICT))))
+    const { runSignalsFetcher } = await import('@/lib/signals/fetcher')
+    await runSignalsFetcher('acct')
+    const prompt = promptOf(model.requests[0].body)
+    expect(prompt).not.toMatch(/Springfield|daylight|photo studio|hyper-local|booking business/i)
+    expect(prompt).toContain('the business, a business advertising on Meta')
+  })
+
+  it('states the configured business as configured (control)', async () => {
+    vi.resetModules()
+    vi.stubEnv('BUSINESS_PROFILE_JSON', JSON.stringify({ name: 'Northwind Bikes', description: 'bicycle repair shop', city: 'Lyon' }))
+    const model = stubFetch(() => jsonResponse(anthropicText(JSON.stringify(VERDICT))))
+    const { runSignalsFetcher } = await import('@/lib/signals/fetcher')
+    await runSignalsFetcher('acct')
+    expect(promptOf(model.requests[0].body)).toContain('Northwind Bikes, bicycle repair shop in Lyon')
+    vi.resetModules()
+  })
+})
+
 describe('transient AI failure classification', () => {
-  it('treats timeouts, 429 and 5xx as transient and everything else as terminal', async () => {
+  it('treats timeouts, 429, 5xx and network failures as transient and everything else as terminal', async () => {
     const { transientAiFailureKind } = await import('@/lib/signals/judge-attempts')
     const ai = await import('@/lib/ai')
     const { OperationTimeoutError } = await import('@/lib/cron/time-budget')
@@ -174,9 +215,12 @@ describe('transient AI failure classification', () => {
     expect(transientAiFailureKind(new OperationTimeoutError('signals judge', 20_000))).toBe('timeout')
     expect(transientAiFailureKind(new ai.AiProviderError('rate_limit', 429))).toBe('rate_limit')
     expect(transientAiFailureKind(new ai.AiProviderError('server', 503))).toBe('server')
+    // A transport failure with no HTTP status (connection reset, DNS, socket closed) says nothing about
+    // the item either: transient, bounded by the same cap.
+    expect(transientAiFailureKind(new ai.AiProviderError('network', null))).toBe('network')
     for (const terminal of [
       new ai.AiRefusalError(null), new ai.AiInvalidOutputError(), new ai.AiMaxTokensError(), new ai.AiIncompleteError(null),
-      new ai.AiProviderError('bad_request', 400), new ai.AiProviderError('auth', 401), new ai.AiProviderError('network', null),
+      new ai.AiProviderError('bad_request', 400), new ai.AiProviderError('auth', 401), new ai.AiProviderError('not_found', 404),
       new ai.AiProviderError('invalid_response', null), new ai.AiDisabledError('off'),
       new Error('signals judge timed out after 20000ms'), 'timeout',
     ]) {

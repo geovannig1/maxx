@@ -7,6 +7,7 @@ import { ArrowLeft, RotateCcw, Save } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { applyTargetOverrides } from '@/lib/targets/target-ranges'
 import { outcomeWords } from '@/config/outcome-nouns'
+import { accountCurrency } from '@/config/business-config'
 
 // What this business calls its outcomes (NEXT_PUBLIC_OUTCOME_NOUN).
 const OW = outcomeWords()
@@ -175,7 +176,7 @@ export default function TargetsEditorPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{m.label}</span>
                     <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border)', color: 'var(--text-tertiary)' }}>
-                      {m.unit === '$' ? '$' : m.unit === '%' ? '%' : m.unit === 'x' ? '×' : '#'} · {m.direction === 'lower_is_better' ? 'lower is better' : 'higher is better'}
+                      {m.unit === '$' ? accountCurrency() : m.unit === '%' ? '%' : m.unit === 'x' ? '×' : '#'} · {m.direction === 'lower_is_better' ? 'lower is better' : 'higher is better'}
                     </span>
                     {m.provisional && <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>provisional</span>}
                   </div>

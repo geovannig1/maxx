@@ -210,7 +210,8 @@ export default async function ReportPage({ params }: PageProps) {
   // placeholder narrative as if the report were broken.
   const metricsOnly = !report.model_used || report.model_used === 'none'
   const ownerDiagnostics = readOwnerDiagnosticsSnapshot(report.report_json?.ownerDiagnostics)
-  // business_revenue_complete is collected-value coverage; the note states source completeness.
+  // business_revenue_complete is collected-value coverage (never a completeness claim); the note states
+  // the sources' completeness, so push-only outcomes are never shown as complete.
   const sourceCompleteness = readReportSourceCompleteness(report.report_json)
   const versionedMoney = report.money_basis_version === 1
     && report.business_revenue_basis === 'outcome_collected_value'

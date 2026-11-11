@@ -35,6 +35,7 @@ describe('outcome webhook sources', () => {
     const enabled = await createSource(db, true)
     expect(await resolve(db, enabled)).toEqual([{
       source_id: enabled, ad_account_id: ACCOUNT, secret: SIGNING_A, timezone_name: 'America/New_York', config: {},
+      previous_secret: null,
     }])
     const disabled = await createSource(db, false, 'Disabled shop')
     expect(await resolve(db, disabled)).toEqual([])
@@ -55,14 +56,14 @@ describe('outcome webhook sources', () => {
   it('rotates a secret in place and refuses to rotate a non-webhook source', async () => {
     const db = await setup()
     const id = await createSource(db, true)
-    expect((await db.query<{ r: boolean }>('select public.rotate_outcome_webhook_secret($1, $2) as r', [id, SIGNING_B])).rows[0].r).toBe(true)
+    expect((await db.query<{ r: boolean }>('select rotated as r from public.rotate_outcome_webhook_secret($1, $2)', [id, SIGNING_B])).rows[0].r).toBe(true)
     expect((await resolve(db, id))[0].secret).toBe(SIGNING_B)
     const { rows } = await db.query<{ rotated: boolean; n: number }>(
       'select rotated_at is not null as rotated, (select count(*)::int from public.outcome_source_secrets) as n from public.outcome_source_secrets')
     expect(rows).toEqual([{ rotated: true, n: 1 }])
     const { rows: acuity } = await db.query<{ id: string }>(
       `insert into public.outcome_sources (ad_account_id, kind, label) values ($1, 'acuity', 'Acuity') returning id`, [ACCOUNT])
-    expect((await db.query<{ r: boolean }>('select public.rotate_outcome_webhook_secret($1, $2) as r', [acuity[0].id, SIGNING_B])).rows[0].r).toBe(false)
+    expect((await db.query<{ r: boolean }>('select rotated as r from public.rotate_outcome_webhook_secret($1, $2)', [acuity[0].id, SIGNING_B])).rows[0].r).toBe(false)
   })
 
   it('rejects a secret that is not 32 random bytes in hex, and creates nothing when it does', async () => {

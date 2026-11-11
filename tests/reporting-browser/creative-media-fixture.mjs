@@ -8,6 +8,9 @@ import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
+// Same paths as scripts/demo/hmr-upgrade.ts (this file may load without tsx): Turbopack /_next/hmr, webpack /_next/webpack-hmr.
+const NEXT_HMR_PATH = /^\/_next\/(?:hmr|webpack-hmr)(?:[/?]|$)/
+
 export function mediaRange(header, length) {
   if (!header) return null
   const match = /^bytes=(\d*)-(\d*)$/.exec(header)
@@ -98,7 +101,7 @@ export async function startCreativeMediaFixture(previewOrigin = 'http://127.0.0.
     proxy.on('upgrade', (request, socket, head) => {
       let url
       try { url = new URL(request.url) } catch { socket.destroy(); return }
-      if (url.host !== '127.0.0.1:3149' || !['ws:', 'http:'].includes(url.protocol) || url.pathname !== '/_next/webpack-hmr') { socket.destroy(); return }
+      if (url.host !== '127.0.0.1:3149' || !['ws:', 'http:'].includes(url.protocol) || !NEXT_HMR_PATH.test(`${url.pathname}${url.search}`)) { socket.destroy(); return }
       const upstream = httpRequest({ hostname: '127.0.0.1', port: 3149, path: `${url.pathname}${url.search}`,
         headers: { ...request.headers, host: '127.0.0.1:3149' } })
       upstream.on('upgrade', (response, remote, remoteHead) => {

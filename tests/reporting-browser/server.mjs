@@ -16,7 +16,11 @@ const child = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'dev',
     NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${authPort}`, NEXT_PUBLIC_SUPABASE_ANON_KEY: 'local-reporting-test',
     SUPABASE_SERVICE_ROLE_KEY: 'local-reporting-test', OWNER_EMAIL: fixtureUser.email,
     SENTRY_DSN: '', NEXT_PUBLIC_SENTRY_DSN: '', SENTRY_AUTH_TOKEN: '', NEXT_TELEMETRY_DISABLED: '1',
-    META_ACCESS_TOKEN: '', GA4_SERVICE_ACCOUNT_JSON: '', MAXX_CHAT_ENABLED: 'false',
+    // Synthetic placeholders: the dashboard hides behind "Finish setup" while either is unset. Reporting
+    // data comes from the test gateways and the auth stub refuses every data request, so no Graph call
+    // is made with these values.
+    META_ACCESS_TOKEN: 'local-reporting-test', META_AD_ACCOUNT_ID: 'act_1234567890',
+    GA4_SERVICE_ACCOUNT_JSON: '', MAXX_CHAT_ENABLED: 'false',
     // The preview runs with AI off: every page it checks must render with no model configured.
     AI_PROVIDER: 'none', ANTHROPIC_API_KEY: '', ANTHROPIC_AUTH_TOKEN: '',
   },

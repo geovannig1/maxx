@@ -119,7 +119,7 @@ export function groupLearningNarrative(input: { outcomes: NarrativeOutcome[]; pa
     const learnable = decisive && !o.estimate_only && isCausalContributionMetric(o.metric_name)
     if (!learnable) {
       const why = !isCausalContributionMetric(o.metric_name)
-        ? 'Diagnostic-only outcome — it was not measured as causal incremental contribution dollars.'
+        ? 'Diagnostic-only outcome — it was not measured as causal incremental contribution.'
         : o.estimate_only
         ? `Estimate-only (GA4 attribution below ${ATTR_FLOOR_PCT}%) — excluded from trusted win-rates even if approved.`
         : o.outcome === 'inconclusive'

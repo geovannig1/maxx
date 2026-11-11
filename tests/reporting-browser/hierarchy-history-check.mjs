@@ -11,6 +11,7 @@ import { join as joinPath } from 'node:path'
 import { chromium, expect as playwrightExpect } from '@playwright/test'
 
 import { fixtureCookie, fixtureUser } from './auth-fixture.mjs'
+import { forwardHmrUpgrades } from '../../scripts/demo/hmr-upgrade.ts'
 import { hierarchyHistoryFixture } from '../fixtures/reporting-hierarchy-history.ts'
 import { buildMetaBreakdowns, CAMPAIGN_DAILY_INPUT_KEYS } from '../../src/lib/reporting/meta-breakdowns.ts'
 import { validateReportingPacket } from '../../src/lib/reporting/validation.ts'
@@ -206,20 +207,8 @@ async function startGateway(data) {
     upstream.on('error', () => { if (!response.headersSent) response.writeHead(502); response.end('Local sample application unavailable.') })
     request.pipe(upstream)
   })().catch(error => json({ error: error instanceof Error ? error.message : 'Hierarchy preview failed.' }, 503)) })
-  server.on('upgrade', (request, socket, head) => {
-    if (new URL(request.url ?? '/', 'http://127.0.0.1').pathname !== '/_next/webpack-hmr') { socket.destroy(); return }
-    const upstream = proxyRequest({ hostname: '127.0.0.1', port: appPort, path: request.url, method: 'GET', headers: { ...request.headers, host: `127.0.0.1:${appPort}` } })
-    upstream.on('upgrade', (upstreamResponse, upstreamSocket, upstreamHead) => {
-      const headers = upstreamResponse.rawHeaders.reduce((text, value, i, all) => i % 2 === 0 ? `${text}${value}: ${all[i + 1]}\r\n` : text, '')
-      socket.write(`HTTP/1.1 101 Switching Protocols\r\n${headers}\r\n`)
-      if (head.length) upstreamSocket.write(head)
-      if (upstreamHead.length) socket.write(upstreamHead)
-      upstreamSocket.on('error', () => socket.destroy()); socket.on('error', () => upstreamSocket.destroy())
-      socket.on('close', () => upstreamSocket.destroy()); upstreamSocket.pipe(socket); socket.pipe(upstreamSocket)
-    })
-    upstream.on('response', () => { upstream.destroy(); socket.destroy() })
-    upstream.on('error', () => socket.destroy()); upstream.end()
-  })
+  // Turbopack's HMR socket is /_next/hmr; dropping it leaves the page rendered but never hydrated.
+  forwardHmrUpgrades(server, { appPort, host: `127.0.0.1:${appPort}` })
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve) })
   const address = server.address()
   return { origin: `http://127.0.0.1:${address.port}`, close: async () => { await new Promise(resolve => server.close(resolve)); await db.close() } }

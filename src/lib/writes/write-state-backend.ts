@@ -1,9 +1,9 @@
 import 'server-only'
 import type { getAdminClient } from '@/lib/supabase/admin'
 import { isDemoMode } from '@/config/demo'
-import { getAdPlatform } from '@/lib/platforms/registry'
 import { roundMoney } from '@/lib/utils/format-currency'
 import { activeAccountConfiguredDailyBudget, captureState, type WriteActionType } from './executor'
+import { fromMetaMinorUnits, toMetaMinorUnits } from './write-preconditions'
 import { META_SNAPSHOT_CONTRACT_VERSION, normalizeMetaAccountId, projectWriteSnapshot } from './meta-live-state'
 
 // ADR-059: where an owner proposal reads the target's current state. Normally Meta (the same reads the
@@ -18,8 +18,9 @@ export interface WriteStateBackend {
   accountDailyBudgetTotal(metaAccountId: string, currency: string): Promise<number | null>
 }
 
-const toMinor = (major: number, currency: string) => getAdPlatform('meta').budgetUnits.toMinor(major, currency)
-const fromMinor = (minor: number, currency: string) => getAdPlatform('meta').budgetUnits.fromMinor(minor, currency)
+// Budget units of the governed write path's platform (see write-preconditions.ts).
+const toMinor = (major: number, currency: string) => toMetaMinorUnits(major, currency)
+const fromMinor = (minor: number, currency: string) => fromMetaMinorUnits(minor, currency)
 
 export function writeStateBackend(db: Db, accountId: string, currency: string): WriteStateBackend {
   if (isDemoMode()) return demoBackend(db, accountId, currency)

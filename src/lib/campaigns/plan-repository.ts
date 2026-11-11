@@ -4,7 +4,8 @@ import { getAdminClient } from '@/lib/supabase/admin'
 import { resolveOnlyActiveAccount } from '@/lib/accounts/active-account'
 import { ownerUserIdMismatch } from '@/lib/auth/owner-identity'
 import { callOwnerRpc, OWNER_IDENTITY_MISMATCH } from '@/lib/writes/owner-rpc'
-import { getAdPlatform } from '@/lib/platforms/registry'
+import { loadAccountPlatform } from '@/lib/platforms/account-platform'
+import type { BudgetUnits } from '@/lib/platforms/types'
 import { formatMoney } from '@/lib/utils/format-currency'
 import { planBriefSchema, type PlanBrief, type PlanBriefInput } from './plan-brief'
 import { canonicalJson, campaignPlanSpecSchema, planAds, planDailyBudgetMinor, type CampaignPlanSpec, type PlanStatus } from './plan-spec'
@@ -49,8 +50,9 @@ function dbFailure(step: string, error: { message?: string } | null, code = 'CAM
 
 export const hashSpec = (spec: CampaignPlanSpec): string => createHash('sha256').update(canonicalJson(spec)).digest('hex')
 
-export function minorFormatter(currency: string): (minor: number) => string {
-  return (minor) => formatMoney(getAdPlatform('meta').budgetUnits.fromMinor(minor, currency), { currency })
+/** Formats a plan's minor-unit amount through the account platform's budget units. */
+export function minorFormatter(units: BudgetUnits, currency: string): (minor: number) => string {
+  return (minor) => formatMoney(units.fromMinor(minor, currency), { currency })
 }
 
 /** Validation and readiness for a spec against the loaded account context. */
@@ -98,7 +100,7 @@ export async function savePlanVersion(input: {
     body: {
       status: 'DRAFT_SAVED', plan_id: row.plan_id, version_id: row.id, version: row.version, ok: validation.ok,
       validation: validation.issues, readiness, notes: input.notes, step_override_required: validation.stepOverrideRequired,
-      total_daily_budget: minorFormatter(input.spec.currency)(validation.totalDailyMinor),
+      total_daily_budget: minorFormatter(input.ctx.account.platform.budgetUnits, input.spec.currency)(validation.totalDailyMinor),
     },
   }
 }
@@ -119,16 +121,16 @@ export async function draftCampaignPlan(briefInput: PlanBriefInput, options: { o
     db, ctx: loaded.context, ownerUserId: options.ownerUserId, planId: null, title: proposed.spec.campaign.name, brief,
     spec: proposed.spec, notes: proposed.notes, source: proposed.source,
   })
-  if (result.http === 201) result.body = { ...result.body, source: proposed.source, summary: planSummary(proposed.spec, loaded.context.account.currency) }
+  if (result.http === 201) result.body = { ...result.body, source: proposed.source, summary: planSummary(proposed.spec, loaded.context.account) }
   return result
 }
 
 export interface PlanSummary { name: string; objective: string; daily_budget: string; ad_sets: number; ads: number; new_creatives: number }
 
-export function planSummary(spec: CampaignPlanSpec, currency: string): PlanSummary {
+export function planSummary(spec: CampaignPlanSpec, account: Pick<LoadedPlanContext['account'], 'currency' | 'platform'>): PlanSummary {
   const ads = planAds(spec)
   return {
-    name: spec.campaign.name, objective: spec.campaign.objective, daily_budget: minorFormatter(currency)(planDailyBudgetMinor(spec)),
+    name: spec.campaign.name, objective: spec.campaign.objective, daily_budget: minorFormatter(account.platform.budgetUnits, account.currency)(planDailyBudgetMinor(spec)),
     ad_sets: spec.ad_sets.length, ads: ads.length, new_creatives: ads.filter(({ ad }) => ad.creative.mode !== 'existing_creative').length,
   }
 }
@@ -167,6 +169,13 @@ export async function listPlans(): Promise<{ ok: true; rows: PlanListRow[] } | {
   if (error) { console.error('[CAMPAIGN PLAN] list failed:', error.message); return { ok: false, code: 'CAMPAIGN_PLAN_READ_FAILED' } }
   const rows = (plans ?? []) as Array<{ id: string; title: string; created_at: string; latest_version: number }>
   if (rows.length === 0) return { ok: true, rows: [] }
+  let units: BudgetUnits
+  try {
+    units = (await loadAccountPlatform(db, accountId)).budgetUnits
+  } catch (platformError) {
+    console.error('[CAMPAIGN PLAN] account platform failed:', platformError instanceof Error ? platformError.message : 'unknown')
+    return { ok: false, code: 'CAMPAIGN_PLAN_READ_FAILED' }
+  }
   const { data: versions, error: vError } = await db.from('campaign_plan_versions').select('id, plan_id, version, status, currency, total_daily_budget_minor')
     .eq('ad_account_id', accountId).in('plan_id', rows.map((r) => r.id))
   if (vError) { console.error('[CAMPAIGN PLAN] versions failed:', vError.message); return { ok: false, code: 'CAMPAIGN_PLAN_READ_FAILED' } }
@@ -179,7 +188,7 @@ export async function listPlans(): Promise<{ ok: true; rows: PlanListRow[] } | {
     ok: true,
     rows: rows.map((r) => {
       const v = latest.get(r.id)
-      return { ...r, status: v?.status ?? null, version_id: v?.id ?? null, total_daily_budget: v ? minorFormatter(v.currency)(Number(v.total_daily_budget_minor)) : null }
+      return { ...r, status: v?.status ?? null, version_id: v?.id ?? null, total_daily_budget: v ? minorFormatter(units, v.currency)(Number(v.total_daily_budget_minor)) : null }
     }),
   }
 }

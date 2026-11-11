@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { fixtureCookie } from './auth-fixture.mjs'
 import { fixturePacket } from '../../scripts/demo/sample/reports'
+import { openReportingTrust, sourceRow } from './source-strip'
 
 async function sources(page: Page, options: { websiteFailed?: boolean; delayOld?: boolean } = {}) {
   await page.route('**/api/**', async route => {
@@ -36,12 +37,20 @@ test('the real proxy rejects an absent session while the local test session open
   await expect(page.getByRole('heading', { name: 'Business results' })).toBeVisible()
   await expect(page.getByRole('combobox', { name: 'Traffic source' })).toHaveCount(0)
   await page.screenshot({ path: 'test-results/reporting-browser/overview-desktop.png', fullPage: true })
-  const findings = page.getByRole('region', { name: 'What deserves a closer look' })
-  await findings.scrollIntoViewIfNeeded()
-  await expect(findings.getByText('Read full observation').first()).toBeVisible()
-  await findings.getByText('Read full observation').first().click()
-  await expect(findings).toContainText('2026-09-02–2026-09-04')
-  await findings.getByText('Read full observation').first().click()
+  // The overview's findings disclosure is now "Why this read →" in the Executive interpretation
+  // (full assessments moved to /reports?report=results). Collapsed by default; opening it shows the
+  // selected period's day-level evidence; closing hides it again.
+  const reading = page.getByRole('region', { name: 'Executive interpretation' })
+  await reading.scrollIntoViewIfNeeded()
+  const why = reading.getByText('Why this read →')
+  const periodEvidence = reading.getByText('2026-09-02 supplied $500.00 of $500.00 booked value (100%), with 5 of 5 paid outcomes.')
+  await expect(why).toBeVisible()
+  await expect(periodEvidence).toBeHidden()
+  await why.click()
+  await expect(periodEvidence).toBeVisible()
+  await expect(reading.getByText('The other 2 dates contributed $0.00 from 0 paid outcomes', { exact: false })).toBeVisible()
+  await why.click()
+  await expect(periodEvidence).toBeHidden()
   await page.screenshot({ path: 'test-results/reporting-browser/overview-findings-desktop.png', fullPage: true })
 })
 
@@ -49,11 +58,16 @@ test('a failed website source does not hide results and can be retried independe
   await sources(page, { websiteFailed: true })
   await page.goto('/dashboard?from=2026-09-02&to=2026-09-04')
   await expect(page.getByRole('region', { name: 'Business results' })).toContainText('$500.00')
-  const website = page.getByLabel('Reporting source status').locator('> div').filter({ hasText: 'GA4 website' })
+  await openReportingTrust(page)
+  const website = sourceRow(page, 'GA4 website')
   await expect(website).toContainText('Unavailable')
+  // GA4 metrics now render in the overview's "After the click" region (Website behavior).
+  const sessions = page.getByRole('region', { name: 'After the click' }).getByText('Sessions', { exact: true }).locator('xpath=..')
+  await expect(sessions).toBeVisible()
+  await expect(sessions).not.toContainText('200')
   await page.getByRole('button', { name: 'Refresh GA4 website' }).click()
   await expect(website).toContainText('Available')
-  await expect(page.getByRole('region', { name: 'Website response' })).toContainText('200')
+  await expect(sessions).toContainText('200')
 })
 
 test('ads filter, detail, Back and two-asset comparison preserve dates and export evidence', async ({ page }) => {
@@ -69,8 +83,12 @@ test('ads filter, detail, Back and two-asset comparison preserve dates and expor
   await expect(search).toHaveValue('walkthrough')
   await search.fill('')
   const checks = page.getByRole('checkbox')
-  await checks.nth(0).check()
-  await checks.nth(1).check()
+  // Selection lives in the URL (?compare=), so the checked state settles one render after the click;
+  // check() verifies synchronously and sees the pre-navigation state.
+  await checks.nth(0).click()
+  await expect(checks.nth(0)).toBeChecked()
+  await checks.nth(1).click()
+  await expect(checks.nth(1)).toBeChecked()
   await page.getByRole('link', { name: 'Compare selected' }).click()
   await expect(page.getByRole('heading', { name: 'Side-by-side comparison' })).toBeVisible()
   await expect(page).toHaveURL(/from=2026-09-02/)
@@ -93,7 +111,8 @@ test('report presets and printing work on mobile without page overflow', async (
   await sources(page)
   await page.goto('/reports?from=2026-09-02&to=2026-09-04&report=website')
   await expect(page.getByRole('tab', { name: /Website journey/ })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('region', { name: 'Booking links and tracking' })).toContainText('Synthetic observed lower bound')
+  // The region is named through the configurable outcome noun (P5d); 'Booking' became 'Outcome'.
+  await expect(page.getByRole('region', { name: 'Outcome links and tracking' })).toContainText('Synthetic observed lower bound')
   await page.getByRole('tab', { name: /Creative/ }).click()
   await expect(page).toHaveURL(/report=creative/)
   await page.goBack()
@@ -107,7 +126,8 @@ test('report presets and printing work on mobile without page overflow', async (
   expect(await page.locator('body').evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(255, 255, 255)')
   await expect(page.getByRole('complementary', { name: 'Primary navigation' })).not.toBeVisible()
   await expect(page.getByText('Evidence as of 2026-09-05T17:00:00Z').first()).toBeVisible()
-  const pageCells = page.getByRole('cell', { name: '/studio-rentals', exact: true })
+  // Landing pages are now row headers of the landing-page table.
+  const pageCells = page.getByRole('rowheader', { name: '/studio-rentals', exact: true })
   await expect(pageCells).toHaveCount(2)
   await expect(pageCells.nth(0)).toBeVisible()
   await expect(pageCells.nth(1)).toBeVisible()
@@ -133,8 +153,11 @@ test('mobile creative comparison, evidence and date controls stay reachable', as
   await page.setViewportSize({ width: 390, height: 844 })
   await sources(page)
   await page.goto('/creative?from=2026-09-02&to=2026-09-04')
-  await page.getByRole('checkbox', { name: 'Compare Studio walkthrough' }).check()
-  await page.getByRole('checkbox', { name: 'Compare Portrait still' }).check()
+  // Selection lives in the URL (?compare=); assert the settled state rather than check()'s synchronous one.
+  await page.getByRole('checkbox', { name: 'Compare Studio walkthrough' }).click()
+  await expect(page.getByRole('checkbox', { name: 'Compare Studio walkthrough' })).toBeChecked()
+  await page.getByRole('checkbox', { name: 'Compare Portrait still' }).click()
+  await expect(page.getByRole('checkbox', { name: 'Compare Portrait still' })).toBeChecked()
   await page.getByRole('link', { name: 'Compare selected' }).click()
   await expect(page.getByRole('heading', { name: 'Side-by-side comparison' })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)

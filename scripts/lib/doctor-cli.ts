@@ -1,6 +1,7 @@
 import { parseDotenv } from '../../src/mcp/env'
 import { INTEGRATIONS, type CheckResult, type IntegrationId } from '../../src/lib/setup/types'
 import { formatChecks } from './check-output'
+import { migrationLedgerCheck, readLedger, type MigrationFile } from './migration-ledger'
 
 // `npm run doctor`: read-only diagnosis through the shared checks module (src/lib/setup/checks.ts).
 // Everything external is injected so tests run offline.
@@ -22,6 +23,8 @@ export interface DoctorDeps {
   stdout: (line: string) => void
   stderr: (line: string) => void
   colour?: boolean
+  /** supabase/migrations and the database's applied versions; doctor-only (the in-app checklist has no DB URL). */
+  migrations?: { list: () => MigrationFile[]; readApplied: (dbUrl: string) => Promise<string[] | 'no_ledger'> }
 }
 
 interface DoctorArgs { offline: boolean; live: boolean; json: boolean; only?: IntegrationId[] }
@@ -61,7 +64,10 @@ export async function runDoctor(argv: string[], deps: DoctorDeps): Promise<numbe
   const fileCheck: CheckResult[] = file === null
     ? [{ id: 'runtime.env_file', integration: 'runtime', level: 'warn', title: 'Env file', detail: `${deps.envFilePath} not found; checking the process environment only.`, fix: 'Run npm run setup.' }]
     : []
-  const result = summarize([...fileCheck, ...summary.checks])
+  const ledger: CheckResult[] = deps.migrations && !args.offline && (!args.only || args.only.includes('supabase'))
+    ? [migrationLedgerCheck(deps.migrations.list(), await readLedger(env.SUPABASE_DB_URL?.trim(), deps.migrations.readApplied))]
+    : []
+  const result = summarize([...fileCheck, ...summary.checks, ...ledger])
   if (args.json) {
     deps.stdout(JSON.stringify({ ...result, envFile: { path: deps.envFilePath, found: file !== null } }))
   } else {

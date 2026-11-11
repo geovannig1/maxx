@@ -261,7 +261,7 @@ describe('Meta outcome hierarchy authority', () => {
   // PAYLOAD SHAPE (as Meta returns it, reduced):
   // on a day with no AppointmentConfirmed results Meta returns the indicator with the `values` key
   // OMITTED — [{"indicator":"conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed"}].
-  // That is a supplied outcome plane reporting zero, and it is what findAppointmentConfirmedResults
+  // That is a supplied outcome plane reporting zero, and it is what findOutcomeEventResults
   // (`r?.values ?? []`) has always read it as. Treating it as a malformed payload fired
   // meta_outcome_<level>_payload_invalid on every zero-booking date.
   const ZERO_RESULT_INDICATOR = {

@@ -50,7 +50,7 @@ async function load(setup: Setup = {}) {
       if (q.table === 'action_decisions' && q.filters.some(([op]) => op === 'gt')) return { data: [], error: null }
       if (q.table === 'action_decisions') return { data: setup.decision ?? decision(), error: null }
       if (q.table === 'change_requests') return { data: setup.original ?? setup.existing ?? null, error: null }
-      if (q.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: setup.currency ?? 'USD' }, error: null }
+      if (q.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: setup.currency ?? 'USD' }, error: null }
       if (q.table === 'adsets' || q.table === 'ads') return { data: { id: 'local-1' }, error: null }
       if (q.op === 'rpc') return { data: { id: 'change-new' }, error: null }
       throw new Error(`unexpected ${q.table}:${q.op}`)

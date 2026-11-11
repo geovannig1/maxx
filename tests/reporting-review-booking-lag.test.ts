@@ -20,8 +20,10 @@ describe('observed paid-touch booking delay review', () => {
     expect(overviewFindings(review).map(item => item.id)).toContain(finding.id)
     expect(overviewFindings(review).some(item => item.area === 'measurement' && item.direction === 'declined')).toBe(true)
   })
-  it('withholds lag interpretation for wrong units, inconsistent sample, source or window', () => {
-    for (const corrupt of ['unit', 'sample', 'source', 'window', 'denominator', 'linked_scope', 'event', 'future'] as const) {
+  // One case per test: each runs the whole expert review (~250 ms, ~0.6 s under load), and eight in one
+  // test took ~14 s on a busy machine. Splitting keeps every assertion and names the case that fails.
+  it.each(['unit', 'sample', 'source', 'window', 'denominator', 'linked_scope', 'event', 'future'] as const)(
+    'withholds lag interpretation for a corrupt %s', corrupt => {
       const data = structuredClone(websiteReportingFixture()), metrics = data.measurement.data!.paidAssociation
       if (corrupt === 'unit') metrics.median_paid_touch_to_booking_lag_days.current.unit = 'money'
       if (corrupt === 'sample') metrics.paid_touch_booking_lag_sample_bookings.current.value = 6
@@ -35,6 +37,5 @@ describe('observed paid-touch booking delay review', () => {
       if (corrupt === 'future') for (const metric of Object.values(metrics)) metric.current.asOf = '2026-09-05T17:00:00.000000001Z'
       const finding = deriveExpertReview(data).findings.find(item => item.id === 'journey.measurement.booking_lag')
       expect(finding?.status === 'unavailable' || !finding).toBe(true)
-    }
-  })
+    })
 })

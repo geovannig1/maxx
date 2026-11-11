@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Button } from '@/components/ui/button'
 import {
+  DEFAULT_ROTATION_GRACE_MINUTES,
+  ROTATION_GRACE_OPTIONS,
   WEBHOOK_SIGNATURE_FORMAT,
   WEBHOOK_SIGNATURE_HEADER,
+  utcMinute,
   type SecretReveal,
   type WebhookDialogState,
 } from './webhook-secret'
@@ -83,6 +86,13 @@ function SecretRevealDialog({ reveal, onClose, returnFocus }: {
       <p id="webhook-secret-warning" className="owner-notice owner-warning">
         Copy this signing secret now and store it in your sending system. You won&apos;t see this secret again: closing this dialog discards it, and only rotating gives a new one.
       </p>
+      {reveal.action === 'rotated' ? (
+        <p className="text-sm">
+          {reveal.previousSecretValidUntil
+            ? `The old secret keeps working until ${utcMinute(reveal.previousSecretValidUntil)}; switch your sender before then.`
+            : 'The old secret has stopped working: deliveries signed with it are refused.'}
+        </p>
+      ) : null}
       <div className="space-y-1">
         <label htmlFor="webhook-secret-value" className="font-medium">Signing secret</label>
         <div className="flex gap-2">
@@ -114,21 +124,30 @@ function ConfirmRotateDialog(props: {
   label: string
   busy: boolean
   error: string | null
-  onConfirm: () => void
+  onConfirm: (graceMinutes: number) => void
   onCancel: () => void
   returnFocus?: RefObject<HTMLElement | null>
 }) {
+  const [grace, setGrace] = useState(DEFAULT_ROTATION_GRACE_MINUTES)
   return (
     <ModalDialog role="alertdialog" titleId="webhook-rotate-title" descriptionId="webhook-rotate-warning"
       onClose={props.onCancel} returnFocus={props.returnFocus}>
       <h2 id="webhook-rotate-title" className="text-base font-semibold">Rotate the signing secret of {props.label}?</h2>
       <p id="webhook-rotate-warning">
-        The old secret stops working immediately: deliveries signed with it are refused until your sender uses the new secret. There is no grace period.
+        The old secret keeps working for the time you choose, so your sender can switch to the new one without refused deliveries; then it stops. Choose &quot;Immediately&quot; if the secret may have leaked.
       </p>
+      <div className="space-y-1">
+        <label htmlFor="webhook-rotate-grace" className="font-medium">Old secret keeps working for</label>
+        <select id="webhook-rotate-grace" value={grace} disabled={props.busy}
+          onChange={(event) => setGrace(Number(event.currentTarget.value))}
+          className="h-8 rounded-lg border px-2" style={{ borderColor: 'var(--border)', background: 'inherit', color: 'inherit' }}>
+          {ROTATION_GRACE_OPTIONS.map((option) => <option key={option.minutes} value={option.minutes}>{option.label}</option>)}
+        </select>
+      </div>
       {props.error ? <p role="alert" className="owner-notice owner-warning">{props.error}</p> : null}
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={props.onCancel} disabled={props.busy} autoFocus>Cancel</Button>
-        <Button type="button" variant="destructive" onClick={props.onConfirm} disabled={props.busy}>
+        <Button type="button" variant="destructive" onClick={() => props.onConfirm(grace)} disabled={props.busy}>
           {props.busy ? 'Rotating…' : 'Rotate secret'}
         </Button>
       </div>
@@ -143,7 +162,7 @@ export function WebhookDialogView(props: {
   busy: boolean
   error: string | null
   onClose: () => void
-  onConfirmRotate: () => void
+  onConfirmRotate: (graceMinutes: number) => void
   returnFocus?: RefObject<HTMLElement | null>
 }) {
   if (props.state.kind === 'revealed') {

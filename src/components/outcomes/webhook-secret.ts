@@ -18,7 +18,21 @@ export interface SecretReveal {
   secret: string
   path: string
   action: 'created' | 'rotated'
+  /** After a rotation: when the replaced secret stops verifying, or null when it already has. */
+  previousSecretValidUntil?: string | null
 }
+
+/** The rotation grace windows offered on /settings/outcomes, in minutes (the route accepts 0 to 1440). */
+export const ROTATION_GRACE_OPTIONS: ReadonlyArray<{ minutes: number; label: string }> = [
+  { minutes: 0, label: 'Immediately' },
+  { minutes: 15, label: '15 minutes' },
+  { minutes: 60, label: '1 hour' },
+  { minutes: 1440, label: '24 hours' },
+]
+export const DEFAULT_ROTATION_GRACE_MINUTES = 60
+
+/** "2026-11-10 19:00 UTC" for an ISO instant. */
+export const utcMinute = (iso: string) => `${new Date(iso).toISOString().slice(0, 16).replace('T', ' ')} UTC`
 
 export type WebhookDialogState =
   | { kind: 'closed' }
@@ -47,7 +61,7 @@ async function postForSecret(
   body: unknown,
   fetchImpl: FetchLike,
   fallback: string,
-): Promise<{ ok: true; sourceId: string; secret: string } | { ok: false; message: string }> {
+): Promise<{ ok: true; sourceId: string; secret: string; json: Record<string, unknown> } | { ok: false; message: string }> {
   let response: Response
   try {
     response = await fetchImpl(url, {
@@ -67,7 +81,7 @@ async function postForSecret(
       || typeof json.secret !== 'string' || !SECRET.test(json.secret)) {
     return { ok: false, message: fallback }
   }
-  return { ok: true, sourceId: json.source_id.toLowerCase(), secret: json.secret }
+  return { ok: true, sourceId: json.source_id.toLowerCase(), secret: json.secret, json }
 }
 
 export async function requestCreateWebhookSource(
@@ -84,10 +98,20 @@ export async function requestCreateWebhookSource(
 
 export async function requestRotateWebhookSecret(
   source: { id: string; label: string },
+  graceMinutes: number = DEFAULT_ROTATION_GRACE_MINUTES,
   fetchImpl: FetchLike = fetch,
 ): Promise<WebhookRequestResult> {
-  const result = await postForSecret(`/api/outcomes/webhook-sources/${encodeURIComponent(source.id)}/rotate`, {}, fetchImpl,
-    'The secret was not rotated. Try again.')
+  const result = await postForSecret(`/api/outcomes/webhook-sources/${encodeURIComponent(source.id)}/rotate`,
+    { grace_minutes: graceMinutes }, fetchImpl, 'The secret was not rotated. Try again.')
   if (!result.ok) return result
-  return { ok: true, reveal: { sourceId: result.sourceId, label: source.label, secret: result.secret, path: webhookPath(result.sourceId), action: 'rotated' } }
+  const until = result.json.previous_secret_valid_until
+  // Anything but a usable instant reads as "already stopped": never claim a window the route did not state.
+  const previousSecretValidUntil = typeof until === 'string' && Number.isFinite(Date.parse(until)) ? until : null
+  return {
+    ok: true,
+    reveal: {
+      sourceId: result.sourceId, label: source.label, secret: result.secret, path: webhookPath(result.sourceId),
+      action: 'rotated', previousSecretValidUntil,
+    },
+  }
 }

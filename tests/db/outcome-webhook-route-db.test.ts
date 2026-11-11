@@ -139,8 +139,9 @@ describe('generic outcome webhook route', () => {
     const shapes = await Promise.all(responses.map(async (r) => ({ status: r.status, body: await r.text(), type: r.headers.get('content-type') })))
     expect(shapes.map((s) => s.status)).toEqual([404, 404, 404])
     expect(new Set(shapes.map((s) => JSON.stringify(s))).size).toBe(1)
-    // The HMAC is computed for every one of them (a placeholder secret for the missing sources).
-    expect(spies.verify).toHaveBeenCalledTimes(3)
+    // The HMAC is computed for every one of them, twice: the live secret and the secret a rotation
+    // replaced (a placeholder when there is none, or for the missing sources), so the work is the same.
+    expect(spies.verify).toHaveBeenCalledTimes(6)
     expect(spies.rateLimit).not.toHaveBeenCalled()
     expect(await n('select count(*)::int n from public.outcomes')).toBe(0)
     expect(await n('select count(*)::int n from public.outcome_webhook_deliveries')).toBe(0)

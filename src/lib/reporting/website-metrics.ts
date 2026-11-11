@@ -54,7 +54,7 @@ export interface BuildWebsiteReportInput {
 }
 
 const SOURCE_DESCRIPTION =
-  'GA4 web telemetry by landing page, device category and session default channel group. Event counts are browser events, not users, sessions, appointments or business bookings.'
+  'GA4 web telemetry by landing page, device category and session default channel group. Event counts are browser events, not users, sessions or business outcomes.'
 
 const complete = { state: 'complete' as const, numerator: 1, denominator: 1 }
 const unknown = { state: 'unknown' as const, numerator: null, denominator: null }
@@ -263,7 +263,7 @@ function eventRows(context: ReportingContext, input: BuildWebsiteReportInput): W
       event_count: makeReportMetric({
         context, source: 'ga4', key: 'event_count', label: 'Event count', unit: 'count', event: event.name,
         entity: { level: 'account', id: `${context.account.id}:event:${index}`.slice(0, 160) },
-        definition: `GA4 eventCount for ${event.name}; distinct from sessions, users and business bookings.`,
+        definition: `GA4 eventCount for ${event.name}; distinct from sessions, users and business outcomes.`,
         current: value, previous: prior, coverage: valueCoverage(value, input.eventCoverage),
         previousCoverage: prior === undefined ? undefined : valueCoverage(prior, input.previousEventCoverage),
         reason: `GA4 did not return a valid eventCount for ${event.name}.`,

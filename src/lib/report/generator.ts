@@ -12,7 +12,7 @@ import { buildExecutiveEvidenceForReport } from './executive-evidence-production
 import { commitExecutiveEvidenceGeneration } from './executive-evidence-store'
 import type { ExecutiveMetaOutcomePlaneV1 } from './executive-evidence.types'
 import { businessLocaleFromAccount } from '@/config/business-config'
-import { outcomeArrivalLine, reportSourceCompleteness, type ReportOutcomeArrival } from '@/lib/outcomes/report-gate'
+import { outcomeArrivalLine, reportMoneyCompleteness, reportSourceCompleteness, type ReportOutcomeArrival } from '@/lib/outcomes/report-gate'
 
 type MetaOutcomePlaneContextV1 = ExecutiveMetaOutcomePlaneV1 | {
   complete: boolean
@@ -333,10 +333,13 @@ export async function generateDailyReport(
           version: 1,
           basis: 'outcome_collected_value',
           source_available: outcomeSourceAvailable,
-          // Collected-value coverage: every active outcome in the window has a recorded collected value.
-          // It says nothing about the sources' completeness, stated in source_completeness.
-          revenue_complete: outcomeSourceAvailable
-            && lastDayOutcome.activeAmountPaidRevenue !== null,
+          // revenue_complete is claimed only for reconciled sources; collected_value_coverage_complete
+          // (every active outcome has a recorded collected value) is what the report columns store.
+          ...reportMoneyCompleteness({
+            sourceAvailable: outcomeSourceAvailable,
+            collectedValueCovered: (lastDayOutcome?.activeAmountPaidRevenue ?? null) !== null,
+            completeness: reportSourceCompleteness(context.outcomeArrival),
+          }),
           observed_collected_value_lower_bound: lastDayOutcome?.activeAmountPaidObserved ?? null,
           covered_outcomes: lastDayOutcome?.amountPaidCoverage.withRecordedAmount ?? null,
           total_outcomes: lastDayOutcome?.amountPaidCoverage.total ?? null,

@@ -226,4 +226,17 @@ describe('outcome conversions', () => {
     expect(first.user_data.fbc).toMatch(/^fb\.1\.\d+\.IwAR-fixture$/)
     expect(second.user_data.fbc).toBeUndefined()
   })
+
+  it('hashes a national phone number with the account country calling code, else the configured one', async () => {
+    const { createHash } = await import('node:crypto')
+    const sha = (v: string) => createHash('sha256').update(v).digest('hex')
+    vi.stubEnv('CONVERSIONS_PHONE_COUNTRY_CODE', '49')
+    await db.query(`update public.ad_accounts set country = 'GB' where id = $1`, [ACCOUNT])
+    await deliver(payload({ external_id: 'phone-gb', customer: { phone: '07700 900123' } }))
+    await db.query(`update public.ad_accounts set country = null where id = $1`, [ACCOUNT])
+    await deliver(payload({ external_id: 'phone-config', customer: { phone: '07700 900123' } }))
+    const [gb, configured] = sentEvents()
+    expect(gb.user_data.ph).toEqual([sha('447700900123')])
+    expect(configured.user_data.ph).toEqual([sha('497700900123')])
+  })
 })

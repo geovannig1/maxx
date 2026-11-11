@@ -6,7 +6,8 @@ import { requestRotateWebhookSecret, webhookDialogReducer } from './webhook-secr
 import { WebhookDialogView } from './WebhookSecretDialog'
 
 // Rotate one webhook source's signing secret (owner-only POST /api/outcomes/webhook-sources/<id>/rotate)
-// after a confirmation that warns the old secret stops at once. The new secret is shown once.
+// after a confirmation that lets the owner choose how long the old secret keeps working (none for a
+// suspected leak). The new secret is shown once, with when the old one stops.
 
 export function WebhookSecretRotate({ id, label }: { id: string; label: string }) {
   const [dialog, dispatch] = useReducer(webhookDialogReducer, { kind: 'closed' })
@@ -19,12 +20,12 @@ export function WebhookSecretRotate({ id, label }: { id: string; label: string }
     dispatch({ type: 'close' })
   }, [])
 
-  async function rotate() {
+  async function rotate(graceMinutes: number) {
     setBusy(true)
     setError(null)
-    const result = await requestRotateWebhookSecret({ id, label })
+    const result = await requestRotateWebhookSecret({ id, label }, graceMinutes)
     setBusy(false)
-    // Shown even if the confirmation was dismissed meanwhile: the old secret has already stopped.
+    // Shown even if the confirmation was dismissed meanwhile: the rotation has already happened.
     if (result.ok) dispatch({ type: 'reveal', reveal: result.reveal })
     else setError(result.message)
   }

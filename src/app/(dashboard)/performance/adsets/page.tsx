@@ -71,11 +71,6 @@ const FLAG_STYLES: Record<string, string> = {
   too_early: 'bg-[var(--border)] border-[var(--border)] text-[var(--text-tertiary)]',
 }
 
-function fmt(v: number | null, prefix = '', decimals = 2): string {
-  if (v === null || v === undefined) return '—'
-  return `${prefix}${v.toFixed(decimals)}`
-}
-
 function selectedWindowMetrics(metrics: EntityMetrics | null, windowDays: number): EntityMetrics | null {
   if (!metrics || windowDays === 1 || metrics.frequency === null) return metrics
   return { ...metrics, frequency: null }
@@ -327,7 +322,7 @@ function AdSetsPageInner() {
             align: 'right',
             render: (a) => (
               <span className="text-sm tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-                {a.daily_budget === null ? 'Unavailable' : fmt(a.daily_budget, '$', 0)}
+                {a.daily_budget === null ? 'Unavailable' : formatMoney(a.daily_budget, { maximumFractionDigits: 0 })}
               </span>
             ),
           },
@@ -393,7 +388,7 @@ function AdSetsPageInner() {
               )}
               {selected.daily_budget !== null ? (
                 <Badge variant="outline" className="text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                  ${selected.daily_budget.toFixed(0)}/day budget
+                  {formatMoney(selected.daily_budget, { maximumFractionDigits: 0 })}/day budget
                 </Badge>
               ) : (
                 <Badge variant="outline" className="text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-tertiary)' }}>

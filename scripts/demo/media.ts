@@ -1,29 +1,14 @@
-import { execFileSync } from 'node:child_process'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
-import { createServer } from 'node:https'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
 import { DEMO_ADS } from './sample/demo-delivery'
+import { SAMPLE_MEDIA_PREFIX, isSampleMediaPath } from '../../src/lib/reporting/sample-media'
 
-// The sample creatives' images (a generated illustration per sample ad, and ./sample/creative.png, a
-// placeholder), served from loopback over HTTPS. Report creative media URLs must be https (src/lib/reporting/contracts.ts), and the dev
-// CSP's img-src allows https://127.0.0.1:* (src/lib/security/csp.ts), so this is the one local URL
-// that satisfies both. The certificate is a throwaway self-signed one made with the local openssl
-// for this run; its files are deleted as soon as the server holds them in memory. Nothing is
-// downloaded and no trust store is changed, so an ordinary browser shows the creative placeholder
-// instead of the image unless the certificate is accepted; demo:check's browser accepts it. Without
-// openssl the sample creatives carry no image.
+// The sample creatives' images: a generated illustration per sample ad, served by the demo gateway
+// (./gateway.ts) from the page's own origin under /sample-media/. Same-origin is what an ordinary
+// browser loads without a certificate exception, and it is inside the page CSP's img-src 'self'. The
+// report contract accepts this path shape besides https (src/lib/reporting/sample-media.ts).
 
-export const SAMPLE_CREATIVE_PATH = '/sample-creative.png'
-// The demo runs from the repository root (start.ts spawns next from node_modules there).
-const IMAGE = join(process.cwd(), 'scripts/demo/sample/creative.png')
-
-export interface SampleMedia {
-  /** The placeholder PNG. */
-  imageUrl: string
-  /** The generated illustration for the sample ad at this index (./sample/demo-delivery.ts order). */
-  imageFor: (index: number) => string
-  stop: () => Promise<void>
+/** The same-origin path of the illustration for the sample ad at this index (./sample/demo-delivery.ts order). */
+export function sampleImageFor(index: number): string {
+  return `${SAMPLE_MEDIA_PREFIX}sample-creative-${index + 1}.svg`
 }
 
 const HUES = [28, 205, 42, 265, 160, 330, 12, 190]
@@ -45,43 +30,18 @@ ${ad.format === 'video' ? '<polygon points="1190,250 1190,410 1330,330" fill="#f
 </svg>`
 }
 
-export async function startSampleMedia(port: number, log: (line: string) => void): Promise<SampleMedia | null> {
-  const directory = await mkdtemp(join(tmpdir(), 'maxx-demo-media-'))
-  try {
-    try {
-      execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-sha256', '-days', '1',
-        '-keyout', join(directory, 'key.pem'), '-out', join(directory, 'cert.pem'), '-subj', '/CN=127.0.0.1',
-        '-addext', 'subjectAltName=IP:127.0.0.1'], { stdio: 'ignore' })
-    } catch {
-      log('Maxx demo: openssl is not available, so the sample creatives show a placeholder instead of an image.')
-      return null
-    }
-    const [key, cert, image] = await Promise.all([
-      readFile(join(directory, 'key.pem')), readFile(join(directory, 'cert.pem')), readFile(IMAGE),
-    ])
-    const server = createServer({ key, cert }, (request, response) => {
-      const path = new URL(request.url ?? '/', 'https://127.0.0.1').pathname
-      const svgIndex = /^\/sample-creative-(\d+)\.svg$/.exec(path)
-      const svg = svgIndex ? sampleCreativeSvg(Number(svgIndex[1]) - 1) : null
-      const body = path === SAMPLE_CREATIVE_PATH ? image : svg ? Buffer.from(svg) : null
-      if (!body || (request.method !== 'GET' && request.method !== 'HEAD')) {
-        response.writeHead(404, { 'Cache-Control': 'no-store' })
-        response.end()
-        return
-      }
-      response.writeHead(200, { 'Content-Type': svg ? 'image/svg+xml' : 'image/png', 'Content-Length': body.length, 'Cache-Control': 'no-store' })
-      response.end(request.method === 'HEAD' ? undefined : body)
-    })
-    await new Promise<void>((done, fail) => {
-      server.once('error', fail)
-      server.listen(port, '127.0.0.1', () => { server.off('error', fail); done() })
-    })
-    const stop = () => new Promise<void>((done) => {
-      server.closeAllConnections()
-      server.close(() => done())
-    })
-    return { imageUrl: `https://127.0.0.1:${port}${SAMPLE_CREATIVE_PATH}`, imageFor: (index) => `https://127.0.0.1:${port}/sample-creative-${index + 1}.svg`, stop }
-  } finally {
-    await rm(directory, { recursive: true, force: true })
-  }
+/** The image for a request path, or null when the path names no sample creative. */
+export function sampleMediaBody(pathname: string): Buffer | null {
+  if (!isSampleMediaPath(pathname)) return null
+  const index = /^\/sample-media\/sample-creative-(\d+)\.svg$/.exec(pathname)
+  const svg = index ? sampleCreativeSvg(Number(index[1]) - 1) : null
+  return svg ? Buffer.from(svg) : null
 }
+
+/** Headers for a sample image: an image only, never a document that could run anything. */
+export const SAMPLE_MEDIA_HEADERS = {
+  'Content-Type': 'image/svg+xml',
+  'X-Content-Type-Options': 'nosniff',
+  'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'",
+  'Cache-Control': 'no-store',
+} as const

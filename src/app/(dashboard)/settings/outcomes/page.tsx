@@ -7,7 +7,8 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { OutcomeSourceToggle } from '@/components/setup/OutcomeSourceToggle'
 import { WebhookSourceCreate } from '@/components/outcomes/WebhookSourceCreate'
 import { WebhookSecretRotate } from '@/components/outcomes/WebhookSecretRotate'
-import { WEBHOOK_SIGNATURE_FORMAT, WEBHOOK_SIGNATURE_HEADER, webhookPath } from '@/components/outcomes/webhook-secret'
+import { WEBHOOK_SIGNATURE_FORMAT, WEBHOOK_SIGNATURE_HEADER, utcMinute, webhookPath } from '@/components/outcomes/webhook-secret'
+import { readWebhookSecretGrace } from '@/lib/outcomes/adapters/webhook/sources'
 import { getOutcomeAdapter } from '@/lib/outcomes/registry'
 import { sourceCompletenessLabel } from '@/lib/outcomes/completeness-label'
 
@@ -15,7 +16,8 @@ import { sourceCompletenessLabel } from '@/lib/outcomes/completeness-label'
 // creation, plus a sources screen"). Owner-only. Shows every source of the active account with its
 // kind, last success and an on/off switch. A disabled source's outcomes stay stored and are counted
 // nowhere; with no source enabled, reports say "no outcome source", never 0. Webhook sources are
-// created and their secrets rotated here; a secret is shown once, in a dialog.
+// created and their secrets rotated here; a secret is shown once, in a dialog. During a rotation grace
+// window the source says until when its old secret is still accepted (never the secret).
 
 async function readSources(): Promise<OutcomeSourceRow[] | null> {
   try {
@@ -24,6 +26,17 @@ async function readSources(): Promise<OutcomeSourceRow[] | null> {
     return active.ok ? await listOutcomeSources(db, active.account.id) : null
   } catch {
     return null
+  }
+}
+
+/** When each rotated webhook source stops accepting its old secret (open windows only). An unreadable
+ *  value shows nothing rather than failing the screen; the verifier enforces the window regardless. */
+async function readGrace(sources: OutcomeSourceRow[] | null): Promise<Record<string, string>> {
+  const ids = (sources ?? []).filter((s) => s.kind === 'webhook').map((s) => s.id)
+  try {
+    return await readWebhookSecretGrace(getAdminClient(), ids)
+  } catch {
+    return {}
   }
 }
 
@@ -38,6 +51,7 @@ const when = (iso: string | null) => (iso ? new Date(iso).toISOString().slice(0,
 export default async function OutcomeSourcesPage() {
   await requireOwner()
   const sources = await readSources()
+  const grace = await readGrace(sources)
   return (
     <div className="space-y-6">
       <PageHeader title="Outcome sources" subtitle="Where your business results come from. Only enabled sources are counted in reports." />
@@ -58,6 +72,7 @@ export default async function OutcomeSourcesPage() {
                 <p className="text-sm">{source.enabled ? `Enabled: counted in reports (${completeness(source.kind)}).` : 'Disabled: stored, counted nowhere.'} Last success {when(source.last_success_at)}.</p>
                 {sourceKindNote(source.kind) ? <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{sourceKindNote(source.kind)}</p> : null}
                 {source.kind === 'webhook' ? <p className="text-xs">Endpoint: <code className="break-all">POST {webhookPath(source.id)}</code></p> : null}
+                {grace[source.id] ? <p className="text-xs">Old secret still accepted until {utcMinute(grace[source.id])} (rotation grace period).</p> : null}
               </div>
               <div className="flex flex-wrap items-start gap-2">
                 {source.kind === 'webhook' ? <WebhookSecretRotate id={source.id} label={source.label} /> : null}

@@ -32,11 +32,13 @@ describe('csv outcome adapter', () => {
 describe('conversions never send a CSV outcome', () => {
   function db(kind: string) {
     const outcome = {
-      id: 'o-1', source_id: 's-1', outcome_type: 'sale', status: 'confirmed', origin: 'website',
+      id: 'o-1', ad_account_id: 'a-1', source_id: 's-1', outcome_type: 'sale', status: 'confirmed', origin: 'website',
       origin_observed_at: '2026-11-01T00:00:00Z', occurred_at: new Date().toISOString(), gross_value: '10', currency: 'USD',
       landing_page: 'https://shop.example/', email: 'a@b.test', conversion_sent_at: null,
     }
-    const rows: Record<string, unknown> = { outcomes: outcome, outcome_sources: { kind, enabled: true, config: {} } }
+    const rows: Record<string, unknown> = {
+      outcomes: outcome, outcome_sources: { kind, enabled: true, config: {} }, ad_accounts: { platform: 'meta', country: null },
+    }
     return {
       from: (table: string) => {
         const chain = { select: () => chain, eq: () => chain, maybeSingle: async () => ({ data: rows[table], error: null }) }

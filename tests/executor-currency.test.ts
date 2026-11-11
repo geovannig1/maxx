@@ -90,7 +90,7 @@ describe('write executor currency and serialization', () => {
     const { proposeChange, calls } = await load((query) => {
       if (query.table === 'change_requests') return { data: null, error: null }
       if (query.table === 'action_decisions') return { data: budgetDecision('not_requested', 40), error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'JPY' }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'JPY' }, error: null }
       if (query.table === 'adsets') return { data: { id: 'local-adset-1' }, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
     })
@@ -109,7 +109,7 @@ describe('write executor currency and serialization', () => {
     const { executeApprovedChange, httpStatusForExecuteResult, calls } = await load((query) => {
       if (query.table === 'change_requests') return { data: approvedBudgetChange(40, '3500'), error: null }
       if (query.table === 'action_decisions') return { data: budgetDecision('approved', 40), error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'EUR' }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'EUR' }, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
     })
 
@@ -157,7 +157,7 @@ describe('write executor currency and serialization', () => {
         const approved = calls.some((q) => q.table === 'change_requests' && q.filters.some(([c]) => c === 'id'))
         return { data: budgetDecision(approved ? 'approved' : 'not_requested', 5000), error: null }
       }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'TWD' }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'TWD' }, error: null }
       if (query.table === 'adsets') return { data: { id: 'local-adset-1' }, error: null }
       if (query.table === 'create_change_request_from_decision') return { data: { id: 'change-1' }, error: null }
       if (query.table === 'action_log' && query.op === 'insert') return { data: { id: 'log-1' }, error: null }
@@ -186,7 +186,7 @@ describe('write executor currency and serialization', () => {
     const { executeApprovedChange } = await load((query) => {
       if (query.table === 'change_requests' && query.op === 'select') return { data: approvedBudgetChange(5000, '4000'), error: null }
       if (query.table === 'action_decisions') return { data: budgetDecision('approved', 5000), error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'TWD' }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'TWD' }, error: null }
       if (query.table === 'adsets') return { data: { id: 'local-adset-1' }, error: null }
       if (query.table === 'action_log' && query.op === 'insert') return { data: { id: 'log-1' }, error: null }
       if (query.op === 'update') return { data: [{ id: 'updated' }], error: null }
@@ -201,7 +201,7 @@ describe('write executor currency and serialization', () => {
     const { proposeChange } = await load((query) => {
       if (query.table === 'change_requests') return { data: null, error: null }
       if (query.table === 'action_decisions') return { data: budgetDecision('not_requested', 40), error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'USD' }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'USD' }, error: null }
       if (query.table === 'adsets') return { data: { id: 'local-adset-1' }, error: null }
       if (query.table === 'create_change_request_from_decision') return { data: { id: 'change-1' }, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
@@ -228,7 +228,7 @@ describe('write executor currency and serialization', () => {
     const { executeApprovedChange, httpStatusForExecuteResult } = await load((query) => {
       if (query.table === 'change_requests') return { data: approvedBudgetChange(40, '3500'), error: null }
       if (query.table === 'action_decisions') return { data: budgetDecision('approved', 40), error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'USD' }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'USD' }, error: null }
       if (query.table === 'adsets') return { data: { id: 'local-adset-1' }, error: null }
       if (query.table === 'action_log' && query.op === 'insert') {
         return { data: null, error: { code: '23505', message: 'duplicate key value violates unique constraint "idx_action_log_one_executing_per_account"' } }

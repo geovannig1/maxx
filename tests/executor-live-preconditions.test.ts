@@ -101,7 +101,7 @@ describe('write executor live preconditions', () => {
     const { executeApprovedChange, calls } = await load((query) => {
       if (query.table === 'change_requests') return { data: approvedChange, error: null }
       if (query.table === 'action_decisions') return { data: decision, error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta' }, error: null }
       if (query.table === 'ads') return { data: null, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
     })
@@ -120,7 +120,7 @@ describe('write executor live preconditions', () => {
         data: { ...approvedChange, before_state: null }, error: null,
       }
       if (query.table === 'action_decisions') return { data: decision, error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta' }, error: null }
       if (query.table === 'ads') return { data: { id: 'local-ad-1' }, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
     })
@@ -147,7 +147,7 @@ describe('write executor live preconditions', () => {
     const { executeApprovedChange, calls } = await load((query) => {
       if (query.table === 'change_requests' && query.op === 'select') return { data: approvedChange, error: null }
       if (query.table === 'action_decisions') return { data: decision, error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta' }, error: null }
       if (query.table === 'ads') return { data: { id: 'local-ad-1' }, error: null }
       if (query.table === 'action_log' && query.op === 'insert') return { data: { id: 'log-1' }, error: null }
       if (query.op === 'update') return { data: [{ id: 'updated' }], error: null }
@@ -171,7 +171,7 @@ describe('write executor live preconditions', () => {
     const { proposeChange, calls } = await load((query) => {
       if (query.table === 'change_requests') return { data: null, error: null }
       if (query.table === 'action_decisions') return { data: { ...decision, approval_state: 'not_requested' }, error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta' }, error: null }
       if (query.table === 'ads') return { data: { id: 'local-ad-1' }, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
     })
@@ -196,7 +196,7 @@ describe('write executor live preconditions', () => {
     const { proposeChange, calls } = await load((query) => {
       if (query.table === 'change_requests') return { data: null, error: null }
       if (query.table === 'action_decisions') return { data: { ...decision, approval_state: 'not_requested' }, error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta' }, error: null }
       if (query.table === 'ads') return { data: { id: 'local-ad-1' }, error: null }
       if (query.table === 'create_change_request_from_decision') return { data: { id: 'change-1' }, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
@@ -242,7 +242,7 @@ describe('write executor live preconditions', () => {
     const { proposeChange, calls } = await load((query) => {
       if (query.table === 'change_requests') return { data: null, error: null }
       if (query.table === 'action_decisions') return { data: budgetDecision, error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'USD' }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'USD' }, error: null }
       if (query.table === 'adsets') return { data: { id: 'local-adset-1' }, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
     })
@@ -281,7 +281,7 @@ describe('write executor live preconditions', () => {
     const { proposeChange, calls } = await load((query) => {
       if (query.table === 'change_requests') return { data: null, error: null }
       if (query.table === 'action_decisions') return { data: budgetDecision, error: null }
-      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'USD' }, error: null }
+      if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'USD' }, error: null }
       if (query.table === 'adsets') return { data: { id: 'local-adset-1' }, error: null }
       throw new Error(`unexpected query ${query.table}:${query.op}`)
     })

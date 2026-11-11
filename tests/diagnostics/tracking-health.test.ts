@@ -7,7 +7,7 @@ import { evaluateTrackingHealth } from '@/lib/tracking/health-monitor'
 describe('evaluateTrackingHealth — attribution vs broken-pixel', () => {
   it('does NOT cry "pixel broken" when the pixel fires site-wide but ~0 is attributed to campaigns', () => {
     const r = evaluateTrackingHealth({
-      isFiring: true, appointmentLast7: 0, appointmentPrev7: 5, deliveryLast7: 240, volumeDropPct: -100,
+      isFiring: true, outcomeEventsLast7: 0, outcomeEventsPrev7: 5, deliveryLast7: 240, volumeDropPct: -100,
       pixelFiringSiteWide: true,
     })
     expect(r.status).toBe('warning') // not critical
@@ -21,7 +21,7 @@ describe('evaluateTrackingHealth — attribution vs broken-pixel', () => {
 
   it('still flags critical when the pixel is NOT firing site-wide (genuine breakage)', () => {
     const r = evaluateTrackingHealth({
-      isFiring: true, appointmentLast7: 0, appointmentPrev7: 5, deliveryLast7: 240, volumeDropPct: -100,
+      isFiring: true, outcomeEventsLast7: 0, outcomeEventsPrev7: 5, deliveryLast7: 240, volumeDropPct: -100,
       pixelFiringSiteWide: false,
     })
     expect(r.status).toBe('critical')
@@ -29,18 +29,27 @@ describe('evaluateTrackingHealth — attribution vs broken-pixel', () => {
   })
 
   it('stays conservative (critical) when site-wide firing is unknown — preserves old behavior', () => {
-    const r = evaluateTrackingHealth({ isFiring: true, appointmentLast7: 0, appointmentPrev7: 5, deliveryLast7: 240, volumeDropPct: -100 })
+    const r = evaluateTrackingHealth({ isFiring: true, outcomeEventsLast7: 0, outcomeEventsPrev7: 5, deliveryLast7: 240, volumeDropPct: -100 })
     expect(r.status).toBe('critical')
   })
 
   it('dormant (no delivery) is still UNVERIFIED regardless of the new signal', () => {
-    const r = evaluateTrackingHealth({ isFiring: false, appointmentLast7: 0, appointmentPrev7: 0, deliveryLast7: 0, volumeDropPct: null, pixelFiringSiteWide: true })
+    const r = evaluateTrackingHealth({ isFiring: false, outcomeEventsLast7: 0, outcomeEventsPrev7: 0, deliveryLast7: 0, volumeDropPct: null, pixelFiringSiteWide: true })
     expect(r.status).toBe('unverified')
     expect(r.dormant).toBe(true)
   })
 
+  it('names the configured event in the dormant message and prints no currency sign', () => {
+    const r = evaluateTrackingHealth({ isFiring: false, outcomeEventsLast7: 0, outcomeEventsPrev7: 0, deliveryLast7: 0, volumeDropPct: null })
+    const text = r.issues.join(' ')
+    expect(text).toContain('zero AppointmentConfirmed events')
+    expect(text).not.toContain('${')
+    expect(text).not.toMatch(/\$/)
+    expect(text).toMatch(/no spend/)
+  })
+
   it('healthy when events are attributed and the pixel is firing', () => {
-    const r = evaluateTrackingHealth({ isFiring: true, appointmentLast7: 6, appointmentPrev7: 5, deliveryLast7: 300, volumeDropPct: 20, pixelFiringSiteWide: true })
+    const r = evaluateTrackingHealth({ isFiring: true, outcomeEventsLast7: 6, outcomeEventsPrev7: 5, deliveryLast7: 300, volumeDropPct: 20, pixelFiringSiteWide: true })
     expect(r.status).toBe('healthy')
   })
 })

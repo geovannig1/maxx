@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import { buildUserMessage, SYSTEM_PROMPT, type ReportInputData } from '@/lib/report/prompt-builder'
 import { renderReconciliationBlock, summarizeReconciliation, reconcileAppointment } from '@/lib/outcomes/adapters/acuity/value-reconciliation'
 import { renderForwardCoverage, computeForwardCoverage } from '@/lib/tracking/forward-coverage'
@@ -185,5 +185,21 @@ describe('assembled report prompt — honesty rules survive assembly', () => {
     expect(bare).not.toContain('=== OUTCOME LEDGER')
     expect(bare).not.toMatch(EMAIL)
     expect(bare.length).toBeGreaterThan(100)
+  })
+})
+
+describe('assembled report prompt — money in the account currency', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('prints every amount in the account currency, never a literal "$" (EUR account)', () => {
+    vi.stubEnv('NEXT_PUBLIC_ACCOUNT_CURRENCY', 'EUR')
+    const msg = buildUserMessage({ ...base, currency: 'EUR', ga4 })
+    expect(msg).toMatch(/€655\.00/)
+    expect(msg).not.toMatch(/\$\s?\d/)
+  })
+
+  it('keeps the USD rendering for a USD account (control)', () => {
+    vi.stubEnv('NEXT_PUBLIC_ACCOUNT_CURRENCY', 'USD')
+    expect(buildUserMessage(base)).toMatch(/\$655\.00/)
   })
 })

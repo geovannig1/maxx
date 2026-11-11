@@ -52,6 +52,6 @@ export async function getLearnings(args: {
     // learned_patterns predates causal-contribution lineage, so old CPA-based rows are withheld.
     patterns: [],
     recent_outcomes: recent,
-    note: `Commercial learning is frozen until an owner-reviewed outcome is measured as causal incremental contribution dollars. Legacy CPA/${OW.many} patterns and attributed-only outcomes are withheld.`,
+    note: `Commercial learning is frozen until an owner-reviewed outcome is measured as causal incremental contribution. Legacy CPA/${OW.many} patterns and attributed-only outcomes are withheld.`,
   }
 }

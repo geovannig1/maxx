@@ -1,6 +1,7 @@
 import { getAdminClient } from '@/lib/supabase/admin'
-import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
-import type { BreakdownRow, BreakdownSource, BreakdownType } from '@/lib/platforms/types'
+import { requireCapability } from '@/lib/platforms/registry'
+import { loadAccountPlatform } from '@/lib/platforms/account-platform'
+import type { BreakdownQuery, BreakdownRow, BreakdownType } from '@/lib/platforms/types'
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 const PLACEMENT_DIMENSIONS = ['publisher_platform', 'platform_position'] as const
@@ -31,7 +32,8 @@ interface PlacementCommitInput {
 }
 
 interface ExecutivePlacementRefreshDeps {
-  fetch: BreakdownSource['fetch']
+  /** Breakdown rows for the account (database id) through its own platform. */
+  fetch(query: BreakdownQuery, adAccountDbId: string): Promise<BreakdownRow[]>
   commit(input: PlacementCommitInput): Promise<number>
   now(): string
 }
@@ -63,7 +65,8 @@ async function commitPlacementWindow(input: PlacementCommitInput): Promise<numbe
 }
 
 const DEFAULT_DEPS: ExecutivePlacementRefreshDeps = {
-  fetch: (query) => requireCapability(getAdPlatform('meta'), 'breakdowns').fetch(query),
+  fetch: async (query, adAccountDbId) =>
+    requireCapability(await loadAccountPlatform(getAdminClient(), adAccountDbId), 'breakdowns').fetch(query),
   commit: commitPlacementWindow,
   now: () => new Date().toISOString(),
 }
@@ -91,7 +94,7 @@ export async function refreshExecutivePlacementEvidence(
         until: date,
         breakdowns: [dimension as BreakdownType],
         strict: true,
-      })
+      }, input.adAccountDbId)
       if (fetched.some((row) => row.entity_level !== 'adset' || row.breakdown_type !== dimension)) {
         throw new Error(`Executive placement source returned a mismatched ${dimension} slice.`)
       }

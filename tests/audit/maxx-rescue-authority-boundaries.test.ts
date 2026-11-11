@@ -109,6 +109,7 @@ import { defaultManifest } from '@/lib/recommendations/manifest'
 import { buildLaunchPerformance } from '@/lib/diagnostics/launch-performance'
 import { projectMetaRecommendationDiagnostic } from '@/mcp/tools/diagnosis-bundle'
 import { projectMetaRecommendationsForModel } from '@/mcp/tools/meta-recommendations'
+import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
 import { detectWrongOptimizationEvent } from '@/lib/alerts/detector'
 import { processFeedbackForCompletedTests, runFeedbackLoop } from '@/lib/feedback/loop'
 import {
@@ -362,7 +363,7 @@ describe('Maxx rescue slice — authority boundaries without a stored CampaignPl
         violations: [],
       },
       fetchedAt: '2026-07-30T00:00:00Z',
-    }, Date.parse('2026-07-30T12:00:00Z'))
+    }, Date.parse('2026-07-30T12:00:00Z'), requireCapability(getAdPlatform('meta'), 'recommendations').isStale)
     expect(dedicatedMetaTool).toMatchObject({
       available: true,
       count: 1,

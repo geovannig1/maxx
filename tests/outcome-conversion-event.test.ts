@@ -4,10 +4,12 @@ import {
   type OutcomeConversionRow,
 } from '@/lib/conversions/outcome-conversions'
 import { buildOutcomeConversionEvent } from '@/lib/platforms/meta/outcome-event'
+import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
+import { createHash } from 'node:crypto'
 
 const NOW = Date.parse('2026-11-08T12:00:00Z')
 const ROW: OutcomeConversionRow = {
-  id: '0b6f2a8e-3c4d-4e5f-8a9b-0c1d2e3f4a5b', source_id: 's', outcome_type: 'lead', status: 'confirmed',
+  id: '0b6f2a8e-3c4d-4e5f-8a9b-0c1d2e3f4a5b', ad_account_id: 'a', source_id: 's', outcome_type: 'lead', status: 'confirmed',
   origin: 'website', origin_observed_at: '2026-11-08T11:00:00Z', occurred_at: '2026-11-08T11:00:00Z',
   gross_value: null, currency: 'GBP', email: ' Lead@Example.test ', phone: null, first_name: null, last_name: null,
   fbp: null, fbc: null, landing_page: 'https://example.test/contact', conversion_sent_at: null,
@@ -98,6 +100,28 @@ describe('generic conversions send mode', () => {
     // Turning on the Acuity example never turns on generic sending.
     [{ ACUITY_CAPI_SEND: 'true' }, 'off'],
   ])('%j → %s', (env, mode) => {
-    expect(resolveOutcomeSendMode(env)).toBe(mode)
+    expect(resolveOutcomeSendMode(env, requireCapability(getAdPlatform('meta'), 'conversions'))).toBe(mode)
+  })
+
+  it('test mode is off without the platform conversions capability; live needs only the flag', () => {
+    expect(resolveOutcomeSendMode({ OUTCOME_CONVERSIONS_SEND: 'test', META_TEST_EVENT_CODE: 'T1' }, null)).toBe('off')
+    expect(resolveOutcomeSendMode({ OUTCOME_CONVERSIONS_SEND: 'true' }, null)).toBe('live')
+  })
+})
+
+describe('phone calling code chosen by core', () => {
+  const sha = (s: string) => createHash('sha256').update(s).digest('hex')
+  const phoneHash = (phoneCallingCode: string | null | undefined) => {
+    const built = buildOutcomeConversionEvent({ ...ROW, phone: '07700 900123', email: null }, { eventName: 'Lead', nowMs: NOW, phoneCallingCode })
+    return built.ok ? (built.payload.data[0].user_data as { ph?: string[] }).ph?.[0] : 'not built'
+  }
+
+  it('hashes with the calling code core passed (the account country)', () => {
+    expect(phoneHash('44')).toBe(sha('447700900123'))
+  })
+
+  it('null adds no prefix (control: a different code changes the hash)', () => {
+    expect(phoneHash(null)).toBe(sha('7700900123'))
+    expect(phoneHash('49')).not.toBe(phoneHash('44'))
   })
 })

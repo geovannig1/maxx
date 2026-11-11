@@ -7,10 +7,12 @@ rewrite. This page describes the interface, its current limits, and the steps to
 ## The interface
 
 `src/lib/platforms/types.ts` declares `AdPlatform`: only the operations the code actually calls,
-grouped by capability.
+grouped by capability. `budgetUnits` (the platform's integer budget units) and `isApiError` are also
+required.
 
 | Group | Required | Operations |
 |---|---|---|
+| `records` | yes | map the platform's wire records into the neutral shapes (see [Record shapes](#record-shapes)) |
 | `entities` | yes | account, campaigns, ad sets, ads, creatives, custom audiences |
 | `insights` | yes | daily insights; period delivery totals |
 | `pacing` | no | today's spend by campaign; active campaign and ad set budgets |
@@ -45,50 +47,89 @@ commented list of inherently Meta-specific modules.
 Live writes go through `writes` only from the change executor, after its write-mode and approval
 gates ([how-maxx-decides.md](how-maxx-decides.md#4-changes-to-the-ad-account)).
 
+## Which platform an account uses
+
+Each ad account records its platform in `ad_accounts.platform` (migration `0003_ad_account_platform.sql`):
+`NOT NULL`, default `'meta'`, and a `CHECK` that lists exactly the registered platform ids. Core code
+resolves the platform from the account through one helper, `adPlatformForAccount` in
+`src/lib/platforms/account-platform.ts` (with `loadAccountPlatform(db, accountId)` and
+`loadActiveAccountPlatform(db)` reading the column first). It fails closed: an unregistered, missing or
+malformed value throws `UnknownAdPlatformError`; nothing falls back to Meta.
+
+The account may also record its country, `ad_accounts.country` (ISO 3166-1 alpha-2, optional). When it is
+set, the default phone calling code for conversions matching comes from it
+(`phoneCallingCodeFor` in `src/lib/capi/phone.ts`); when it is null, `CONVERSIONS_PHONE_COUNTRY_CODE`
+decides, as before. Nothing fills the column automatically. The Acuity reference adapter's own sender
+still reads the configured code only.
+
+A few places still name Meta on purpose, each with a comment saying why:
+
+- **The governed write path** (`src/lib/writes/write-preconditions.ts`) validates Meta entity ids, account
+  ids and snapshots. Its entry gate, `resolveWriteTargetContext`, resolves the target account's platform
+  and refuses any account that is not Meta before any read or write.
+- **The reporting packet's `meta` section** (`src/lib/reporting/loader.ts`): the packet contract has a
+  section named for Meta with a Meta-shaped schema.
+- **The setup/doctor connection check** (`src/lib/setup/network-checks.ts`) checks the `META_*`
+  configuration, which exists before any account row.
+- **The launch diagnosis's pure builder** (`src/lib/diagnostics/launch-performance.ts`) looks up an event
+  in Meta dataset stats; its loader reads those stats through the account's platform.
+- **The reporting benchmark script** (`scripts/bench/reporting-packet.ts`) measures Meta's reader offline.
+
+## Record shapes
+
+`src/lib/platforms/records.ts` defines the platform-neutral shapes core code can rely on for any
+platform: `PlatformCampaign`, `PlatformAdSet`, `PlatformAd`, `PlatformCreative` and `PlatformInsightRow`
+(ids, names, normalised status and the platform's own delivery status, budgets, spend, impressions,
+reach, frequency, clicks and link clicks). Money is in major units of the account currency; a value the
+platform did not report is `null`, never 0. Platform-modelled conversions are deliberately not in the
+neutral shapes: they depend on each platform's attribution windows and event names.
+
+Every platform implements the required `records` group, which maps its own wire records into those
+shapes inside its module (Meta: `src/lib/platforms/meta/records.ts`). The entity and insight operations
+still return each platform's wire records (`CampaignRecord`, `InsightRecord`, … are Meta's today), because
+the warehouse ingest (`src/lib/sync/upsert-*.ts`) and the `daily_insights` columns follow Meta's fields,
+including its modelled results. That ingest is the largest piece of Meta-specific core left.
+
 ## Current limits
 
-These are known and deliberate for v1; each is a step in the guide below.
-
-- **Records are Meta-shaped.** The record types (`CampaignRecord`, `InsightRecord`, …) are Meta's wire
-  shapes under neutral names. A second platform must either map into them or, better, generalize
-  them first.
-- **Ad accounts have no platform column.** Every account is a Meta account, so core callers ask for
-  `getAdPlatform('meta')` explicitly (33 calls in 15 files) rather than reading the platform from
-  the account.
-- **The database columns and metric names follow Meta** (for example Meta's conversion action names in
-  the daily insights table).
+- **The warehouse follows Meta.** The sync's upsert modules and table columns read Meta's wire fields
+  (for example Meta's conversion action names in `daily_insights`).
+- **`ad_accounts.account_id` is unique on its own**, not per platform, and the sync upserts on it.
 - **One ad account per install**, matching the single-owner model.
 
-## Adding a second platform
+## What a second platform must implement
 
 1. **Open an issue first** with the platform, the capabilities you intend to implement, and how its
    numbers map to Maxx's evidence kinds (delivery, platform-modelled conversions). See
    [CONTRIBUTING.md](../CONTRIBUTING.md).
-2. **Generalize the record types** in `src/lib/platforms/types.ts` where the new platform's shapes
-   differ, keeping Meta's mapping behind its implementation. Keep the existing golden tests green:
-   a change to a money or count output needs an explicit, reviewed justification.
-3. **Add the platform id** to `AdPlatformId` and implement `AdPlatform` in
-   `src/lib/platforms/<id>/`. `entities` and `insights` are required; implement only the optional
-   groups the platform really supports, and let the rest be refused by `requireCapability`.
-4. **Register it** in the `PLATFORMS` table in `src/lib/platforms/registry.ts`.
-5. **Extend the boundary rule:** add the platform's API hosts to `tests/platform-boundary.test.ts`, so
-   they may appear only inside `src/lib/platforms/<id>/`.
-6. **Record the platform on the account:** add a platform column to the ad-account table in a new
-   migration, then replace the explicit `getAdPlatform('meta')` calls with the account's platform.
-7. **Implement the reporting capability:** Meta's readers live in `src/lib/platforms/meta/reporting/`
-   and map Graph fields into the report packet; a second platform maps its own fields into the same
-   packet contract (`src/lib/reporting/contracts.ts`). Likewise `conversions` builds the platform's
-   own event for an outcome and resolves its own credentials; core
+2. **Add the platform id** to `AdPlatformId` in `src/lib/platforms/types.ts`, implement `AdPlatform` in
+   `src/lib/platforms/<id>/`, and register it in `PLATFORMS` in `src/lib/platforms/registry.ts`.
+   Required: `budgetUnits`, `isApiError`, `entities`, `insights` and `records` (the mapping into the
+   neutral shapes, tested with offline fixtures of the platform's wire format). Implement only the
+   optional groups the platform really supports; `requireCapability` refuses the rest.
+3. **Widen the database:** a new migration that adds the id to `ad_accounts_platform_check`, and, before
+   two platforms can share an install, makes `ad_accounts.account_id` unique per platform (and moves the
+   sync's `onConflict` with it).
+4. **Generalise the entity and insight record types** in `types.ts` where the new platform's wire shapes
+   differ, and move the warehouse ingest (`src/lib/sync/upsert-*.ts`) onto the neutral records or onto a
+   per-platform ingest. Keep the existing golden tests green: a change to a money or count output needs an
+   explicit, reviewed justification.
+5. **Extend the boundary rule:** add the platform's API hosts to `tests/platform-boundary.test.ts`, so they
+   may appear only inside `src/lib/platforms/<id>/`.
+6. **Replace the named-Meta places above that the platform needs:** its own governed write path (or a
+   generalised one) before `resolveWriteTargetContext` may accept it; its own reporting section in the
+   packet contract (`src/lib/reporting/contracts.ts`); its own setup check.
+7. **Conversions:** implement `conversions` so it builds the platform's own event for an outcome (using the
+   `phoneCallingCode` core passes) and resolves its own credentials; core
    `src/lib/conversions/outcome-conversions.ts` only gates, records and labels.
-8. **Configuration:** add the platform's variables to the schema in `src/config/env-vars-*.ts` (secret
-   flags, formats, setup prompts), run `npm run env:docs`, and implement `connectionCheck` so
-   `npm run doctor` and `/setup` can verify the token, permissions, timezone and currency.
-9. **Attribution label:** show the platform's own attribution window beside its modelled conversions,
-   as Meta's is (`src/lib/platforms/meta/attribution.ts`), and keep them labelled as platform
-   estimates, never outcomes.
-10. **Tests first:** extend `tests/ad-platform-registry.test.ts` (delegation of every operation,
-    capability flags, refusal of an unsupported capability), add fixtures for the new wire shapes
-    with no network, and run `npm run gate`.
+8. **Configuration:** add the platform's variables to `src/config/env-vars-*.ts` (secret flags, formats,
+   setup prompts), run `npm run env:docs`, and implement `connectionCheck` so `npm run doctor` and `/setup`
+   can verify the token, permissions, timezone and currency.
+9. **Attribution label:** show the platform's own attribution window beside its modelled conversions, as
+   Meta's is (`src/lib/platforms/meta/attribution.ts`), and keep them labelled as platform estimates.
+10. **Tests first:** extend `tests/ad-platform-registry.test.ts` (delegation of every operation, capability
+    flags, refusal of an unsupported capability), add record-mapping fixtures like
+    `tests/platform-neutral-records.test.ts`, and run `npm run gate`.
 
 A second platform is out of scope for v1 itself; the interface exists so it can be added without
 touching the evidence and authority rules.

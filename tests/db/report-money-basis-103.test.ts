@@ -46,6 +46,27 @@ describe('report money-basis contract', () => {
     expect(Number(result.rows[0].business_revenue)).toBe(500)
   })
 
+  it('stores collected-value coverage, not the completeness claim, for a push-only report', async () => {
+    // Every collected value is recorded, but the source is push-only: revenue_complete is false (no
+    // completeness proof) while the column keeps its contract, collected-value coverage.
+    await insertDaily(4, {
+      money_basis: {
+        version: 1,
+        basis: 'outcome_collected_value',
+        source_available: true,
+        revenue_complete: false,
+        collected_value_coverage_complete: true,
+        observed_collected_value_lower_bound: 500,
+        covered_outcomes: 3,
+        total_outcomes: 3,
+        source_completeness: 'as_received',
+      },
+    }, 500)
+    const result = await db.query<Record<string, unknown>>(`SELECT * FROM public.daily_reports WHERE id=$1`, [id(4)])
+    expect(result.rows[0]).toMatchObject({ business_revenue_complete: true, collected_value_covered_outcomes: 3, collected_value_total_outcomes: 3 })
+    expect(Number(result.rows[0].business_revenue)).toBe(500)
+  })
+
   it('keeps an incomplete observed sum as a lower bound and forbids a revenue value', async () => {
     const reportJson = {
       money_basis: {

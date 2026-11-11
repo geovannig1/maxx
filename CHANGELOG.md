@@ -5,6 +5,62 @@ All notable changes to Maxx are recorded here. The format follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html): the public surface is the environment
 variables, the database schema, the HTTP API, the webhook and CSV contracts, and the MCP tool names.
 
+## [Unreleased]
+
+### Added
+
+- **Webhook secret rotation grace period.** `POST /api/outcomes/webhook-sources/{id}/rotate` accepts
+  `grace_minutes` (0 to 1440, default 60) and returns `previous_secret_valid_until`; the replaced secret
+  keeps verifying until then and is never returned. Settings offers Immediately, 15 minutes, 1 hour or
+  24 hours. Use 0 for a suspected leak.
+- **Paid-touch secret rotation:** `PAID_TOUCH_TOKEN_PREVIOUS_SECRET` verifies (never signs) tokens until
+  `PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL`, at most 7 days ahead; a later end is reported as a
+  configuration error.
+- **Ad accounts record their platform and country** (`ad_accounts.platform`, default `meta`, and
+  `ad_accounts.country`). Sync, crons, diagnostics, conversions, campaign plans and MCP tools resolve
+  the platform from the account and fail closed on an unknown one. The account country, when set,
+  supplies the phone calling code for conversions ahead of `CONVERSIONS_PHONE_COUNTRY_CODE`.
+- **Tokenless webhook outcomes** with an `fbclid` and paid-social UTMs link to a paid touch through the
+  same rule the reference adapter uses; every unclear case stays unlinked.
+- `npm run doctor` with `SUPABASE_DB_URL` set names every migration file the database has not applied.
+
+### Changed
+
+- **Report money basis:** `money_basis.revenue_complete` now means collected-value coverage **and**
+  every outcome source reconciled, so it is false on an as-received (webhook) or mixed report. Coverage
+  alone is `money_basis.collected_value_coverage_complete`.
+- AI judge calls that fail with no HTTP status (connection reset, DNS) are retried as transient, within
+  the same per-item cap; 4xx and validation errors stay final.
+- Webhook and CSV money is compared with `OUTCOME_MONEY_CEILING` exactly, digit by digit, including
+  exponent settings such as `1e-7`.
+- Diagnostics, prompts and copy no longer print a literal dollar sign (money uses the account
+  currency), and AI prompts no longer state the example business profile. Remaining booking-specific
+  wording is counted by a test that only allows it to fall.
+- The demo serves its sample images from its own origin and uses three ports.
+
+### Fixed
+
+- Stale outcome labelling no longer stops when a page fills with rows carrying other final labels.
+- Tracking-health messages print the configured outcome event instead of a literal `${event}`.
+
+### Removed
+
+- The unused date-range picker components and the `react-day-picker` dependency.
+
+### Database
+
+- `0003_ad_account_platform.sql` and `0004_secret_rotation_grace.sql`. `rotate_outcome_webhook_secret`
+  takes `p_grace_seconds` and returns `(rotated, grace_until)`; `get_outcome_webhook_source` also
+  returns `previous_secret` while its window is open.
+
+### Deploy notes
+
+- A release that adds a migration deploys together with its code: apply the migration and deploy the
+  application in the same upgrade ([Upgrades](docs/operations.md#upgrades)). Code that expects a new
+  or renamed column fails until its migration has run, and a migration applied without its code can
+  break the code still running. `npm run doctor` with `SUPABASE_DB_URL` set lists any migration file
+  the database has not applied.
+
 ## [1.0.0] - 2026-11-09
 
 The first public release. Maxx began as a private tool built for one appointment-based business, with
