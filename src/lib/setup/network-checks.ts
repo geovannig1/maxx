@@ -123,6 +123,8 @@ export async function ownerChecks(env: EnvRecord, deps: CheckDeps): Promise<Chec
 export async function metaChecks(env: EnvRecord, deps: CheckDeps): Promise<CheckResult[]> {
   const accessToken = envValue(env, 'META_ACCESS_TOKEN')
   const accountId = envValue(env, 'META_AD_ACCOUNT_ID')
+  // The Meta configuration check (META_* variables): it runs before any ad account row exists, so it
+  // names the platform it checks rather than resolving one from an account.
   const check = getAdPlatform('meta').connectionCheck
   if (!accessToken || !accountId || !check) return []
   const result = await check.check({

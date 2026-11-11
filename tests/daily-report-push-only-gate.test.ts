@@ -212,12 +212,20 @@ describe('generateDailyReport records how push-only outcomes arrived', () => {
     expect(nullArrival.report_json).not.toHaveProperty('outcome_arrival')
     expect(nullArrival.full_report_md).toBe(reconciled.full_report_md)
     expect(pushOnly.full_report_md).not.toBe(reconciled.full_report_md)
-    // the money basis differs only in the explicit source completeness it now states.
-    const { source_completeness: pushCompleteness, ...pushBasis } = pushOnly.report_json.money_basis as Record<string, unknown>
-    const { source_completeness: reconciledCompleteness, ...reconciledBasis } = reconciled.report_json.money_basis as Record<string, unknown>
+    // the money basis differs only in the source completeness it states and in revenue_complete, which a
+    // push-only source cannot prove; the collected-value coverage (what the column stores) is the same.
+    const {
+      source_completeness: pushCompleteness, revenue_complete: pushComplete, ...pushBasis
+    } = pushOnly.report_json.money_basis as Record<string, unknown>
+    const {
+      source_completeness: reconciledCompleteness, revenue_complete: reconciledComplete, ...reconciledBasis
+    } = reconciled.report_json.money_basis as Record<string, unknown>
     expect(pushBasis).toEqual(reconciledBasis)
     expect(pushCompleteness).toBe('as_received')
     expect(reconciledCompleteness).toBe('reconciled')
+    expect(pushComplete).toBe(false)
+    expect(reconciledComplete).toBe(reconciledBasis.collected_value_coverage_complete)
+    expect(typeof pushBasis.collected_value_coverage_complete).toBe('boolean')
     expect(pushOnly.business_revenue).toBe(reconciled.business_revenue)
   })
 })

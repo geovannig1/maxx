@@ -49,7 +49,7 @@ function queryChain(table: string) {
     chain[method] = () => chain
   }
   chain.maybeSingle = async () => (table === 'ad_accounts'
-    ? { data: { id: AD_ACCOUNT_DB_ID }, error: null }
+    ? { data: { id: AD_ACCOUNT_DB_ID, platform: 'meta' }, error: null }
     : { data: { id: REPORT_ID, report_json: state.reportJson }, error: null })
   chain.then = (resolve: (value: { data: Array<Record<string, unknown>>; error: null }) => unknown) =>
     Promise.resolve(resolve({

@@ -425,6 +425,6 @@ export function buildTestBrief(
   void _decision
   void _identity
   throw new Error(
-    'Legacy test-brief generation is disabled. Use the governed CampaignPlan grader with causal incremental contribution dollars, owner ceilings, assignment, maturity, and stop rules.',
+    'Legacy test-brief generation is disabled. Use the governed CampaignPlan grader with causal incremental contribution, owner ceilings, assignment, maturity, and stop rules.',
   )
 }

@@ -262,8 +262,8 @@ npm run demo
 ```
 
 Open http://127.0.0.1:3000. You are signed in as the fictional owner. The demo runs with AI off,
-never reads your `.env.local` and has no connection to Meta. It uses ports 3000 to 3003; if one is
-taken, it says which, and `npm run demo -- --port 4000` moves it to 4000 to 4003.
+never reads your `.env.local` and has no connection to Meta. It uses ports 3000 to 3002; if one is
+taken, it says which, and `npm run demo -- --port 4000` moves it to 4000 to 4002.
 
 ## Install
 

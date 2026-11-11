@@ -4,7 +4,8 @@ import { accountTimezone, businessDateOf, metaOutcomeEventName } from '@/config/
 import { BUSINESS_PROFILE, EXAMPLE_BUSINESS_PROFILE, type BusinessProfile } from '@/config/business-profile'
 import { isDemoMode } from '@/config/demo'
 import { SPEND_FLOORS } from '@/config/spend-floors'
-import { getAdPlatform } from '@/lib/platforms/registry'
+import { adPlatformForAccount, type PlatformAccount } from '@/lib/platforms/account-platform'
+import type { AdPlatform } from '@/lib/platforms/types'
 import { BUDGET_HARD_CAP } from '@/lib/writes/executor'
 import { maxBudgetChangePercent } from '@/lib/writes/owner-change-policy'
 import { writeStateBackend } from '@/lib/writes/write-state-backend'
@@ -26,6 +27,8 @@ type Db = ReturnType<typeof getAdminClient>
 
 export interface PlanAccount {
   id: string
+  /** The account's ad platform (ad_accounts.platform); its budget units convert the plan's money. */
+  platform: AdPlatform
   metaAccountId: string
   currency: string
   timezone: string
@@ -65,12 +68,14 @@ export function defaultDestination(hosts: readonly string[], profile: BusinessPr
   }) ?? null
 }
 
-async function readAccount(db: Db, accountId: string): Promise<PlanAccount | null> {
-  const { data, error } = await db.from('ad_accounts').select('id, account_id, currency, timezone_name, pixel_id, facebook_page_id').eq('id', accountId).maybeSingle()
+async function readAccount(db: Db, accountId: string): Promise<PlanAccount | 'platform_unsupported' | null> {
+  const { data, error } = await db.from('ad_accounts').select('id, account_id, currency, timezone_name, pixel_id, facebook_page_id, platform').eq('id', accountId).maybeSingle()
   if (error || !data) return null
-  const row = data as { id: string; account_id: string; currency: string; timezone_name: string | null; pixel_id: string | null; facebook_page_id: string | null }
+  const row = data as { id: string; account_id: string; currency: string; timezone_name: string | null; pixel_id: string | null; facebook_page_id: string | null } & PlatformAccount
+  let platform: AdPlatform
+  try { platform = adPlatformForAccount(row) } catch { return 'platform_unsupported' }
   return {
-    id: row.id, metaAccountId: row.account_id, currency: row.currency, timezone: row.timezone_name ?? accountTimezone(),
+    id: row.id, platform, metaAccountId: row.account_id, currency: row.currency, timezone: row.timezone_name ?? accountTimezone(),
     pixelId: row.pixel_id && /^\d{1,32}$/.test(row.pixel_id) ? row.pixel_id : null,
     pageId: row.facebook_page_id && /^\d{1,32}$/.test(row.facebook_page_id) ? row.facebook_page_id : null,
   }
@@ -115,9 +120,10 @@ async function readCopy(db: Db, accountId: string): Promise<PlanCopy[]> {
 export async function loadPlanContext(db: Db, accountId: string): Promise<PlanContextResult> {
   const account = await readAccount(db, accountId)
   if (!account) return { ok: false, code: 'ACCOUNT_UNAVAILABLE' }
+  if (account === 'platform_unsupported') return { ok: false, code: 'ACCOUNT_PLATFORM_UNSUPPORTED' }
   const [audiences, assets, copyBank] = await Promise.all([readAudiences(db, accountId), readAssets(db, accountId), readCopy(db, accountId)])
   if (audiences === null || assets === null) return { ok: false, code: 'PLAN_CONTEXT_UNAVAILABLE' }
-  const units = getAdPlatform('meta').budgetUnits
+  const units = account.platform.budgetUnits
   const currency = account.currency
   const toMinor = (major: number) => Math.round(units.toMinor(major, currency))
   const minDailyMinor = (goal: OptimizationGoal) => toMinor(SPEND_FLOORS.minDailyBudget * metaMinimumMultiple(goal))
@@ -136,7 +142,7 @@ export async function loadPlanContext(db: Db, accountId: string): Promise<PlanCo
       validation: {
         accountCurrency: currency, metaAccountId: normalizeMetaAccountId(account.metaAccountId) ?? account.metaAccountId, currencySupported: units.supports(currency), today,
         // The same guard as every ADR-059 money write (security review M2); re-run at execution.
-        configuredCurrencyProblem: currencyMismatch(currency),
+        configuredCurrencyProblem: currencyMismatch(currency, units),
         minDailyBudgetMinor: minDailyMinor, ceilingMinor: toMinor(BUDGET_HARD_CAP),
         accountActiveDailyMinor: activeMajor === null ? null : toMinor(activeMajor), maxStepPercent: maxBudgetChangePercent(),
         pageId: account.pageId, pixelId: account.pixelId,

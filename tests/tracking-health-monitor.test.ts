@@ -5,7 +5,7 @@ type Row = Record<string, unknown>
 const state = vi.hoisted(() => ({
   metaResponse: null as unknown,
   rows: {
-    ad_accounts: [{ pixel_id: 'pixel-from-db' }] as Row[],
+    ad_accounts: [{ id: 'account-1', pixel_id: 'pixel-from-db', platform: 'meta' }] as Row[],
     daily_insights: [] as Row[],
     app_settings: [] as Row[],
     alerts: [] as Row[],
@@ -78,7 +78,7 @@ describe('checkTrackingHealth — Meta pixel read failures fail closed', () => {
     expect(result.is_firing).toBe(false)
     expect(result.browser_pixel_status).toBe('unavailable')
     expect(result.dataset_capi_status).toBe('unverified')
-    expect(result.appointment_confirmed_last_7d).toBe(4)
+    expect(result.outcome_events_last_7d).toBe(4)
     expect(result.delivery_last_7d).toBe(250)
     expect(result.issues.join(' ')).toMatch(/Meta Pixel browser health is unavailable/i)
     expect(result.issues.join(' ')).not.toMatch(/CAPI|dataset/i)

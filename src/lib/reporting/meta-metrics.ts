@@ -1,7 +1,7 @@
 import type { MetricClaim } from '@/lib/cockpit/contracts'
 import { classifyWindowSettle } from '@/lib/insights/settle-window'
 import { canonicalConversion } from '@/lib/conversions/labels'
-import { readAppointmentConfirmedResult, readBookingValue } from '@/lib/sync/insight-outcomes'
+import { readOutcomeEventResult, readBookingValue } from '@/lib/sync/insight-outcomes'
 import type { MetaInsightRow } from '@/types/meta-api'
 import { COMPLETE_FIELD_COVERAGE, makeReportMetric, UNKNOWN_FIELD_COVERAGE } from './claims'
 import type { ReportMetricMap, ReportingContext } from './contracts'
@@ -41,7 +41,7 @@ function appointmentResult(row: MetaRow) {
     const windows = entry.values.flatMap((value: { attribution_windows: string[] }) => value.attribution_windows)
     if (new Set(windows).size !== windows.length) return null
   }
-  const result = readAppointmentConfirmedResult(row.results as MetaInsightRow['results'])
+  const result = readOutcomeEventResult(row.results as MetaInsightRow['results'])
   return result.valid && result.matched && Number.isInteger(result.value) ? result : null
 }
 

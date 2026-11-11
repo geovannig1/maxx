@@ -66,7 +66,7 @@ describe('owner profit direction policy', () => {
     expect(MAXX_INSTRUCTIONS).toMatch(/incremental[\s\S]*caused by advertising[\s\S]*counterfactual/i)
     expect(MAXX_INSTRUCTIONS).toMatch(/exact paid-touch attribution[\s\S]*association[\s\S]*not causation/i)
     expect(MAXX_INSTRUCTIONS).toMatch(/\$100[\s\S]*hard[\s\S]*ceiling/i)
-    expect(MAXX_INSTRUCTIONS).toMatch(/profit dollars[\s\S]*not[\s\S]*ROAS|ROAS[\s\S]*not[\s\S]*profit dollars/i)
+    expect(MAXX_INSTRUCTIONS).toMatch(/ROAS is not profit\b/i)
   })
 
   it('rejects a cheap booking CPA when collected contribution is negative', () => {

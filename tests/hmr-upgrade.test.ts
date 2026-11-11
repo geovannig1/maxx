@@ -80,7 +80,9 @@ describe('forwardHmrUpgrades', () => {
 
 describe('the demo gateway and the browser preview share the forwarder', () => {
   const root = path.resolve(__dirname, '..')
-  for (const file of ['scripts/demo/gateway.ts', 'tests/reporting-browser/interactive-preview.ts']) {
+  for (const file of ['scripts/demo/gateway.ts', 'tests/reporting-browser/interactive-preview.ts',
+    'tests/reporting-browser/progressive-gateway.ts', 'tests/reporting-browser/prepared.spec.ts',
+    'tests/reporting-browser/saved-preview.ts', 'tests/reporting-browser/hierarchy-history-check.mjs']) {
     it(file, () => {
       const source = readFileSync(path.join(root, file), 'utf8')
       expect(source).toMatch(/forwardHmrUpgrades\(server, \{/)

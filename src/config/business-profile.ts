@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { businessDisplayName } from './business-display'
 import { accountCurrency, accountTimezone } from './business-config'
+import { formatMoneyAmount } from '@/lib/utils/format-currency'
 
 // The business profile is the ONLY place business-specific facts live. Prompts, brand facts, the
 // booking page URL and the CAPI event source URL all read from here. Override it with the
@@ -65,7 +66,8 @@ export const EXAMPLE_BUSINESS_PROFILE: BusinessProfile = {
     'freight elevator for gear',
     'changing room',
   ],
-  pricing: ['studio rental from $60/hr', 'half-day blocks from $200'],
+  // Example prices, stated in the account currency like every other amount.
+  pricing: [`studio rental from ${formatMoneyAmount(60)}/hr`, `half-day blocks from ${formatMoneyAmount(200)}`],
   personas: ['product photographers', 'portrait photographers', 'small brands', 'video crews', 'students', 'e-commerce sellers'],
   requiresVerification: ['specific customer counts (e.g. "1,000 happy clients")', '"same-day booking guaranteed"', '"largest studio in the city"'],
 }

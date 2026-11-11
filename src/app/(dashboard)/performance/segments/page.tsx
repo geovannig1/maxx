@@ -18,6 +18,7 @@ import { ExportCsvButton } from '@/components/export/ExportCsvButton'
 import { SEGMENT_DIMENSIONS, SEGMENT_METRIC_KEYS, DIMENSION_BY_KEY } from '@/lib/segments/dimensions'
 import { DaypartHeatmap, type DaypartRow } from '@/components/charts/DaypartHeatmap'
 import { metaOutcomeEventName } from '@/config/business-config'
+import { formatMoney } from '@/lib/utils/format-currency'
 
 // The Meta pixel event that marks an outcome (NEXT_PUBLIC_META_OUTCOME_EVENT).
 const EVENT = metaOutcomeEventName()
@@ -176,7 +177,7 @@ export default function SegmentsPage() {
             <>
               {daypartBest && (
                 <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
-                  Cheapest Meta Results: <span className="font-medium" style={{ color: 'var(--success)' }}>{DAY_NAMES[daypartBest.day]} {hourLabel(daypartBest.hour)}</span> at ${daypartBest.cpa?.toFixed(0)} cost / Result · {daypartBest.bookings} modelled Results.
+                  Cheapest Meta Results: <span className="font-medium" style={{ color: 'var(--success)' }}>{DAY_NAMES[daypartBest.day]} {hourLabel(daypartBest.hour)}</span> at {daypartBest.cpa == null ? '—' : formatMoney(daypartBest.cpa, { maximumFractionDigits: 0 })} cost / Result · {daypartBest.bookings} modelled Results.
                 </p>
               )}
               <DaypartHeatmap data={daypart} />

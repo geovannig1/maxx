@@ -24,8 +24,24 @@ export interface ReportOutcomeArrival {
 }
 
 /** How a report's outcome sources are complete: proven against their systems, counted as they arrived,
- *  or both. Distinct from money_basis.revenue_complete, which measures collected-value coverage. */
+ *  or both. */
 export type ReportSourceCompleteness = 'reconciled' | 'as_received' | 'mixed'
+
+/**
+ * PURE. The two money-basis completeness facts a report records:
+ * - `collected_value_coverage_complete`: every active outcome in the window has a recorded collected
+ *   value (what the report tables' business_revenue_complete column stores, by its contract).
+ * - `revenue_complete`: the report claims its revenue is complete. Only reconciled sources can prove
+ *   that, so it is false on an as-received or mixed report whatever the coverage.
+ */
+export function reportMoneyCompleteness(input: {
+  sourceAvailable: boolean
+  collectedValueCovered: boolean
+  completeness: ReportSourceCompleteness
+}): { revenue_complete: boolean; collected_value_coverage_complete: boolean } {
+  const covered = input.sourceAvailable && input.collectedValueCovered
+  return { revenue_complete: covered && input.completeness === 'reconciled', collected_value_coverage_complete: covered }
+}
 
 function isPushOnlyKind(kind: string): boolean {
   const adapter = getOutcomeAdapter(kind)
@@ -71,7 +87,7 @@ export function reportSourceCompleteness(arrival: ReportOutcomeArrival | null | 
 }
 
 /** PURE. The note under a report's collected-value figure when every counted outcome has a recorded value
- *  (revenue_complete). It names the sources' completeness and never calls push-only outcomes complete. */
+ *  (collected-value coverage). It names the sources' completeness and never calls push-only outcomes complete. */
 export function collectedValueNote(
   words: { many: string },
   completeness: ReportSourceCompleteness | undefined,

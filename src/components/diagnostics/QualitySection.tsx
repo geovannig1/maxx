@@ -3,6 +3,7 @@
 import { TrustBadge } from '@/components/trust/TrustBadge'
 import { rankingInfo, type QualityVerdict } from '@/lib/diagnostics/rankings'
 import type { DeliveryDiagnosticResult, DeliveryDiagnosticStatus, DeliverySignalState } from '@/lib/diagnostics/opportunity'
+import { formatMoneyTrim } from '@/lib/utils/format-currency'
 
 interface AdRow {
   ad_id: string
@@ -48,7 +49,7 @@ export function QualitySection({ ads, adsets, coverage }: { ads: AdRow[]; adsets
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-[12.5px] font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.adset_name}</p>
-                    <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>${a.spend.toLocaleString()} delivered in this window</p>
+                    <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>{formatMoneyTrim(a.spend)} delivered in this window</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-[11px] font-semibold rounded-full px-2 py-0.5" style={{ background: `${DELIVERY_COLOR[a.delivery_diagnostic.status]}1f`, border: `1px solid ${DELIVERY_COLOR[a.delivery_diagnostic.status]}`, color: DELIVERY_COLOR[a.delivery_diagnostic.status] }}>
@@ -96,7 +97,7 @@ export function QualitySection({ ads, adsets, coverage }: { ads: AdRow[]; adsets
                 {ads.slice(0, 25).map((a) => (
                   <tr key={a.ad_id}>
                     <td className="font-medium max-w-[220px] truncate" style={{ color: 'var(--text-primary)' }}>{a.ad_name}</td>
-                    <td className="text-right tabular-nums" style={{ color: 'var(--text-secondary)' }}>${a.spend.toLocaleString()}</td>
+                    <td className="text-right tabular-nums" style={{ color: 'var(--text-secondary)' }}>{formatMoneyTrim(a.spend)}</td>
                     <td><RankPill raw={a.quality_ranking} /></td>
                     <td><RankPill raw={a.engagement_rate_ranking} /></td>
                     <td><RankPill raw={a.conversion_rate_ranking} /></td>

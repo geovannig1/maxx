@@ -59,15 +59,19 @@ which changes only the formatting. How totals are computed, and their error boun
   window is covered by a recent, complete reconciliation; otherwise the read fails with that source's
   reason, because a missing reconciliation would make an incomplete total look complete.
 - A push-only source (the signed webhook) and the CSV import have no completeness proof. Their
-  outcomes count **as received**, and reports label them that way.
+  outcomes count as they arrived, and Settings → Outcome sources and the reports label them that way:
+  **As received** for a signed webhook, **As imported** for a CSV source.
 - The daily sync reconciles only enabled sources whose adapter can reconcile. An install whose sources
   are all push-only reconciles nothing, and its syncs are not marked partial for it.
 - Reports state the sources' completeness in `money_basis.source_completeness`: `reconciled`,
   `as_received` (every source is push-only) or `mixed` (reconciled and push-only sources together; the
   report also records the "As received" / "As imported" label of the push-only part).
-  `money_basis.revenue_complete` (column `business_revenue_complete`) is a different measure:
-  collected-value coverage, true when every active outcome in the window has a recorded collected
-  value. It can be true on a push-only report and never means the sources are complete.
+  `money_basis.revenue_complete` claims the report's revenue is complete, so it is true only when
+  every source is reconciled and every active outcome in the window has a recorded collected value;
+  it is always false on an `as_received` or `mixed` report. Collected-value coverage alone is
+  `money_basis.collected_value_coverage_complete`, which is what the report column
+  `business_revenue_complete` stores; it can be true on a push-only report and never means the
+  sources are complete.
 - The Meta pixel event that marks an outcome in Meta's Results, actions and tracking health is
   `NEXT_PUBLIC_META_OUTCOME_EVENT` (default `AppointmentConfirmed`, for example `Purchase` or `Lead`).
 
@@ -172,14 +176,19 @@ The screen uses the owner-only route `POST /api/outcomes/webhook-sources` (`{ "l
 
 ### 2. Rotate the secret
 
-In the list, choose **Rotate secret** on the webhook source and confirm. The dialog shows the new
-secret once, as above. The route behind it is `POST /api/outcomes/webhook-sources/<source_id>/rotate`
-(response `{ source_id, secret }`).
+In the list, choose **Rotate secret** on the webhook source, choose how long the old secret keeps
+working, and confirm. The dialog shows the new secret once, as above, and when the old one stops. The
+route behind it is `POST /api/outcomes/webhook-sources/<source_id>/rotate` with an optional body
+`{ "grace_minutes": 0 }` to `1440` (default `60`); the response is
+`{ source_id, secret, previous_secret_valid_until }`, the last being `null` when the old secret has
+already stopped. The old secret itself is never returned.
 
-**There is no grace period.** The old secret stops verifying the moment the rotation commits, so a
-delivery signed with it gets `404`. Rotate when your sender can be updated straight away, or pause
-the sender first, rotate, update it, and resume. Deliveries refused during the switch are not stored;
-send them again, signed with the new secret. Rotate at once if the secret may have leaked.
+**Grace period.** For the window you choose, deliveries signed with either the old or the new secret
+verify, so you can update your sender without refused deliveries; the source's row on
+`/settings/outcomes` says until when the old secret is still accepted. After that, a delivery signed
+with the old secret gets `404`; send it again, signed with the new secret. Rotating again inside the
+window keeps only the secret that rotation replaced. Choose **Immediately** (`grace_minutes: 0`) if
+the secret may have leaked: the old secret then stops the moment the rotation commits.
 
 ### 3. Sign each delivery
 
@@ -298,10 +307,23 @@ What happens to it:
 - Without `PAID_TOUCH_TOKEN_SECRET`, nothing is linked (`paid_touch: "not_configured"`).
 - The token is never stored with the outcome; the link keeps only its SHA-256 hash.
 
+**Click-id fallback (no token).** A delivery without a token whose `attribution` carries an `fbclid`
+with paid-social UTMs (`utm_medium` `paid_social` and `utm_source` `meta`, `facebook` or
+`instagram`) is linked by that click id, the same rule the Acuity example applies: Maxx looks for
+the most recent paid touch of this ad account captured by `/api/attribution/paid-touch` with exactly
+that `fbclid` and complete campaign, ad set and ad ids, observed at or before `occurred_at`, on an
+outcome whose `origin` is `website`. When it finds one the response says `paid_touch: "linked"` and
+the link has no token. Anything ambiguous fails closed and stays unlinked (`paid_touch: "absent"`,
+reason `no_paid_touch_token`): no captured touch with that click id, a touch captured after the
+outcome or for another account, an `origin` of `staff_or_manual` or `unknown`. A click id without
+paid-social UTMs is not paid evidence and is not looked up. A token that fails verification is
+final: the click id beside it is never a second chance.
+
 Coverage stays honest: every applied delivery is recorded as evaluated. An outcome without a token is
-counted as not linked (`absent`). One with a Meta click id and paid-social UTMs but no token, or with
-a rejected token, had a paid click Maxx could not link, so the linker is reported incomplete for that
-window rather than complete.
+counted as not linked (`absent`) unless the click-id fallback links it. One with a Meta click id and
+paid-social UTMs that neither a token nor the fallback could link, or with a rejected token, had a
+paid click Maxx could not link, so the linker is reported incomplete for that window rather than
+complete.
 
 ### Signing examples
 
@@ -419,7 +441,8 @@ fails the delivery: the outcome is stored first.
 ## The Acuity Scheduling example
 
 Acuity is kept as a worked example of a reconciled source. It is off unless `ACUITY_USER_ID` and
-`ACUITY_API_KEY` are set.
+`ACUITY_API_KEY` are set. Every `ACUITY_*` variable configures this adapter only: if you do not use
+Acuity, leave them all unset; nothing else reads them.
 
 - **Ingestion:** Acuity calls `/api/webhooks/acuity` (appointment scheduled, rescheduled, canceled,
   changed). The route verifies Acuity's `x-acuity-signature` (HMAC-SHA256 of the raw body with your

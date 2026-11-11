@@ -24,7 +24,7 @@ function bindAllForTest(adSets: Array<Omit<CohortAdSet, 'in_launch_cohort'>>): C
 // ── Bug 1: dormant account is UNVERIFIED, not pixel-broken ─────────────────────────────────────────
 describe('Bug 1 — pixel health does not cry "broken" on a dormant account', () => {
   it('no delivery + no conversions ⇒ unverified/dormant, NOT a broken verdict', () => {
-    const r = evaluateTrackingHealth({ isFiring: false, appointmentLast7: 0, appointmentPrev7: 0, deliveryLast7: 0, volumeDropPct: null })
+    const r = evaluateTrackingHealth({ isFiring: false, outcomeEventsLast7: 0, outcomeEventsPrev7: 0, deliveryLast7: 0, volumeDropPct: null })
     expect(r.status).toBe('unverified')
     expect(r.dormant).toBe(true)
     expect(r.status).not.toBe('critical')
@@ -33,20 +33,20 @@ describe('Bug 1 — pixel health does not cry "broken" on a dormant account', ()
   })
 
   it('a dormant account never produces a pixel-broken (critical) verdict, even with prior events', () => {
-    const r = evaluateTrackingHealth({ isFiring: false, appointmentLast7: 0, appointmentPrev7: 12, deliveryLast7: 0, volumeDropPct: -100 })
+    const r = evaluateTrackingHealth({ isFiring: false, outcomeEventsLast7: 0, outcomeEventsPrev7: 12, deliveryLast7: 0, volumeDropPct: -100 })
     expect(r.status).toBe('unverified')
     expect(r.dormant).toBe(true)
   })
 
   it('STILL catches a real break: delivery but zero conversions ⇒ critical (fix does not over-suppress)', () => {
-    const r = evaluateTrackingHealth({ isFiring: true, appointmentLast7: 0, appointmentPrev7: 5, deliveryLast7: 240, volumeDropPct: -100 })
+    const r = evaluateTrackingHealth({ isFiring: true, outcomeEventsLast7: 0, outcomeEventsPrev7: 5, deliveryLast7: 240, volumeDropPct: -100 })
     expect(r.status).toBe('critical')
     expect(r.dormant).toBe(false)
     expect(r.issues.join(' ')).toMatch(/despite active ad delivery/i)
   })
 
   it('healthy when delivering and converting', () => {
-    const r = evaluateTrackingHealth({ isFiring: true, appointmentLast7: 6, appointmentPrev7: 5, deliveryLast7: 300, volumeDropPct: 20 })
+    const r = evaluateTrackingHealth({ isFiring: true, outcomeEventsLast7: 6, outcomeEventsPrev7: 5, deliveryLast7: 300, volumeDropPct: 20 })
     expect(r.status).toBe('healthy')
     expect(r.dormant).toBe(false)
   })

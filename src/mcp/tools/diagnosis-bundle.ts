@@ -4,7 +4,9 @@ import { buildQualityReport } from '@/lib/diagnostics/quality-report'
 import { buildAnomalyReport } from '@/lib/diagnostics/anomaly-report'
 import { buildReconciliationReport } from '@/lib/diagnostics/reconciliation-report'
 import { getApprovedVerticalBenchmarks } from '@/lib/targets/vertical-benchmarks'
-import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
+import { requireCapability } from '@/lib/platforms/registry'
+import { loadAccountPlatform } from '@/lib/platforms/account-platform'
+import { getAdminClient } from '@/lib/supabase/admin'
 import { getEconomics } from './economics'
 import { getCreativeInsights } from './creative-insights'
 import type { NativeRecommendationsResult as MetaRecommendationsResult } from '@/lib/platforms/types'
@@ -94,7 +96,7 @@ export async function getDiagnosisBundle(args: { window_days?: number }): Promis
       section(buildReconciliationReport({ from, to, adAccountId: activeAccount.account.id }), 'reconciliation'),
       section(getEconomics(range), 'economics'),
       section(getCreativeInsights(range), 'creative insights'),
-      requireCapability(getAdPlatform('meta'), 'recommendations').fetch(),
+      loadAccountPlatform(getAdminClient(), activeAccount.account.id).then((platform) => requireCapability(platform, 'recommendations').fetch()),
       getApprovedVerticalBenchmarks().catch(() => []),
     ])
 

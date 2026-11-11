@@ -10,7 +10,9 @@ import { readMeasurementReport } from './measurement-reader'
 import { finishBusinessProgress, hasPendingBusinessIntelligence, hasUnavailableBusinessIntelligence } from './business-progress'
 import { META_DETAILS_LOADING_NOTE, type BusinessReport, ReportingPacketSchema, type MetaReport, type ReportSection, type ReportingContext, type ReportingPacket, type ReportingSectionName } from './contracts'
 
-// The Meta section is read through the ad-platform interface (its reporting capability).
+// The Meta section is read through the ad-platform interface (its reporting capability). The packet's
+// section is Meta's by contract (section 'meta', MetaReport), so it names Meta rather than resolving the
+// account's platform: a second platform needs its own section in the packet contract first.
 const readMetaReport = (...args: Parameters<ReportingReader['readReport']>) =>
   requireCapability(getAdPlatform('meta'), 'reporting').readReport(...args)
 

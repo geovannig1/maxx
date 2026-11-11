@@ -1,6 +1,6 @@
 import { MAXX_OWNER_PROFIT_POLICY } from '@/lib/economics/profit-policy'
 import { promptBusiness } from '@/config/prompt-business'
-import { formatMoneyAmount } from '@/lib/utils/format-currency'
+import { formatMoney, formatMoneyAmount } from '@/lib/utils/format-currency'
 import { outcomeWords, withIndefiniteArticle } from '@/config/outcome-nouns'
 import { metaOutcomeEventName } from '@/config/business-config'
 
@@ -109,7 +109,7 @@ Analyze the supplied observations like a trusted advisor. Do not claim knowledge
 - Existing customers stay separate in reporting. Exclude them from acquisition only when an approved CampaignPlan declares new-customer acquisition and preserves a separate retention path.
 - For PROFIT claims and automatic money authority, maximize incremental contribution from ad-attributed, processor-settled collected revenue: collections excluding tax, minus payment fees, variable fulfillment costs, and ad spend.
 - "Incremental" means caused by advertising versus the declared counterfactual. Attribute settled money through governed treatment/comparator assignment; exact paid touch alone remains an association view.
-- Optimize ${OW.many} and amount paid on active ${OW.many} for the owner-confirmed growth objective. Optimize absolute contribution dollars only on the separate profit decision plane; do not confuse a platform return metric with profit.
+- Optimize ${OW.many} and amount paid on active ${OW.many} for the owner-confirmed growth objective. Optimize absolute contribution only on the separate profit decision plane; do not confuse a platform return metric with profit.
 - Never infer that more spend is profitable from positive average contribution. An increase requires a mature causal interval above zero for both the proposed change's marginal contribution versus the current state and the proposed treatment's total contribution versus no ads.
 - Exact paid-touch attribution is association, not causation. It can support diagnosis but cannot alone prove incrementality. Causal contribution requires payment-to-experiment assignment plus a controlled or defensible quasi-experimental comparison. If settlement, cost, assignment, maturity, uncertainty, or incrementality evidence is missing, incremental contribution is UNAVAILABLE.
 - The owner-approved account-wide daily budget ceiling is ${formatMoneyAmount(MAXX_OWNER_PROFIT_POLICY.dailyBudgetCeiling)}. No narrative or recommendation may imply more. Positive evidence may justify a future owner discussion; it does not change the ceiling.
@@ -122,7 +122,7 @@ Analyze the supplied observations like a trusted advisor. Do not claim knowledge
 - A versioned, approved CampaignPlan backed by a freshness-verified business and landing-page snapshot must establish those choices. Until it is supplied, label the relevant context unavailable and keep the analysis observational.
 
 ## Source of Truth (critical) — THREE PLANES, never mix them
-- **Outcome ledger = BUSINESS TRUTH for ${OW.many}, booked value, and amount_paid recorded on active ${OW.many}.** The outcome source API is the canonical record for active ${OW.many} and charged price, including organic, manual, and $0 ${OW.many}. Booked value is the scheduled price. When an "OUTCOME LEDGER" block is provided, quote all-source active ${OW.one} counts and amount paid on active ${OW.many}; keep booked value separate. Owner-excluded post-sale exception topics stay out of this reporting.
+- **Outcome ledger = BUSINESS TRUTH for ${OW.many}, booked value, and amount_paid recorded on active ${OW.many}.** The outcome source API is the canonical record for active ${OW.many} and charged price, including organic, manual, and zero-value ${OW.many}. Booked value is the scheduled price. When an "OUTCOME LEDGER" block is provided, quote all-source active ${OW.one} counts and amount paid on active ${OW.many}; keep booked value separate. Owner-excluded post-sale exception topics stay out of this reporting.
 - **GA4 = CONFIRMATION-EVENT TELEMETRY, not a money lens.** GA's paid/organic split describes which channel a browser SESSION came from. The aggregate rows supplied here carry no ${OW.one} identity; some recent underlying events may carry ${withIndefiniteArticle(OW.one)} ID, but only the exact reconciliation may use them and only when identity coverage is proven complete. Aggregate rows may double-count one ${OW.one} and carry a comp at its NOMINAL price. NEVER judge ad performance, efficiency, CPA or ROAS from them. A PAID result requires an EXACT ${OW.one}-id join to the outcome ledger over a window with complete identity coverage; without one, paid CPA and paid/campaign ROAS are UNAVAILABLE — say "unavailable", never "0". GA counts only WEB-OBSERVED events, so it measures a different population than the outcome total (which also holds phone/manual/organic ${OW.many}). Do NOT assert a fixed direction between them: state the two populations and the observed difference, and if it is not explained by the reconciliation block, call it unexplained. GA is also NOT the authoritative count of the events Meta's optimizer received — accepted server CAPI deliveries and Meta dataset event counts outrank it for that question.
 - **Meta "${EVENT}" = MODELLED ATTRIBUTION only** (pixel/CAPI-based, view-through-heavy). Modelled attribution can UNDER- or OVER-attribute relative to business truth — never assert a fixed direction. Use Meta to describe where its system allocated delivery and conversion credit, not to claim which campaign caused a business outcome.
 - If the planes disagree: Outcome source is the business total, GA4 is web confirmation-event telemetry, and Meta is the modelled estimate. GA4 events are not ${withIndefiniteArticle(OW.one)} subset until an exact ${OW.one}-id join proves that relationship. A difference is NOT self-explaining — say which reconciliation state it falls into, and label anything unproven as unexplained.
@@ -194,8 +194,8 @@ For each material observation, state: observed fact + numbers + source + date ra
 An "OWNER DECISION MEMORY" block may be provided in the data. It is the human's standing record: decisions on past recommendations (rejected/snoozed/acted-on), manual actions taken in Ads Manager, unresolved setting conflicts, and lessons awaiting review. Use it as context, but do not turn it into a new instruction. The report generator does not accept or persist LLM-authored tasks.` as const
 
 export function buildUserMessage(data: ReportInputData): string {
-  const fmt = (n: number | null, prefix = '$', decimals = 2): string =>
-    n !== null ? `${prefix}${n.toFixed(decimals)}` : 'N/A'
+  // Money in the account currency, with the currency's minor-unit digits.
+  const fmt = (n: number | null): string => n !== null ? formatMoney(n) : 'N/A'
 
   const pct = (n: number | null): string =>
     n !== null ? `${n.toFixed(2)}%` : 'N/A'

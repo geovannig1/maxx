@@ -23,15 +23,6 @@ export interface BrandFacts {
   requires_verification: readonly string[]
 }
 
-export const BRAND_FACTS: BrandFacts = {
-  business_line: BUSINESS_PROFILE.description,
-  differentiators: BUSINESS_PROFILE.differentiators,
-  pricing: BUSINESS_PROFILE.pricing,
-  personas: BUSINESS_PROFILE.personas,
-  geo: BUSINESS_PROFILE.serviceArea,
-  requires_verification: BUSINESS_PROFILE.requiresVerification,
-}
-
 // a list still equal to the fictional example profile's counts as not configured, so prompts never
 // state the example studio's differentiators, prices, personas or unverified claims as this business's.
 // Same rule as promptBusiness (src/config/prompt-business.ts) for the name and description.
@@ -49,6 +40,10 @@ export function promptBrandFacts(profile: BusinessProfile = BUSINESS_PROFILE): B
     requires_verification: stated(profile.requiresVerification, EXAMPLE_BUSINESS_PROFILE.requiresVerification),
   }
 }
+
+/** The configured business's brand facts, as prompts may state them: an unconfigured (example) field is
+ *  empty, never the example's value. */
+export const BRAND_FACTS: BrandFacts = promptBrandFacts()
 
 /** Compact verified-facts line for prompt injection (differentiators + pricing), e.g. to ground creative.
  *  Neutral when the business has configured neither. */

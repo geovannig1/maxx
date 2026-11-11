@@ -6,10 +6,13 @@
 // every other group is an optional capability. A platform that lacks one simply omits the group, and
 // capabilitiesOf() / requireCapability() in ./registry turn that into flags and a typed refusal.
 //
-// Record and result SHAPES are Meta's today: Meta is the first implementation and the warehouse
-// ingests its wire shapes. They are re-exported here under platform-neutral names so core code does
-// not import Meta modules. A second platform maps its records into these shapes; widening them into a
-// platform-neutral model is a later, separate change.
+// Two kinds of record shape:
+//   * neutral records (./records.ts: PlatformCampaign, PlatformInsightRow, ...) that any platform maps
+//     its own records into through the required `records` group; core code that needs only ids, names,
+//     status, budgets and delivery metrics reads these;
+//   * wire records (CampaignRecord, InsightRecord, ...), which are Meta's today and which the entity and
+//     insight operations still return, because the warehouse ingest reads Meta's fields (its modelled
+//     results among them). They are re-exported under neutral names so core code does not import Meta.
 //
 // Credentials are each platform's own concern: no operation takes a token except conversions.send,
 // whose credential the platform itself resolves (conversions.resolveSendCredentials) or, for the
@@ -38,6 +41,7 @@ import type { MetaRecommendation, MetaRecommendationsResult } from './meta/fetch
 import type { DeliveryEstimateResult } from './meta/fetch-delivery-estimate'
 import type { MetaReportOptions } from './meta/reporting/meta-reader'
 import type { MetaReport, ReportSection, ReportingContext } from '@/lib/reporting/contracts'
+import type { PlatformAd, PlatformAdSet, PlatformCampaign, PlatformCreative, PlatformInsightRow } from './records'
 
 /** Registered platform ids. Add an id here when a platform is registered in ./registry. */
 export type AdPlatformId = 'meta'
@@ -68,6 +72,25 @@ export type NativeRecommendationsResult = MetaRecommendationsResult
 export type { DeliveryEstimateResult }
 export type ReportOptions = MetaReportOptions
 export type PlatformReport = MetaReport
+
+export type {
+  PlatformAd,
+  PlatformAdSet,
+  PlatformCampaign,
+  PlatformCreative,
+  PlatformEntityStatus,
+  PlatformInsightLevel,
+  PlatformInsightRow,
+} from './records'
+
+/** Maps the platform's own wire records into the neutral shapes. Pure; required of every platform. */
+export interface RecordMapper {
+  campaign(record: CampaignRecord): PlatformCampaign
+  adSet(record: AdSetRecord): PlatformAdSet
+  ad(record: AdRecord): PlatformAd
+  creative(record: CreativeRecord): PlatformCreative
+  insight(row: InsightRecord): PlatformInsightRow
+}
 
 /** An error raised by a platform's API client, classified the way the sync engine retries and reports. */
 export interface AdPlatformApiError extends Error {
@@ -140,7 +163,14 @@ export interface ConversionOutcome {
   conversion_event_id?: string | null
 }
 
-export interface ConversionEventOptions { eventName: string; testEventCode?: string | null; nowMs?: number }
+export interface ConversionEventOptions {
+  eventName: string
+  testEventCode?: string | null
+  nowMs?: number
+  /** Calling code for phone numbers written without one, chosen by core from the account's country or
+   *  configuration (phoneCallingCodeFor in src/lib/capi/phone.ts); null adds none. */
+  phoneCallingCode?: string | null
+}
 
 /** A built event: the platform's payload plus the neutral fields the delivery record stores. */
 export type ConversionEventBuild =
@@ -270,6 +300,7 @@ export interface AdPlatform {
   readonly label: string
   isApiError(err: unknown): err is AdPlatformApiError
   readonly budgetUnits: BudgetUnits
+  readonly records: RecordMapper
   readonly entities: EntityReader
   readonly insights: InsightsReader
   readonly pacing?: PacingReader
@@ -288,4 +319,4 @@ export interface AdPlatform {
 }
 
 /** Operation groups: the two required ones plus every optional capability. */
-export type AdPlatformCapability = Exclude<keyof AdPlatform, 'id' | 'label' | 'isApiError' | 'budgetUnits'>
+export type AdPlatformCapability = Exclude<keyof AdPlatform, 'id' | 'label' | 'isApiError' | 'budgetUnits' | 'records'>

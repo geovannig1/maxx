@@ -3,7 +3,8 @@ import { NextRequest } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { getAppointment } from '@/lib/outcomes/adapters/acuity/client'
 import { toLedgerRow, upsertAppointments, resolveAdAccountId } from '@/lib/outcomes/adapters/acuity/ledger'
-import { verifyAcuitySignature, parseWebhookBody, isAppointmentAction } from '@/lib/outcomes/adapters/acuity/webhook'
+import { parseWebhookBody, isAppointmentAction } from '@/lib/outcomes/adapters/acuity/webhook'
+import { getOutcomeAdapter } from '@/lib/outcomes/registry'
 import {
   linkAcuityPaidTouchWithFallback,
   paidTouchLinkConfig,
@@ -97,9 +98,11 @@ async function readBoundedRawBody(req: Request): Promise<BoundedRawBody> {
 // (Acuity retries + the sweep converge), and Meta's event_id dedup backstops any overlap.
 
 export async function POST(req: NextRequest) {
-  const acuityUser = process.env.ACUITY_USER_ID
+  // Configuration and signature checks go through the outcome-source adapter registry (the adapter
+  // object's validateConfig and verifyPush); the ingestion below stays this adapter's own path.
+  const adapter = getOutcomeAdapter('acuity')
   const acuityKey = process.env.ACUITY_API_KEY
-  if (!acuityUser || !acuityKey) {
+  if (!adapter?.verifyPush || !acuityKey || !adapter.validateConfig(process.env, {}).ok) {
     return Response.json({ error: 'Webhook not configured (ACUITY_USER_ID / ACUITY_API_KEY missing).' }, { status: 503 })
   }
 
@@ -116,7 +119,7 @@ export async function POST(req: NextRequest) {
   }
   const { rawBody } = body
 
-  if (!verifyAcuitySignature(rawBody, req.headers.get('x-acuity-signature'), acuityKey)) {
+  if (!adapter.verifyPush({ rawBody, headers: req.headers, url: new URL(req.url), secret: acuityKey }).ok) {
     return Response.json({ error: 'Invalid signature' }, { status: 401 })
   }
   const webhookSecret = process.env.ACUITY_WEBHOOK_SECRET

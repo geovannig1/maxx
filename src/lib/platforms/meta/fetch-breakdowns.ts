@@ -1,7 +1,7 @@
 import { metaGetPaginated } from './client'
 import { ACTION_ATTRIBUTION_WINDOWS } from './attribution'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { readAppointmentConfirmedResult } from '@/lib/sync/upsert-insights'
+import { readOutcomeEventResult } from '@/lib/sync/upsert-insights'
 import type { MetaInsightRow } from '@/types/meta-api'
 
 // ============================================================
@@ -121,7 +121,7 @@ export function findBookingsFromActions(actions: MetaBreakdownAction[] | undefin
 export function bookingsForBreakdownRecord(
   rec: Pick<MetaBreakdownRecord, 'actions' | 'results'>,
 ): number | null {
-  const result = readAppointmentConfirmedResult(rec.results)
+  const result = readOutcomeEventResult(rec.results)
   return result.matched && result.valid ? Math.round(result.value) : null
 }
 

@@ -3,7 +3,8 @@ import type { PaidCohortEvidence } from '@/lib/attribution/paid-cohort-reader'
 import type { PaidEligibilityManifestWindowProof } from '@/lib/attribution/paid-eligibility-manifest'
 import { inclusiveAccountDates } from '@/lib/economics/account-date-window'
 import { computeActiveAccountDailyBudget } from '@/lib/economics/pragmatic-profit-evidence'
-import { getAdPlatform } from '@/lib/platforms/registry'
+import { loadAccountPlatform } from '@/lib/platforms/account-platform'
+import type { AdPlatform } from '@/lib/platforms/types'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { currencyFractionDigits } from '@/lib/utils/format-currency'
 import type {
@@ -134,6 +135,8 @@ type NativePeriodDelivery = {
 }
 
 async function readNativePeriodDelivery(
+  db: SupabaseClient,
+  adAccountId: string,
   metaAccountId: string,
   range: CockpitRange,
   generationBlockerCodes: readonly string[],
@@ -153,9 +156,20 @@ async function readNativePeriodDelivery(
     }
   }
 
+  let platform: AdPlatform
+  try {
+    platform = await loadAccountPlatform(db, adAccountId)
+  } catch {
+    return {
+      frequency: null,
+      reach: null,
+      blockerCodes: ['meta_native_period_all_days_platform_unavailable'],
+    }
+  }
+
   let rows: NativePeriodInsightRow[]
   try {
-    rows = await getAdPlatform('meta').insights.fetchPeriodDelivery({
+    rows = await platform.insights.fetchPeriodDelivery({
       accountId: metaAccountId,
       since: range.start,
       until: range.end,
@@ -378,7 +392,7 @@ export async function readMetaDelivery(
     && !metricBlockers.some((code) => code.startsWith('meta_purchase_'))
   const leadAvailable = spendAvailable && sawLead
     && !metricBlockers.some((code) => code.startsWith('meta_lead_'))
-  const nativePeriod = await readNativePeriodDelivery(metaAccountId, range, generation.blockerCodes)
+  const nativePeriod = await readNativePeriodDelivery(db, adAccountId, metaAccountId, range, generation.blockerCodes)
   const frequencyAvailable = spendAvailable && nativePeriod.frequency !== null && nativePeriod.blockerCodes.length === 0
   return {
     available: spendAvailable && resultsAvailable,

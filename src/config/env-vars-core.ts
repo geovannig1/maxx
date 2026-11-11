@@ -22,7 +22,7 @@ export const CORE_ENV_VARS: EnvVarSpec[] = [
   v('SUPABASE_SERVICE_ROLE_KEY', 'supabase', 'Server-only key with full database access, used by API routes after the owner check and by cron and webhook handlers. It is the whole authorization boundary: keep it off machines that do not need it.', {
     secret: true, required: ALWAYS, format: formats.key, setup: 'ask', prompt: 'Supabase service-role key (server only)',
   }),
-  v('SUPABASE_DB_URL', 'tooling', 'Postgres connection string that `npm run setup` passes to `supabase db push --db-url` to apply the schema. Read only by setup; never written to .env.local.', {
+  v('SUPABASE_DB_URL', 'tooling', 'Postgres connection string that `npm run setup` passes to `supabase db push --db-url` to apply the schema, and that `npm run doctor` uses to check every migration file was applied. Read only by those two scripts; never written to .env.local.', {
     secret: true, format: formats.postgresUrl, scope: 'script',
   }),
   // Owner
@@ -85,7 +85,7 @@ export const CORE_ENV_VARS: EnvVarSpec[] = [
   v('NEXT_PUBLIC_MIN_SPEND_TO_JUDGE', 'business', 'Spend, in the account currency, below which an ad, ad set or campaign is too early to judge. Every other spend floor (dormancy, alerts, target-range minimum spend, trend and pattern thresholds) is a fixed multiple of it. The default suits currencies with USD-sized units; set a larger amount for currencies with small units, e.g. 3000 for JPY.', { format: formats.positiveDecimal, default: '20' }),
   // Outcome sources (the reference adapter's own variables, then conversions sending)
   ...REFERENCE_ADAPTER_ENV_VARS,
-  v('CONVERSIONS_PHONE_COUNTRY_CODE', 'outcomes', 'Country calling code added to customer phone numbers written without one (44 for the United Kingdom, 49 for Germany, 1 for the United States and Canada) before they are hashed for the Conversions API; a national trunk 0 is removed first. Unset adds no code, so national numbers cannot match. Numbers written with + or 00 keep their own code.', {
+  v('CONVERSIONS_PHONE_COUNTRY_CODE', 'outcomes', 'Country calling code added to customer phone numbers written without one (44 for the United Kingdom, 49 for Germany, 1 for the United States and Canada) before they are hashed for the Conversions API; a national trunk 0 is removed first. Unset adds no code, so national numbers cannot match. Numbers written with + or 00 keep their own code. Generic (webhook) outcomes use the ad account country (ad_accounts.country) instead when it is set.', {
     format: formats.phoneCallingCode, example: '44',
   }),
   v('OUTCOME_MONEY_CEILING', 'outcomes', 'Largest value of one outcome, in major units of the account currency, accepted from the outcome webhook or a CSV import. A larger value is refused with a 4xx and never sent to the Conversions API.', { format: formats.positiveNumber, default: '1000000000' }),
@@ -93,6 +93,12 @@ export const CORE_ENV_VARS: EnvVarSpec[] = [
   // Paid-touch capture (ADR-056): inert unless all four are set.
   v('PAID_TOUCH_TOKEN_SECRET', 'paid_touch', 'Signs paid-touch tokens. Setup generates it; the endpoint stays inert until the other three paid-touch values are set too.', {
     secret: true, format: formats.secret32Bytes, setup: 'generate', required: when('when paid-touch capture is configured', paidTouchStarted),
+  }),
+  v('PAID_TOUCH_TOKEN_PREVIOUS_SECRET', 'paid_touch', 'Rotation grace: the PAID_TOUCH_TOKEN_SECRET you just replaced. Tokens signed with it still verify (nothing new is signed with it) until PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL, so visitors captured before the switch can still be linked. Remove both once the window is over.', {
+    secret: true, format: formats.secret32Bytes,
+  }),
+  v('PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL', 'paid_touch', 'End of the rotation grace window for PAID_TOUCH_TOKEN_PREVIOUS_SECRET. At most 7 days ahead: a later or unreadable value turns the window off (the old secret verifies nothing).', {
+    format: formats.graceWindowEnd, example: '2026-11-17T18:00:00Z',
   }),
   v('PAID_TOUCH_ALLOWED_ORIGINS', 'paid_touch', 'Exact https origins of your website allowed to call /api/attribution/paid-touch (a browser guard, not authentication).', {
     format: formats.httpsOrigins, example: 'https://www.example.com', required: when('when paid-touch capture is configured', paidTouchStarted),

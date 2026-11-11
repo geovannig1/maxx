@@ -90,13 +90,13 @@ export function namesOutcomeEvent(actionType: string, eventName: string = OUTCOM
   return t === event || t.endsWith(`.${event}`) || t.endsWith(`:${event}`) || t.endsWith(`_${event}`)
 }
 
-// Match ONLY the AppointmentConfirmed custom event, in whatever prefix form Meta returns
+// Match ONLY the configured outcome event (AppointmentConfirmed by default), in whatever prefix form Meta returns
 // (offsite_conversion.fb_pixel_custom.AppointmentConfirmed | offsite_conversion.custom.AppointmentConfirmed
 //  | offsite_conversion.custom.<id>). Deliberately EXCLUDES the bare 'offsite_conversion.fb_pixel_custom'
 // aggregate (which sums ALL custom pixel events) and other events (Schedule, Purchase, custom click events, etc.).
 // NOTE: verify against the raw /insights actions array on the next sync — booking counts must still match
 // Meta Ads Manager.
-function isAppointmentConfirmedType(actionType: string, extraConversionId?: string): boolean {
+function isOutcomeEventType(actionType: string, extraConversionId?: string): boolean {
   const t = (actionType ?? '').toLowerCase()
   return (
     namesOutcomeEvent(t) ||
@@ -105,7 +105,7 @@ function isAppointmentConfirmedType(actionType: string, extraConversionId?: stri
   )
 }
 
-/** Ads Manager "Results" column: count the indicators naming AppointmentConfirmed
+/** Ads Manager "Results" column: count the indicators naming the configured outcome event
  *  (e.g. "conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed"). Indicators for other
  *  optimization goals (landing_page_view, leads, …) are ignored — this must count bookings only.
  *
@@ -117,7 +117,7 @@ function isAppointmentConfirmedType(actionType: string, extraConversionId?: stri
  *  Summing every entry counted each booking twice (warehouse 14 vs Ads Manager 7). Per indicator:
  *  the 'default' entry IS the Ads Manager number. Per-window entries are attribution diagnostics;
  *  they are never promoted to the result total when `default` is absent. */
-export interface AppointmentConfirmedResultRead {
+export interface OutcomeEventResultRead {
   value: number
   matched: boolean
   valid: boolean
@@ -127,13 +127,13 @@ export interface AppointmentConfirmedResultRead {
   splitComplete: boolean
 }
 
-/** Canonical AppointmentConfirmed Results reader. Repeated indicator aliases are the same logical
+/** Canonical Results reader for the configured outcome event. Repeated indicator aliases are the same logical
  * conversion, so MAX is used rather than summing them. A values-less indicator is Meta's explicit
  * zero shape; a populated values list without `default` is diagnostic-only and therefore unavailable. */
-export function readAppointmentConfirmedResult(
+export function readOutcomeEventResult(
   results: MetaInsightRow['results'],
-): AppointmentConfirmedResultRead {
-  let selected: AppointmentConfirmedResultRead | null = null
+): OutcomeEventResultRead {
+  let selected: OutcomeEventResultRead | null = null
   let valid = true
   for (const result of results ?? []) {
     if (!namesOutcomeEvent(result?.indicator ?? '')) continue
@@ -195,7 +195,7 @@ export function readAppointmentConfirmedResult(
       ? Math.abs(clickBookings + viewBookings - value) <= COUNT_TOLERANCE
       : value === 0
     if (sawClick && sawView && !splitComplete) candidateValid = false
-    const candidate: AppointmentConfirmedResultRead = {
+    const candidate: OutcomeEventResultRead = {
       value,
       matched: true,
       valid: candidateValid,
@@ -218,15 +218,15 @@ export function readAppointmentConfirmedResult(
       }
 }
 
-export function findAppointmentConfirmedResults(results: MetaInsightRow['results']): number {
-  return readAppointmentConfirmedResult(results).value
+export function findOutcomeEventResults(results: MetaInsightRow['results']): number {
+  return readOutcomeEventResult(results).value
 }
 
-/** View-through share of the Results count: the ['1d_view'] per-window entries of AppointmentConfirmed
- *  indicators (the same payload findAppointmentConfirmedResults dedups). Returns null — NOT 0 — when no
+/** View-through share of the Results count: the ['1d_view'] per-window entries of the outcome-event
+ *  indicators (the same payload findOutcomeEventResults dedups). Returns null — NOT 0 — when no
  *  per-window breakdown is present (absence of the breakdown is unknown, not "no view-throughs"). */
-export function findAppointmentConfirmedViewThrough(results: MetaInsightRow['results']): number | null {
-  const result = readAppointmentConfirmedResult(results)
+export function findOutcomeEventViewThrough(results: MetaInsightRow['results']): number | null {
+  const result = readOutcomeEventResult(results)
   return result.matched && result.splitAvailable ? result.viewBookings : null
 }
 
@@ -257,7 +257,7 @@ export function findAppointmentConfirmedViewThrough(results: MetaInsightRow['res
  * amount, so malformed money fail-stops rather than resolving to zero.
  */
 /**
- * The VIEW-THROUGH share of booking value — the money twin of `findAppointmentConfirmedViewThrough`.
+ * The VIEW-THROUGH share of booking value — the money twin of `findOutcomeEventViewThrough`.
  *
  * An absent `1d_view` alongside ANY other window sub-key is a measured ZERO — Meta omits a
  * zero-valued window rather than withholding the breakdown. `null` is reserved for a row reporting no
@@ -278,7 +278,7 @@ export function readBookingValueViewThrough(
 
     // SAME SELECTION AS `readBookingValue`, which uses `normalizedActionMax` — the MAX matching
     // entry, not the first. This used `.find()`, and the two readers could therefore describe
-    // DIFFERENT entries on the same row. `readAppointmentConfirmedResult`'s docblock states that
+    // DIFFERENT entries on the same row. `readOutcomeEventResult`'s docblock states that
     // repeated aliases of one logical conversion are an anticipated payload shape, so with an alias
     // pair [{value 100, 1d_view 100}, {value 3800, 1d_view 2356}] the total would store 3800
     // (max) while the view-through stored 100 (first) — a 2.6% view-through share against a true
@@ -286,7 +286,7 @@ export function readBookingValueViewThrough(
     let best: MetaInsightAction | null = null
     let bestValue = -1
     for (const entry of source) {
-      if (!isAppointmentConfirmedType(entry.action_type ?? '', extraConversionId)) continue
+      if (!isOutcomeEventType(entry.action_type ?? '', extraConversionId)) continue
       const total = parseOutcomeNumber(entry.value)
       if (total === null) return { value: null, valid: false }
       if (total > bestValue) { bestValue = total; best = entry }
@@ -297,7 +297,7 @@ export function readBookingValueViewThrough(
     if (raw === undefined) {
       // META OMITS A ZERO-VALUED WINDOW — it does not withhold the breakdown.
       //
-      // Mirroring `findAppointmentConfirmedViewThrough`'s "absent = unknown" rule was wrong HERE, and
+      // Mirroring `findOutcomeEventViewThrough`'s "absent = unknown" rule was wrong HERE, and
       // ad-set-level rows show why (under the sync's own window request; account and ad level are
       // inferred from this): on every row where `1d_view` was absent, `7d_click` alone equalled
       // `value` exactly. The breakdown WAS reported; the omitted window was simply zero.
@@ -377,13 +377,13 @@ export function readBookingValue(
   // future reads — do not let a reader infer more from it than that.
   const named = normalizedActionMax(
     conversionValues,
-    (type) => isAppointmentConfirmedType(type, extraConversionId),
+    (type) => isOutcomeEventType(type, extraConversionId),
   )
   if (named.matched) return named
 
   const specific = normalizedActionMax(
     actionValues,
-    (type) => isAppointmentConfirmedType(type, extraConversionId),
+    (type) => isOutcomeEventType(type, extraConversionId),
   )
   return specific.matched ? specific : { value: 0, valid: specific.valid, matched: false }
 }

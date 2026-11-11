@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
   findActionValueOrNull,
-  findAppointmentConfirmedResults,
-  findAppointmentConfirmedViewThrough,
+  findOutcomeEventResults,
+  findOutcomeEventViewThrough,
   normalizeOutcome,
 } from '@/lib/sync/upsert-insights'
 
@@ -26,11 +26,11 @@ describe('findActionValueOrNull', () => {
 // the bookings Ads Manager showed. The 'default' entry IS Ads Manager's
 // Results number; per-window entries are diagnostic only and are never promoted into Results.
 
-describe('findAppointmentConfirmedResults', () => {
+describe('findOutcomeEventResults', () => {
   it('THE DOUBLE-COUNT SHAPE: per-window entry + default total = counted ONCE', () => {
     // Campaign-level insights shape for a one-booking day.
     expect(
-      findAppointmentConfirmedResults([
+      findOutcomeEventResults([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [
@@ -45,7 +45,7 @@ describe('findAppointmentConfirmedResults', () => {
   it('multi-window day: 7d_click + 1d_view + default — default wins, no summing across windows', () => {
     // A 3-booking day where 1 came via click and 2 via view; default carries the total.
     expect(
-      findAppointmentConfirmedResults([
+      findOutcomeEventResults([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [
@@ -60,7 +60,7 @@ describe('findAppointmentConfirmedResults', () => {
 
   it('counts a default-only indicator (the original live Warm ad set shape)', () => {
     expect(
-      findAppointmentConfirmedResults([
+      findOutcomeEventResults([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [{ value: '2', attribution_windows: ['default'] }],
@@ -71,7 +71,7 @@ describe('findAppointmentConfirmedResults', () => {
 
   it('does not promote attribution partitions when the canonical default result is absent', () => {
     expect(
-      findAppointmentConfirmedResults([
+      findOutcomeEventResults([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [
@@ -85,7 +85,7 @@ describe('findAppointmentConfirmedResults', () => {
 
   it('does not promote untagged diagnostic values into the canonical result', () => {
     expect(
-      findAppointmentConfirmedResults([
+      findOutcomeEventResults([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [{ value: '1' }, { value: '2' }],
@@ -96,7 +96,7 @@ describe('findAppointmentConfirmedResults', () => {
 
   it('deduplicates repeated AppointmentConfirmed result aliases by MAX rather than summing', () => {
     expect(
-      findAppointmentConfirmedResults([
+      findOutcomeEventResults([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [
@@ -114,7 +114,7 @@ describe('findAppointmentConfirmedResults', () => {
 
   it('ignores indicators for other optimization goals — bookings only', () => {
     expect(
-      findAppointmentConfirmedResults([
+      findOutcomeEventResults([
         { indicator: 'actions:landing_page_view', values: [{ value: '34' }] },
         { indicator: 'conversions:offsite_conversion.fb_pixel_lead', values: [{ value: '3' }] },
       ]),
@@ -122,11 +122,11 @@ describe('findAppointmentConfirmedResults', () => {
   })
 
   it('is null-safe: missing field, empty array, malformed entries', () => {
-    expect(findAppointmentConfirmedResults(undefined)).toBe(0)
-    expect(findAppointmentConfirmedResults([])).toBe(0)
-    expect(findAppointmentConfirmedResults([{}, { indicator: 'x' }, { values: [{}] }])).toBe(0)
+    expect(findOutcomeEventResults(undefined)).toBe(0)
+    expect(findOutcomeEventResults([])).toBe(0)
+    expect(findOutcomeEventResults([{}, { indicator: 'x' }, { values: [{}] }])).toBe(0)
     expect(
-      findAppointmentConfirmedResults([
+      findOutcomeEventResults([
         { indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed', values: [{ value: 'oops' }] },
       ]),
     ).toBe(0)
@@ -215,10 +215,10 @@ describe('normalizeOutcome — booking action alias precedence', () => {
   })
 })
 
-describe('findAppointmentConfirmedViewThrough', () => {
+describe('findOutcomeEventViewThrough', () => {
   it('reads the 1d_view per-window entry (the live all-view-through account shape)', () => {
     expect(
-      findAppointmentConfirmedViewThrough([
+      findOutcomeEventViewThrough([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [
@@ -232,7 +232,7 @@ describe('findAppointmentConfirmedViewThrough', () => {
 
   it('a click-only day has 0 view-throughs (window entries present, none 1d_view)', () => {
     expect(
-      findAppointmentConfirmedViewThrough([
+      findOutcomeEventViewThrough([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [
@@ -246,20 +246,20 @@ describe('findAppointmentConfirmedViewThrough', () => {
 
   it('returns null — unknown, not zero — when no per-window breakdown exists', () => {
     expect(
-      findAppointmentConfirmedViewThrough([
+      findOutcomeEventViewThrough([
         {
           indicator: 'conversions:offsite_conversion.fb_pixel_custom.AppointmentConfirmed',
           values: [{ value: '2', attribution_windows: ['default'] }],
         },
       ]),
     ).toBeNull()
-    expect(findAppointmentConfirmedViewThrough(undefined)).toBeNull()
-    expect(findAppointmentConfirmedViewThrough([])).toBeNull()
+    expect(findOutcomeEventViewThrough(undefined)).toBeNull()
+    expect(findOutcomeEventViewThrough([])).toBeNull()
   })
 
   it('ignores non-AppointmentConfirmed indicators', () => {
     expect(
-      findAppointmentConfirmedViewThrough([
+      findOutcomeEventViewThrough([
         { indicator: 'actions:landing_page_view', values: [{ value: '9', attribution_windows: ['1d_view'] }] },
       ]),
     ).toBeNull()

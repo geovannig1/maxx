@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ImageOff, Film } from 'lucide-react'
 import type { ReportCreative } from '@/lib/reporting/contracts'
+import { isSampleMediaPath } from '@/lib/reporting/sample-media'
 
 function safeUrl(value?: string | null) {
   if (!value) return null
@@ -12,11 +13,14 @@ function safeUrl(value?: string | null) {
   } catch { return null }
 }
 
+/** An image may also be a demo sample on the page's own origin (@/lib/reporting/sample-media). */
+const safeImageUrl = (value?: string | null) => value && isSampleMediaPath(value) ? value : safeUrl(value)
+
 export function CreativeAsset({ creative, name, compact = false, detailsLoading = false }: { creative: ReportCreative | null; name: string; compact?: boolean; detailsLoading?: boolean }) {
   const [failed, setFailed] = useState<string[]>([])
   const fail = (url: string) => setFailed(previous => previous.includes(url) ? previous : [...previous, url])
   const video = safeUrl(creative?.videoUrl)
-  const image = [safeUrl(creative?.imageUrl), safeUrl(creative?.thumbnailUrl)].find(url => url && !failed.includes(url))
+  const image = [safeImageUrl(creative?.imageUrl), safeImageUrl(creative?.thumbnailUrl)].find(url => url && !failed.includes(url))
   const playable = video && !failed.includes(video) && !compact
   return <figure className="min-w-0">
     <div className={`relative flex items-center justify-center overflow-hidden rounded-lg bg-[var(--bg-subtle)] ${compact ? 'h-14 w-20' : 'aspect-[16/10] w-full'}`}>

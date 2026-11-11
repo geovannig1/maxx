@@ -51,6 +51,9 @@ const ACUITY_SOURCE_JOIN = 'outcome_sources!outcomes_source_id_fkey!inner(kind)'
 // Terminal capi_send_error labels the sweep must never retry.
 /** Exported so monitoring reads the SAME terminal set the sweep skips — a second copy would drift. */
 export const CAPI_TERMINAL = new Set(['staff_created', 'expired', 'origin_unknown', 'no_id', 'missed-48h-window'])
+/** Stale close-out: rows per page and pages per run (bounded; the next run resumes). */
+const STALE_PAGE = 500
+const STALE_MAX_PAGES = 20
 
 function todayPlus(days: number): string {
   const d = new Date(nyToday() + 'T00:00:00Z')
@@ -137,10 +140,13 @@ export async function sweepUnsentCapi(supabase: SupabaseClient = getAdminClient(
 
   // Label everything unsent past the cutoff (incl. the pre-activation backfill on the first live run) —
   // sending those would risk double-counting against un-deduped browser copies; they are closed out.
+  // The select excludes EVERY terminal label, not only 'missed-48h-window': rows labelled staff_created,
+  // expired, origin_unknown or no_id would otherwise keep matching, fill a page that marks nothing and
+  // stop the loop with retryable rows still behind them. Marked rows drop out of the next page, so the
+  // loop pages without an offset. At most STALE_PAGE x STALE_MAX_PAGES rows per run, one page in memory
+  // at a time; anything left matches again on the next run.
   let markedMissed = 0
-  for (let guard = 0; guard < 20; guard++) {
-    // Marked rows must drop out of this select or unstable page ordering could early-break the loop:
-    // keep null-error rows and non-missed labels; 'missed-48h-window' rows no longer match.
+  for (let page = 0; page < STALE_MAX_PAGES; page++) {
     const { data: stale, error: staleErr } = await supabase
       .from('outcomes')
       .select(`id, conversion_send_error, ${ACUITY_SOURCE_JOIN}`)
@@ -148,12 +154,12 @@ export async function sweepUnsentCapi(supabase: SupabaseClient = getAdminClient(
       .is('conversion_sent_at', null)
       .neq('status', 'cancelled')
       .lt('occurred_at', cutoffIso)
-      .or('conversion_send_error.is.null,conversion_send_error.neq.missed-48h-window')
-      .limit(500)
+      .or(`conversion_send_error.is.null,conversion_send_error.not.in.(${[...CAPI_TERMINAL].join(',')})`)
+      .limit(STALE_PAGE)
     if (staleErr) throw new Error(`capi sweep stale query: ${staleErr.message}`)
-    const toMark = ((stale ?? []) as Array<{ id: string; conversion_send_error: string | null }>)
-      .filter((r) => !r.conversion_send_error || !CAPI_TERMINAL.has(r.conversion_send_error))
-      .map((r) => r.id)
+    const rows = (stale ?? []) as Array<{ id: string; conversion_send_error: string | null }>
+    // Defensive: the query already excludes terminal labels.
+    const toMark = rows.filter((r) => !r.conversion_send_error || !CAPI_TERMINAL.has(r.conversion_send_error)).map((r) => r.id)
     if (toMark.length === 0) break
     const { error: updErr } = await supabase
       .from('outcomes')
@@ -161,7 +167,7 @@ export async function sweepUnsentCapi(supabase: SupabaseClient = getAdminClient(
       .in('id', toMark)
     if (updErr) throw new Error(`capi sweep mark-missed: ${updErr.message}`)
     markedMissed += toMark.length
-    if (toMark.length < 500) break
+    if (rows.length < STALE_PAGE) break
   }
 
   return { mode, ran: true, sent, skipped, errors, markedMissed }

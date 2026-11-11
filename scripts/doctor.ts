@@ -12,6 +12,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { mergeEnv, runDoctor } from './lib/doctor-cli'
+import { listMigrationFiles, readAppliedVersions } from './lib/migration-ledger'
 
 async function main(): Promise<number> {
   const envFilePath = resolve(process.cwd(), process.env.MAXX_ENV_FILE || '.env.local')
@@ -31,6 +32,7 @@ async function main(): Promise<number> {
     stdout: (line) => console.log(line),
     stderr: (line) => console.error(line),
     colour: process.stdout.isTTY === true,
+    migrations: { list: () => listMigrationFiles(resolve(process.cwd(), 'supabase/migrations')), readApplied: readAppliedVersions },
   })
 }
 

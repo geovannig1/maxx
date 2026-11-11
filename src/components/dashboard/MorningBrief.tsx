@@ -154,7 +154,7 @@ export function MorningBrief() {
       ) : data?.meta_delivery.available ? (
         <div>
           <p style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
-            ${data.meta_delivery.spend.toFixed(2)} Meta spend yesterday
+            {formatMoney(data.meta_delivery.spend)} Meta spend yesterday
           </p>
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '5px' }}>
             {data.meta_delivery.modelled_results} Meta-modelled event{data.meta_delivery.modelled_results === 1 ? '' : 's'} · diagnostic delivery context only

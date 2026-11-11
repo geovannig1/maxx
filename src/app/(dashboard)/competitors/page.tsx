@@ -241,7 +241,7 @@ function RunningAdsPanel({ competitor }: { competitor: Competitor }) {
                 <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{ad.impression_range} impressions</span>
               )}
               {ad.spend_range && (
-                <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>${ad.spend_range} spent</span>
+                <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Spend range {ad.spend_range}</span>
               )}
             </div>
 

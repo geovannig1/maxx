@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { EXAMPLE_BUSINESS_PROFILE, type BusinessProfile } from '@/config/business-profile'
-import { promptBrandFacts, renderBrandFactsLine, renderPersonasLine, renderUnverifiedCaveat } from '@/lib/knowledge/brand-facts'
+import { BRAND_FACTS, promptBrandFacts, renderBrandFactsLine, renderPersonasLine, renderUnverifiedCaveat } from '@/lib/knowledge/brand-facts'
 import { MAXX_INSTRUCTIONS } from '@/mcp/instructions'
 import { buildCompetitorAdPrompt } from '@/lib/competitors/analyze-ad'
 import { COPY_SYSTEM_PROMPT } from '@/lib/creative/copy-tone'
@@ -40,6 +40,12 @@ describe('brand facts in prompts are neutral when the business is unconfigured',
   it('treats each field on its own: configured differentiators with example pricing show only the differentiators', () => {
     const partial = { ...EXAMPLE_BUSINESS_PROFILE, differentiators: ['same-day repairs'] }
     expect(renderBrandFactsLine(partial)).toBe('same-day repairs')
+  })
+
+  it('the exported BRAND_FACTS follow the same rule: no example fact when unconfigured', () => {
+    expect(JSON.stringify(BRAND_FACTS)).not.toMatch(EXAMPLE_WORDS)
+    expect(JSON.stringify(BRAND_FACTS)).not.toMatch(/Springfield|daylight photo studio/)
+    expect(BRAND_FACTS).toEqual(promptBrandFacts())
   })
 
   it('the default (unconfigured) prompts carry no example fact', () => {

@@ -3,26 +3,28 @@ import { OperationTimeoutError } from '@/lib/cron/time-budget'
 import type { getAdminClient } from '@/lib/supabase/admin'
 
 /**
- * Transient judge failures per feed item (migration 20261110120000). A timeout, a 429 or a provider
- * 5xx says nothing about the item, so the item is not stored and is judged again on a later run; this
+ * Transient judge failures per feed item (migration 20261110120000; `network` since
+ * 0004_secret_rotation_grace.sql). A timeout, a 429, a provider 5xx or a transport failure with no HTTP
+ * status (connection reset, DNS, closed socket) says nothing about the item, so the item is not stored and is judged again on a later run; this
  * table counts those failures so the retry is bounded. A row exists only while an item is waiting for
  * another attempt: storing the item, judged or not, removes it.
  */
 
 type Db = ReturnType<typeof getAdminClient>
 
-export type TransientAiFailureKind = 'timeout' | 'rate_limit' | 'server'
+export type TransientAiFailureKind = 'timeout' | 'rate_limit' | 'server' | 'network'
 
 const TABLE = 'expert_insight_judge_attempts'
 
 /**
  * The transient kind of an AI failure, or null when retrying cannot help. Only the gateway's own
- * classification counts (src/lib/ai/errors.ts) plus our own wait limit: a refusal, unusable output,
- * a client error, an auth error or an unclassified transport failure is terminal for the item.
+ * classification counts (src/lib/ai/errors.ts) plus our own wait limit: a refusal, unusable output, a
+ * client error (4xx), an auth error or an invalid response is terminal for the item. Retries stay
+ * bounded by SIGNALS_JUDGE_MAX_TRANSIENT_FAILURES whatever the kind.
  */
 export function transientAiFailureKind(error: unknown): TransientAiFailureKind | null {
   if (error instanceof AiTimeoutError || error instanceof OperationTimeoutError) return 'timeout'
-  if (error instanceof AiProviderError && (error.kind === 'rate_limit' || error.kind === 'server')) return error.kind
+  if (error instanceof AiProviderError && (error.kind === 'rate_limit' || error.kind === 'server' || error.kind === 'network')) return error.kind
   return null
 }
 

@@ -79,7 +79,7 @@ describe('executor: owner-initiated requests', () => {
         if (query.table === 'change_requests' && query.op === 'select') return { data: approvedChange(initiatedBy), error: null }
         if (query.table === 'change_requests' && query.op === 'update') return { data: [{ id: 'change-1' }], error: null }
         if (query.table === 'action_decisions') return { data: ownerReviewDecision, error: null }
-        if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, currency: 'USD' }, error: null }
+        if (query.table === 'ad_accounts') return { data: { account_id: 'act_12345', is_active: true, platform: 'meta', currency: 'USD' }, error: null }
         if (query.table === 'adsets') return { data: { id: 'local-adset-1' }, error: null }
         if (query.table === 'action_log' && query.op === 'insert') return { data: { id: 'claim-1' }, error: null }
         if (query.table === 'action_log' && query.op === 'update') return { data: [{ id: 'claim-1' }], error: null }

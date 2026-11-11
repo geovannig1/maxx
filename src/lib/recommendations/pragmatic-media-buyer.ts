@@ -68,7 +68,7 @@ function scaleCopy(p: {
   const upside = projectedRevenue != null && projectedRevenue > 0
     ? `If the observed ${roasText} attributed revenue ROAS holds, increasing account daily budget from ${fmt(p.currentBudget)} to ${fmt(p.proposedBudget)} could add ~${fmt(projectedRevenue)} in recorded collected value per day for an extra ${fmt(incrementalSpend)} in ad spend. Target is the ${rangeText}.`
     : `If efficiency holds, increasing account daily budget from ${fmt(p.currentBudget)} to ${fmt(p.proposedBudget)} may add recorded collected value. Target is the ${rangeText}.`
-  const downside = `Attributed association is not incremental proof. The next dollar may convert at a lower rate, especially if the audience saturates or frequency rises. If ROAS drops to 1x on the incremental spend, the ${fmt(incrementalSpend)} daily increase becomes a loss.`
+  const downside = `Attributed association is not incremental proof. The next unit of spend may convert at a lower rate, especially if the audience saturates or frequency rises. If ROAS drops to 1x on the incremental spend, the ${fmt(incrementalSpend)} daily increase becomes a loss.`
   const reason = `PRAGMATIC SCALE PROPOSAL — owner-reviewed change: account daily budget from ${fmt(p.currentBudget)} to ${fmt(p.proposedBudget)} (20% step, capped at ${fmt(PRAGMATIC_DAILY_BUDGET_CEILING)}). Recent exact paid cohort shows ${p.recentBookings} ${OW.one}(s), ${fmt(p.recentRevenue)} recorded collected value on ${fmt(p.recentSpend)} spend = ${roasText} attributed revenue ROAS${gapText}. Owner approval required; this is association evidence, not causal incrementality.`
   return { reason, upside, downside }
 }

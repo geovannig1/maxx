@@ -9,8 +9,9 @@
 #   1. grep the replay output for any ERROR line
 #   2. assert the objects the chain is supposed to have produced actually exist
 #
-# Usage: scripts/verify-replay.sh        (from the repo root)
-# Exit:  0 = replay clean AND every expected object present; non-zero otherwise.
+# Usage: scripts/verify-replay.sh                 (from the repo root)
+#        scripts/verify-replay.sh --check-target  (only run the target guards below; touches nothing)
+# Exit:  0 = replay clean AND every expected object present; non-zero otherwise. 2 = refused target.
 
 set -euo pipefail
 
@@ -22,6 +23,24 @@ case "$host" in
   127.0.0.1|localhost|::1) ;;
   *) echo "REFUSING: $host is not loopback. This script RESETS the database." >&2; exit 2 ;;
 esac
+
+# Same database. `db reset` acts on the stack supabase/config.toml names; the checks below read SB_DB_URL.
+# If they differ (another local Postgres, the shadow DB, a second Supabase project), the reset and the
+# verification look at different databases and a pass means nothing. On loopback the port is what
+# tells local stacks apart (each project's config.toml gives its own ports), so the ports must match.
+config_port="$(awk '/^\[/ { in_db = ($0 == "[db]") } in_db && /^port[[:space:]]*=/ { gsub(/[^0-9]/, ""); print; exit }' supabase/config.toml)"
+url_port="$(printf '%s' "$DB" | sed -nE 's#^[^:]+://[^@]*@[^:/?]+:([0-9]+).*#\1#p')"
+url_port="${url_port:-5432}"
+if [ -z "$config_port" ]; then
+  echo "REFUSING: no [db] port in supabase/config.toml, so the reset target cannot be matched to SB_DB_URL." >&2; exit 2
+fi
+if [ "$url_port" != "$config_port" ]; then
+  echo "REFUSING: SB_DB_URL uses port $url_port but supabase/config.toml resets the database on port $config_port." >&2
+  echo "          Point SB_DB_URL at the configured stack, or the checks would verify a database that was not reset." >&2
+  exit 2
+fi
+echo "   target: $host port $config_port (matches supabase/config.toml [db])"
+[ "${1:-}" = "--check-target" ] && exit 0
 
 echo "== replaying migrations from zero =="
 out="$(scripts/sb.sh db reset 2>&1)" || { echo "$out" | tail -30; echo "FAIL: db reset exited non-zero"; exit 1; }

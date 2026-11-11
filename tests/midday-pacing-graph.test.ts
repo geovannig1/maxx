@@ -13,7 +13,7 @@ vi.mock('@/lib/supabase/admin', () => ({
       const builder: Record<string, unknown> = {}
       for (const m of ['select', 'eq', 'or', 'order', 'limit']) builder[m] = () => builder
       builder.maybeSingle = async () => (table === 'ad_accounts'
-        ? { data: { id: 'db-account-1' }, error: null }
+        ? { data: { id: 'db-account-1', platform: 'meta' }, error: null }
         : { data: { completed_at: new Date().toISOString() }, error: null })
       return builder
     },

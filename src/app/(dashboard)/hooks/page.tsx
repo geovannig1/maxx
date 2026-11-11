@@ -458,7 +458,7 @@ export default function HooksPage() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                   <span>Link CTR {g.link_ctr != null ? (g.link_ctr * 100).toFixed(2) + '%' : '—'}</span>
                   <span>CPC {g.cpc != null ? formatMoney(g.cpc) : '—'}</span>
-                  <span>${g.spend.toFixed(0)} · {g.impressions.toLocaleString()} impr · {g.ads} ad{g.ads === 1 ? '' : 's'}</span>
+                  <span>{formatMoney(g.spend, { maximumFractionDigits: 0 })} · {g.impressions.toLocaleString()} impr · {g.ads} ad{g.ads === 1 ? '' : 's'}</span>
                   {g.avg_hook_strength != null && <span>vision {g.avg_hook_strength}/5</span>}
                   <span style={{ color: 'var(--text-tertiary)' }}>~{g.meta_bookings_estimate} Meta {OW.one} events (pixel est.)</span>
                 </div>

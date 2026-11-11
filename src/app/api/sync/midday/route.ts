@@ -6,7 +6,8 @@ import { detectStaleData, detectWriteModeTripwire } from '@/lib/monitoring/detec
 import { emitAlert } from '@/lib/monitoring/alerts'
 import { ownerOnly } from '@/lib/auth/require-owner'
 import { insertAlertsDeduped } from '@/lib/alerts/insert'
-import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
+import { requireCapability } from '@/lib/platforms/registry'
+import { adPlatformForAccount } from '@/lib/platforms/account-platform'
 import { checkCronAuthorization } from '@/lib/auth/cron-secret'
 import { enforceApiRateLimit } from '@/lib/security/api-rate-limit'
 import { apiErrorResponse } from '@/lib/security/api-error'
@@ -95,7 +96,7 @@ export async function GET(req: Request) {
     const cleanId = metaAccountId.replace('act_', '')
     const { data: account } = await db
       .from('ad_accounts')
-      .select('id')
+      .select('id, platform')
       .or(`account_id.eq.${metaAccountId},account_id.eq.act_${cleanId}`)
       .maybeSingle()
 
@@ -104,7 +105,9 @@ export async function GET(req: Request) {
     }
 
     const adAccountDbId = account.id as string
-    const pacing = requireCapability(getAdPlatform('meta'), 'pacing')
+    // The account's own platform; an unknown one throws and fails the run.
+    const platform = adPlatformForAccount(account)
+    const pacing = requireCapability(platform, 'pacing')
     const accountIdForApi = cleanId
 
     // Fetch today's spend via Meta Insights API (every page)
@@ -129,7 +132,7 @@ export async function GET(req: Request) {
       for (const c of await pacing.fetchActiveCampaignBudgets(accountIdForApi)) {
         if (c.id && c.daily_budget) {
           // Meta returns daily_budget in its own offset unit (currency-offset.ts)
-          budgetMap.set(c.id, getAdPlatform('meta').budgetUnits.fromMinor(parseFloat(c.daily_budget)))
+          budgetMap.set(c.id, platform.budgetUnits.fromMinor(parseFloat(c.daily_budget)))
         }
         if (c.id && c.name && !nameMap.has(c.id)) {
           nameMap.set(c.id, c.name)
@@ -147,7 +150,7 @@ export async function GET(req: Request) {
       for (const a of await pacing.fetchActiveAdSetBudgets(accountIdForApi)) {
         if (a.campaign_id && a.daily_budget) {
           // Meta returns daily_budget in its own offset unit (currency-offset.ts)
-          const dollars = getAdPlatform('meta').budgetUnits.fromMinor(parseFloat(a.daily_budget))
+          const dollars = platform.budgetUnits.fromMinor(parseFloat(a.daily_budget))
           abBudgetByCampaign.set(a.campaign_id, (abBudgetByCampaign.get(a.campaign_id) ?? 0) + dollars)
         }
       }
@@ -240,7 +243,7 @@ export async function GET(req: Request) {
           alert_type: 'spend_drop',
           severity: 'warning',
           title: 'Campaign has no spend today — possible delivery issue',
-          message: `${campaignName ?? campaignId} has $0 spend after ${hoursElapsed.toFixed(0)} hours. Expected ~${expectedPacingPct?.toFixed(0)}% of daily budget by now.`,
+          message: `${campaignName ?? campaignId} has no spend after ${hoursElapsed.toFixed(0)} hours. Expected ~${expectedPacingPct?.toFixed(0)}% of daily budget by now.`,
           metric_name: 'spend',
           metric_value: 0,
           threshold_value: null,

@@ -174,7 +174,7 @@ export function OverviewTrends({ data, savedId }: { data: ReportingData; savedId
   }, [])
   return <section aria-labelledby={`${id}-title`} id="overview-trends" className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
     <h2 id={`${id}-title`} className="text-lg font-semibold tracking-tight">Results over time</h2>
-    <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]">{data.context.timezone} · Aligned intervals; each chart has its own dollar scale.</p>
+    <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]">{data.context.timezone} · Aligned intervals; each chart has its own money scale.</p>
     <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--text-secondary)]" aria-label="Chart legend">
       <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 bg-[var(--text-secondary)]" aria-hidden="true" />Current · solid</span>
       <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 border border-[var(--text-secondary)]" style={{ background: 'repeating-linear-gradient(135deg, transparent, transparent 2px, var(--text-secondary) 2px, var(--text-secondary) 3px)' }} aria-hidden="true" />Prior · striped</span>

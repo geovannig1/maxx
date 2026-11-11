@@ -1,4 +1,4 @@
-import { createMetricClaim, type MetricClaim } from '@/lib/cockpit/contracts'
+import { createMetricClaim, reidentifyMetricClaim, type MetricClaim } from '@/lib/cockpit/contracts'
 import { reconcileMetaOutcomeHierarchy } from '@/lib/sync/insight-outcomes'
 import type { MetaInsightRow } from '@/types/meta-api'
 import type { MetaReport, ReportMetricMap, ReportBreakdown, ReportSeriesPoint, ReportingContext, ReportingRange } from './contracts'
@@ -24,10 +24,11 @@ const BREAKDOWN_METRICS = ['spend', 'impressions', 'reach', 'frequency', 'cpm', 
 export const META_DAILY_METRIC_KEYS = [...META_NATIVE_METRIC_DEFINITIONS.map(metric => metric.key), ...META_RATIO_METRIC_DEFINITIONS.map(([key]) => key)]
 export const CAMPAIGN_DAILY_INPUT_KEYS = ['bookings', 'appointment_value', 'bookings_click', 'bookings_view']
 
-/** A time-increment query is an independent observation even for a one-day report. */
+/** A time-increment query is an independent observation even for a one-day report. The claims were
+ *  validated when built; re-identifying validates only the ids (reidentifyMetricClaim). */
 export function dailyMetaMetrics(metrics: ReportMetricMap): ReportMetricMap {
   const ids = new Map(Object.values(metrics).flatMap(metric => [metric.current, metric.previous].flatMap(claim => claim ? [[claim.claimId, `${claim.claimId}:daily`] as const] : [])))
-  const claim = (value: MetricClaim) => createMetricClaim({ ...value, claimId: ids.get(value.claimId)!, inputClaimIds: value.inputClaimIds.map(id => ids.get(id) ?? id) })
+  const claim = (value: MetricClaim) => reidentifyMetricClaim(value, ids.get(value.claimId)!, value.inputClaimIds.map(id => ids.get(id) ?? id))
   return Object.fromEntries(Object.entries(metrics).map(([key, metric]) => [key, { ...metric, current: claim(metric.current), previous: metric.previous ? claim(metric.previous) : null }]))
 }
 

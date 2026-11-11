@@ -75,7 +75,7 @@ function PaidCreativeRow({ creative }: { creative: PaidCreativeEvidence }) {
         </p>
       </div>
       <p className="text-[11px] mt-1 leading-relaxed tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-        ${outcomes.spend.toFixed(2)} spend · {countLabel(outcomes.captured_touches, 'captured touch', 'captured touches')} ·{' '}
+        {formatMoney(outcomes.spend)} spend · {countLabel(outcomes.captured_touches, 'captured touch', 'captured touches')} ·{' '}
         {countLabel(outcomes.value_bearing_bookings, `value-bearing ${outcomeNoun({ plural: false })}`)} · {formatMoney(outcomes.booked_value)} booked value ·{' '}
         {countLabel(outcomes.zero_value_bookings, `zero-value ${outcomeNoun({ plural: false })}`)} · {countLabel(outcomes.canceled_links, 'canceled link')}
       </p>
@@ -164,9 +164,9 @@ function PaidAttributeDirection({ direction }: { direction: VisionPaidAttributeD
               {group.attribute}: {group.value}
             </p>
             <p className="text-[11px] mt-1 tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-              {countLabel(group.creative_count, 'creative')} · ${group.outcomes.spend.toFixed(2)} spend ·{' '}
+              {countLabel(group.creative_count, 'creative')} · {formatMoney(group.outcomes.spend)} spend ·{' '}
               {countLabel(group.outcomes.value_bearing_bookings, `value-bearing ${outcomeNoun({ plural: false })}`)} ·{' '}
-              ${group.outcomes.booked_value.toFixed(2)} booked value
+              {formatMoney(group.outcomes.booked_value)} booked value
             </p>
             {group.sparse && (
               <p className="text-[11px] mt-1" style={{ color: 'var(--text-tertiary)' }}>
@@ -278,7 +278,7 @@ export function OwnerDiagnosticsPanel({ diagnostics }: { diagnostics: OwnerDiagn
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{observation.ad_name}</p>
                         <p className="text-[11px] tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
-                          ${observation.metrics.spend.toFixed(2)} spend · {observation.metrics.impressions.toLocaleString()} impressions
+                          {formatMoney(observation.metrics.spend)} spend · {observation.metrics.impressions.toLocaleString()} impressions
                         </p>
                       </div>
                       <DeliverySubStatus evidence={observation.delivery_sub_status} />

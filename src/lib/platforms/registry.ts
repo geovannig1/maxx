@@ -6,8 +6,8 @@ import type { AdPlatform, AdPlatformCapability, AdPlatformId } from './types'
 // operations; it never imports a platform's modules. Registering a second platform means adding its
 // id to AdPlatformId and its implementation below; nothing in the core changes.
 //
-// Until ad accounts record which platform they belong to, every account is a Meta account, so core
-// callers ask for getAdPlatform('meta') explicitly rather than through an implicit default.
+// Core callers that act for an ad account resolve its platform from the account's `platform` column
+// through adPlatformForAccount (./account-platform), never by naming a platform here.
 
 const PLATFORMS: Readonly<Record<AdPlatformId, AdPlatform>> = {
   meta: metaAdPlatform,

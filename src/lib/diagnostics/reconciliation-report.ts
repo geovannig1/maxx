@@ -15,7 +15,8 @@ import {
   reconciliationVariancePct,
 } from '@/lib/diagnostics/reconcile'
 import { computeTrust } from '@/lib/trust/trust'
-import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
+import { requireCapability } from '@/lib/platforms/registry'
+import { adPlatformForAccount } from '@/lib/platforms/account-platform'
 import type { DatasetQualityResult } from '@/lib/platforms/types'
 
 // RECONCILIATION GATHERER — the body of /api/diagnostics/reconciliation, extracted so the MCP tools
@@ -57,7 +58,7 @@ export async function buildReconciliationReport({ from, to, adAccountId }: Recon
   const db = getAdminClient()
   const { data: account, error: accErr } = await db
     .from('ad_accounts')
-    .select('id, amount_spent, spend_cap, last_synced_at')
+    .select('id, amount_spent, spend_cap, last_synced_at, platform')
     .eq('id', adAccountId)
     .eq('is_active', true)
     .maybeSingle()
@@ -74,7 +75,7 @@ export async function buildReconciliationReport({ from, to, adAccountId }: Recon
     getGa4ConfirmationTelemetryBySource(from, to).catch(() => ({ available: false as const, paid: { bookings: 0, revenue: 0 }, organic: { bookings: 0, revenue: 0 }, metaPaid: { bookings: 0, revenue: 0 }, byChannel: [] })),
     getGa4ConfirmationTelemetryByCampaign(from, to).catch(() => ({ available: false as const, rows: [], totals: { confirmationEvents: 0, eventValue: 0 }, attributedShare: null })),
     computeUtmCoverage(account.id as string),
-    requireCapability(getAdPlatform('meta'), 'datasetDiagnostics').fetchQuality({ adAccountDbId: account.id as string }).catch(
+    Promise.resolve().then(() => requireCapability(adPlatformForAccount(account), 'datasetDiagnostics').fetchQuality({ adAccountDbId: account.id as string })).catch(
       (e): DatasetQualityResult => ({ available: false, reason: e instanceof Error ? e.message : 'dataset quality fetch failed', datasetId: null }),
     ),
   ])

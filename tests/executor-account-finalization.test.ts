@@ -36,7 +36,7 @@ function database(calls: Query[], options: { requestStillApproved?: boolean } = 
       }
     }
     if (query.table === 'ad_accounts' && query.op === 'select') {
-      return { data: { account_id: 'act_12345', is_active: true }, error: null }
+      return { data: { account_id: 'act_12345', is_active: true, platform: 'meta' }, error: null }
     }
     if (query.table === 'ads' && query.op === 'select') {
       return { data: { id: 'local-ad-1' }, error: null }

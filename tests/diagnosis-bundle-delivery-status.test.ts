@@ -20,7 +20,10 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/lib/supabase/admin', () => ({
   getAdminClient: () => ({
-    from: vi.fn(() => mocks.latestDeliveryQuery),
+    from: vi.fn((table: string) => table === 'ad_accounts'
+      // The active account's platform (ad_accounts.platform) serves the recommendations read.
+      ? { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { platform: 'meta' }, error: null }) }) }) }
+      : mocks.latestDeliveryQuery),
   }),
 }))
 

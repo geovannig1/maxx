@@ -9,8 +9,11 @@ import { resolveSendMode } from '@/lib/capi/acuity-capi'
 
 /**
  * The Acuity Scheduling example adapter (ADR-058), off unless ACUITY_USER_ID and ACUITY_API_KEY are
- * set. Its ingestion paths (webhook route, nightly reconcile, backfill script) are unchanged; this
- * object describes them to the core.
+ * set. Reached through the registry: the webhook route checks its configuration and signatures with
+ * validateConfig and verifyPush, and the daily sync runs the nightly reconcile and conversion sweep
+ * through reconcile. The route's ledger writer and the adapter's own conversion sender stay its own:
+ * the golden semantics (tests/golden) pin that sender's event, and the ledger rows carry Acuity's raw
+ * appointment, which the core's normalized-outcome writer does not.
  *
  * Conversions: Acuity's own Meta integration already sends Purchase and Schedule without event ids, so
  * mirroring either would double-count. Maxx sends only its historical `AppointmentConfirmed` with the

@@ -30,7 +30,8 @@ export const runtime = 'nodejs'
 //   0. a per-address, in-process limit (no database, no HMAC) so an unauthenticated flood is cheap;
 //   1. size bound, then the secret-free header checks (shape, ±5-minute timestamp) — these reveal
 //      nothing about whether the source exists;
-//   2. source lookup and HMAC verification. An unknown, disabled or secretless source is verified
+//   2. source lookup and HMAC verification, against the live secret and, during a rotation grace
+//      window, the secret it replaced. An unknown, disabled or secretless source is verified
 //      against a placeholder secret, and every failure at this step — including a wrong signature
 //      on a real source — returns the same 404, so neither the status nor the work done reveals
 //      whether a source id exists;
@@ -96,9 +97,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ sourceI
   } catch (error) {
     return apiErrorResponse(ROUTE, 'SOURCE_LOOKUP_FAILED', error, 503)
   }
-  const verified = verifyOutcomeWebhookSignature({
+  // Both the live secret and the replaced one (open rotation grace window, else a placeholder) are
+  // always checked, so the work done reveals neither whether the source exists nor whether a window is open.
+  const current = verifyOutcomeWebhookSignature({
     header, rawBody: body.rawBody, secret: source?.secret ?? PLACEHOLDER_SECRET,
   })
+  const previous = verifyOutcomeWebhookSignature({
+    header, rawBody: body.rawBody, secret: source?.previousSecret ?? PLACEHOLDER_SECRET,
+  })
+  const verified = current.ok ? current : previous.ok && source?.previousSecret ? previous : current
   if (!source || !verified.ok) return notFound()
 
   const limited = await enforceApiRateLimit({

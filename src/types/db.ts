@@ -76,6 +76,10 @@ export interface AdAccount {
   pixel_id: string | null
   instagram_account_id: string | null
   facebook_page_id: string | null
+  /** Registered ad-platform id (migration 0003); resolve it with adPlatformForAccount. */
+  platform: string
+  /** ISO 3166-1 alpha-2 country, or null (migration 0003). */
+  country: string | null
   is_active: boolean
   created_at: string
   updated_at: string

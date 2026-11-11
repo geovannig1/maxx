@@ -4,6 +4,7 @@
 import { createServer, request as proxyRequest, type IncomingMessage, type ServerResponse } from 'node:http'
 import { randomUUID } from 'node:crypto'
 import { fixtureCookie, fixtureUser } from './auth-fixture.mjs'
+import { forwardHmrUpgrades } from '../../scripts/demo/hmr-upgrade'
 import { preparedReportingReply } from '../../src/lib/reporting/prepared-response'
 import { REPORTING_PREPARED_TYPE } from '../../src/lib/reporting/prepared-contract'
 import { saveReportingReport, listSavedReportingReports, openSavedReportingReport } from '../../src/lib/reporting/saved-service'
@@ -13,6 +14,7 @@ import { resolveReportingRange } from '../../src/lib/reporting/range'
 import type { StoredReportingSnapshot } from '../../src/lib/reporting/snapshot-store'
 import type { ReportingSectionName } from '../../src/lib/reporting/contracts'
 import { SavedReportError } from '../../src/lib/reporting/saved-contract'
+import { compactReportingPacket } from '../../src/lib/reporting/packet-format'
 
 async function main() {
 const origin = 'http://127.0.0.1:3150'
@@ -113,7 +115,7 @@ const server = createServer((request, response) => { void (async () => {
     }
     if (method === 'POST') await publish(range.from, range.to)
     const saved = await sourceSnapshot(source, range.from, range.to)
-    if (scenario === 'fallback') return json(response, saved.snapshot.packet)
+    if (scenario === 'fallback') return json(response, saved.storedPacket ?? compactReportingPacket(saved.snapshot.packet))
     // Ordinary source scope has no selected daily-detail projection. A frozen
     // ad drill must consume this inventory without requesting a new detail scope.
     if (url.searchParams.get('details')) return json(response, { error: 'Optional detail is outside this fictional source scenario.' }, 503)
@@ -129,21 +131,8 @@ const server = createServer((request, response) => { void (async () => {
   json(response, { error: error instanceof SavedReportError ? error.message : 'The fictional saved-report request could not complete.' }, status)
 }) })
 
-server.on('upgrade', (request, socket, head) => {
-  if (new URL(request.url ?? '/', origin).pathname !== '/_next/webpack-hmr') { socket.destroy(); return }
-  const upstream = proxyRequest({ hostname: '127.0.0.1', port: 3147, path: request.url, method: 'GET',
-    headers: { ...request.headers, host: '127.0.0.1:3147' } })
-  upstream.on('upgrade', (response, upstreamSocket, upstreamHead) => {
-    const headers = response.rawHeaders.reduce((text, value, i, all) => i % 2 === 0 ? `${text}${value}: ${all[i + 1]}\r\n` : text, '')
-    socket.write(`HTTP/1.1 101 Switching Protocols\r\n${headers}\r\n`)
-    if (head.length) upstreamSocket.write(head)
-    if (upstreamHead.length) socket.write(upstreamHead)
-    upstreamSocket.on('error', () => socket.destroy()); socket.on('error', () => upstreamSocket.destroy())
-    socket.on('close', () => upstreamSocket.destroy()); upstreamSocket.pipe(socket); socket.pipe(upstreamSocket)
-  })
-  upstream.on('response', () => { upstream.destroy(); socket.destroy() })
-  upstream.on('error', () => socket.destroy()); upstream.end()
-})
+// Turbopack's HMR socket is /_next/hmr; dropping it leaves the page rendered but never hydrated.
+forwardHmrUpgrades(server, { appPort: 3147, host: '127.0.0.1:3147' })
 
 await publish('2026-09-02', '2026-09-04')
 server.listen(3150, '127.0.0.1', () => console.log(`Fictional saved-report preview ${origin}/preview · run ${randomUUID()}`))

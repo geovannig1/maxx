@@ -360,7 +360,7 @@ export default function CampaignsPage() {
               <CampaignStatusBadge status={selected.status} />
               {selected.daily_budget !== null ? (
                 <Badge variant="outline" className="text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
-                  ${selected.daily_budget.toFixed(0)}/day budget
+                  {formatMoney(selected.daily_budget, { maximumFractionDigits: 0 })}/day budget
                 </Badge>
               ) : (
                 <Badge variant="outline" className="text-xs" style={{ borderColor: 'var(--border)', color: 'var(--text-tertiary)' }}>

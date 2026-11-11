@@ -195,8 +195,8 @@ demo mode is refused in production and on Vercel.
 - The MCP server reads `.env.local` directly; treat any MCP client you connect as having the
   service-role key.
 - Rotate on any suspicion: Meta token and app secret, Supabase service-role and anon keys,
-  `CRON_SECRET`, `PAID_TOUCH_TOKEN_SECRET`, webhook source secrets (no grace period: the old secret
-  stops at once), Acuity API key, GA4 service-account key, model keys, email credentials, Sentry
+  `CRON_SECRET`, `PAID_TOUCH_TOKEN_SECRET`, webhook source secrets (on a suspected leak, rotate with
+  no grace period so the old secret stops at once), Acuity API key, GA4 service-account key, model keys, email credentials, Sentry
   tokens. Where and how, secret by secret: [operations.md](operations.md#rotating-secrets).
 
 ## Inbound data is untrusted
@@ -239,8 +239,8 @@ uploaded to Sentry, and deleted from the build.
 
 - **Paid-touch tokens are claims.** The public capture endpoint refuses an ad id that is not a synced
   ad of the account, but otherwise signs whatever Meta ids the page sends; linking verifies the
-  signature, the stored hash and time order. A visitor who books a real appointment can therefore steer the attribution of
-  their own booking. Treat per-ad paid-touch attribution as association, which the product already
+  signature, the stored hash and time order. A visitor who completes a real outcome (an order, a lead, a booking) can therefore steer the
+  attribution of their own outcome. Treat per-ad paid-touch attribution as association, which the product already
   does, and keep `ACUITY_CAPI_SEND` off until you are comfortable with the fbclid fallback.
 - **Rate limiting is per client address plus a global cap.** Behind a proxy you control, set
   `PAID_TOUCH_TRUSTED_PROXY_HOPS`; without any forwarding header every visitor shares one bucket,

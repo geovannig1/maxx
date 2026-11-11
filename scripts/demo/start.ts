@@ -1,13 +1,13 @@
 /**
  * `npm run demo`: the full product on sample data, with no accounts and no secrets.
  *
- *   npm run demo                 # http://127.0.0.1:3000 (uses ports 3000 to 3003)
- *   npm run demo -- --port 4000  # another port (the app, sample backend and sample media use the next three)
+ *   npm run demo                 # http://127.0.0.1:3000 (uses ports 3000 to 3002)
+ *   npm run demo -- --port 4000  # another port (the app and the sample backend use the next two)
  *
- * Loopback servers on four ports: a sample backend (Supabase Auth + REST over an in-memory PGlite with
- * the shipped schema and a fictional seed), the app (`next dev` with MAXX_DEMO=1, Meta off, AI off), a
- * sample-media server for the creatives' image, and a gateway that signs you in as the fictional owner
- * and serves sample reports. A busy port stops it before anything starts (./ports.ts). Every variable the
+ * Loopback servers on three ports: a sample backend (Supabase Auth + REST over an in-memory PGlite with
+ * the shipped schema and a fictional seed), the app (`next dev` with MAXX_DEMO=1, Meta off, AI off), and
+ * a gateway that signs you in as the fictional owner and serves sample reports and the sample creatives'
+ * images. A busy port stops it before anything starts (./ports.ts). Every variable the
  * schema knows is set explicitly, so a real .env.local in the clone is never read by the demo app.
  * MAXX_DEMO=1 is refused in production and on Vercel. Ctrl-C stops them all.
  */
@@ -16,7 +16,7 @@ import type { Server } from 'node:http'
 import { ENV_VARS } from '../../src/config/env'
 import { DEMO_USER, demoSessionCookie, startBackend } from './backend'
 import { startGateway } from './gateway'
-import { startSampleMedia } from './media'
+import { sampleImageFor } from './media'
 import { DEMO_META_ACCOUNT, createSampleDb } from './sample-db'
 import { demoCalendar, type DemoCalendar } from './sample/demo-account'
 import { assertDemoPortsFree, demoPorts } from './ports'
@@ -25,8 +25,8 @@ export interface DemoHandle {
   url: string
   /** The day the sample data is anchored to, and its default report range. */
   calendar: DemoCalendar
-  /** The generated creative image of the first sample ad, or null without openssl. */
-  sampleImageUrl: string | null
+  /** The generated creative image of the first sample ad, on the gateway's origin. */
+  sampleImageUrl: string
   stop: () => Promise<void>
 }
 
@@ -58,7 +58,7 @@ export function demoAppEnv(base: NodeJS.ProcessEnv, backendUrl: string, gatewayU
 
 export async function startDemo(port = 3000, log: (line: string) => void = console.log): Promise<DemoHandle> {
   await assertDemoPortsFree(port)
-  const { app: appPort, backend: backendPort, media: mediaPort } = demoPorts(port)
+  const { app: appPort, backend: backendPort } = demoPorts(port)
   const calendar = demoCalendar()
   log('Maxx demo: building the sample database (shipped schema + fictional seed)…')
   const db = await createSampleDb(calendar)
@@ -68,10 +68,7 @@ export async function startDemo(port = 3000, log: (line: string) => void = conso
   const app: ChildProcess = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'dev', '--hostname', '127.0.0.1', '--port', String(appPort)], {
     stdio: ['ignore', 'inherit', 'inherit'], env: demoAppEnv(process.env, backendUrl, url),
   })
-  const media = await startSampleMedia(mediaPort, log)
-  const gateway = await startGateway({
-    port, appPort, sessionCookie: demoSessionCookie(backendUrl), calendar, imageFor: media?.imageFor,
-  })
+  const gateway = await startGateway({ port, appPort, sessionCookie: demoSessionCookie(backendUrl), calendar })
   const close = (server: Server) => new Promise<void>((done) => server.close(() => done()))
   let stopped = false
   const stop = async () => {
@@ -79,11 +76,11 @@ export async function startDemo(port = 3000, log: (line: string) => void = conso
     stopped = true
     const exited = new Promise<void>((done) => { if (app.exitCode !== null) done(); else app.once('exit', () => done()) })
     app.kill('SIGTERM')
-    await Promise.all([exited, close(gateway), close(backend), media?.stop()])
+    await Promise.all([exited, close(gateway), close(backend)])
     await db.close()
   }
   log(`Maxx demo on sample data: ${url}  (no accounts, no secrets; Ctrl-C to stop)`)
-  return { url, calendar, sampleImageUrl: media?.imageFor(0) ?? null, stop }
+  return { url, calendar, sampleImageUrl: `${url}${sampleImageFor(0)}`, stop }
 }
 
 function parsePort(argv: string[]): number {

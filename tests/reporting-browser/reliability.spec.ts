@@ -1,6 +1,7 @@
 import { expect, test, type Page, type Route } from '@playwright/test'
 import { fixtureCookie } from './auth-fixture.mjs'
 import { fixturePacket } from '../../scripts/demo/sample/reports'
+import { openReportingTrust, sourceRow } from './source-strip'
 
 type Mode = 'ok' | 'failed' | 'denied' | 'hang'
 async function sourceControl(page: Page) {
@@ -29,13 +30,14 @@ test.beforeEach(async ({ context }) => {
 test('refresh retains matching results until replacement, with explicit refresh failure and original age', async ({ page }) => {
   const control = await sourceControl(page)
   await page.goto('/dashboard?from=2026-09-02&to=2026-09-04')
+  await openReportingTrust(page)
   const advertising = page.getByRole('region', { name: 'Advertising results' })
   await expect(advertising).toContainText('$120.00')
   control.modes.meta = 'hang'
   await page.getByRole('button', { name: 'Refresh Meta advertising' }).click()
   await expect.poll(() => control.held.length).toBe(1)
   await expect(advertising).toContainText('$120.00')
-  const source = page.getByLabel('Reporting source status').locator('> div').filter({ hasText: 'Meta advertising' })
+  const source = sourceRow(page, 'Meta advertising')
   await expect(source).toContainText('Refreshing')
   await control.held[0].fulfill({ status: 503, json: { error: 'Controlled refresh failure' } })
   await expect(source).toContainText('Refresh failed')
@@ -66,10 +68,11 @@ test('a hung source reaches a bounded error while healthy business results remai
   const control = await sourceControl(page)
   control.modes.meta = 'hang'
   await page.goto('/dashboard?from=2026-09-02&to=2026-09-04')
+  await openReportingTrust(page)
   await expect(page.getByRole('region', { name: 'Business results' })).toContainText('$500.00')
   await expect.poll(() => control.held.length).toBe(1)
   await page.clock.fastForward(120_001)
-  const source = page.getByLabel('Reporting source status').locator('> div').filter({ hasText: 'Meta advertising' })
+  const source = sourceRow(page, 'Meta advertising')
   await expect(source).toContainText('Unavailable')
   await page.getByLabel('Meta advertising source details').click()
   await expect(source).toContainText('took too long')
@@ -81,6 +84,7 @@ test('a hung source reaches a bounded error while healthy business results remai
 test('lost session clears every cached source and offers sign-in without sending an email', async ({ page }) => {
   const control = await sourceControl(page)
   await page.goto('/dashboard?from=2026-09-02&to=2026-09-04')
+  await openReportingTrust(page)
   await expect(page.getByRole('region', { name: 'Business results' })).toContainText('$500.00')
   control.modes.meta = 'denied'
   await page.getByRole('button', { name: 'Refresh Meta advertising' }).click()

@@ -4,7 +4,8 @@ import { nyDaysAgo, nyEndOfDayMs, nyToday } from '@/lib/utils/date-utils'
 import { deriveFirstDelivery, type DeliveryDay } from '@/lib/insights/first-delivery'
 import { classifyOptimizationSignal, type OptimizationSignalResult } from '@/lib/diagnostics/optimization-signal'
 import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
-import type { DatasetStatsResult } from '@/lib/platforms/types'
+import { loadAccountPlatform } from '@/lib/platforms/account-platform'
+import type { AdPlatform, DatasetStatsResult } from '@/lib/platforms/types'
 import { getGa4ConfirmationTelemetryBySource } from '@/lib/ga4/client'
 import { getMetricStatus, type MetricKey, type MetricStatus } from '@/lib/targets/target-ranges'
 import { deriveExitedLearning } from '@/lib/recommendations/trend'
@@ -463,6 +464,8 @@ export function buildLaunchPerformance(input: LaunchPerformanceBuildInput): Laun
     // GA confirmation telemetry is event-specific. It may only supply the rate when the OBSERVED
     // configured event is the same named event; it is never substituted for another event.
     const gaRate = primaryEvent === GA_CONFIRMATION_EVENT ? input.conversionEventPerWeek : undefined
+    // Pure builder with no account in hand: the event-name lookup is Meta's (the event volume is Meta
+    // dataset stats), so it names Meta. The loader reads the volume through the account's platform.
     const pixelRate = eventVolume.available && primaryEvent ? requireCapability(getAdPlatform('meta'), 'datasetDiagnostics').eventPerWeek(eventVolume, primaryEvent) : null
     const rate = gaRate ?? pixelRate
     const source: 'ga4' | 'pixel_stats' | null = gaRate != null ? 'ga4' : pixelRate != null ? 'pixel_stats' : null
@@ -869,9 +872,9 @@ async function fetchAudienceInventory(
   }
 }
 
-async function fetchRequiredDatasetStats(adAccountDbId: string): Promise<DatasetStatsResult> {
+async function fetchRequiredDatasetStats(platformOf: () => Promise<AdPlatform>, adAccountDbId: string): Promise<DatasetStatsResult> {
   try {
-    return await requireCapability(getAdPlatform('meta'), 'datasetDiagnostics').fetchEventVolume({ adAccountDbId })
+    return await requireCapability(await platformOf(), 'datasetDiagnostics').fetchEventVolume({ adAccountDbId })
   } catch {
     throw new LaunchPerformanceUnavailableError('dataset_stats')
   }
@@ -946,13 +949,17 @@ export async function diagnoseLaunchPerformance(opts?: {
       } catch { /* optional for legacy pure/dashboard callers; unresolved ownership freezes */ }
     }
     if (!accountId) return buildLaunchPerformance(empty)
+    // The account's own platform, read once when a live platform call needs it.
+    const ownerAccountId = accountId
+    let platformRead: Promise<AdPlatform> | null = null
+    const platformOf = () => (platformRead ??= loadAccountPlatform(db, ownerAccountId))
 
     // Active ad sets (delivery truth) for this account. Delivery sub-status is optional enrichment:
     // older production schemas can lack those columns, but that must not block the core diagnosis.
     const adsetRows = await fetchActiveAdsets(db, accountId)
     if (adsetRows.length === 0) {
       const eventVolume = includeLiveEnrichment
-        ? await fetchRequiredDatasetStats(accountId)
+        ? await fetchRequiredDatasetStats(platformOf, accountId)
         : liveEnrichmentDisabled()
       return buildLaunchPerformance({ ...empty, eventVolume })
     }
@@ -986,7 +993,7 @@ export async function diagnoseLaunchPerformance(opts?: {
         adsetRows.map(async (a) => {
           if (!a.adset_id) return
           try {
-            const est = await requireCapability(getAdPlatform('meta'), 'deliveryEstimate').fetch(a.adset_id)
+            const est = await requireCapability(await platformOf(), 'deliveryEstimate').fetch(a.adset_id)
             if (est.available) mauByAdsetId.set(a.adset_id, { lower: est.mau_lower, upper: est.mau_upper })
           } catch { /* optional signal — never blocks the diagnosis */ }
         }),
@@ -1064,7 +1071,7 @@ export async function diagnoseLaunchPerformance(opts?: {
         : controls[0] ?? 'unknown'
 
     const eventVolume = includeLiveEnrichment
-      ? await fetchRequiredDatasetStats(accountId)
+      ? await fetchRequiredDatasetStats(platformOf, accountId)
       : liveEnrichmentDisabled()
     // Authoritative conversion-event rate from GA4 (reconciles with the outcome ledger): 28 CLOSED days ÷ 4 weeks.
     // (Ending at nyToday() made a 29-day span incl. a partial day — diluted the /week rate ~3.5% low,

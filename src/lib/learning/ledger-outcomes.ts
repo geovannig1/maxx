@@ -55,7 +55,7 @@ export function scoreSetupDecisionWindow(i: SetupScoreInput): SetupScore {
     : `GA4 campaign-tag coverage ${(i.attributionCoverage * 100).toFixed(0)}%${i.attributionCoverage < MIN_ATTRIBUTED_SHARE ? ` < ${MIN_ATTRIBUTED_SHARE * 100}%` : ''}`
   return {
     outcome: 'inconclusive',
-    note: `[diagnostic only — Meta-modelled bookings and CPA; ${coverage}. No settled-cost reconciliation or causal counterfactual exists, so this cannot establish incremental contribution.] Post-action ${EVAL_WINDOW_DAYS}d: ${cpaStr} across ${i.postBookings} modelled booking(s).`,
+    note: `[diagnostic only — Meta-modelled conversions and CPA; ${coverage}. No settled-cost reconciliation or causal counterfactual exists, so this cannot establish incremental contribution.] Post-action ${EVAL_WINDOW_DAYS}d: ${cpaStr} across ${i.postBookings} modelled conversion(s).`,
     confidence: 'low',
     estimateOnly: true,
     dataSufficient,
@@ -230,7 +230,7 @@ export async function evaluateLedgerOutcomes(
         entity_level: row.entity_type,
         meta_entity_id: ref?.metaEntityId ?? null,
         recommendation: `${row.setting_name}: ${value}`,
-        hypothesis: row.reason ?? 'This setup decision may improve causal incremental contribution dollars.',
+        hypothesis: row.reason ?? 'This setup decision may improve causal incremental contribution.',
         metric_name: 'meta_modelled_cpa_diagnostic',
         baseline_value: null,
         observed_value: postCpa,

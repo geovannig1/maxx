@@ -95,8 +95,8 @@ function hypothesisFor(flagType: string): string {
     case 'loser': return 'Required counterfactual: the owner-confirmed intervention causes greater incremental contribution than the governed comparison.'
     case 'creative_refresh': return 'Required counterfactual: the creative replacement causes greater incremental contribution than the governed comparison; CTR is diagnostic only.'
     case 'winner': return 'Required counterfactual: unchanged delivery creates positive incremental contribution over the governed comparison.'
-    case 'scale_candidate': return 'Required counterfactual: the owner-confirmed spend change causes more absolute incremental contribution dollars than the governed comparison.'
-    default: return 'Required counterfactual: the owner-confirmed intervention causes more incremental contribution dollars than the governed comparison.'
+    case 'scale_candidate': return 'Required counterfactual: the owner-confirmed spend change causes more absolute incremental contribution than the governed comparison.'
+    default: return 'Required counterfactual: the owner-confirmed intervention causes more incremental contribution than the governed comparison.'
   }
 }
 
@@ -132,7 +132,7 @@ function scoreFlagBase(
     if (postSpend >= MIN_POST_SPEND_DECISIVE) {
       return { outcome: 'inconclusive', note: `Kept spending ${formatMoney(postSpend)} after the flag — likely NOT implemented; cannot attribute an outcome to the recommendation.`, confidence: 'low' }
     }
-    return { outcome: 'inconclusive', note: `Thin post-period data (${formatMoney(postSpend)}, ${postBookings} bookings) — not enough to judge.`, confidence: 'low' }
+    return { outcome: 'inconclusive', note: `Thin post-period data (${formatMoney(postSpend)}, ${postBookings} modelled conversions) — not enough to judge.`, confidence: 'low' }
   }
 
   // winner / scale_candidate — we recommended keeping/scaling. Need real post-period volume to judge.
@@ -140,7 +140,7 @@ function scoreFlagBase(
     return { outcome: 'inconclusive', note: `Too little post-period spend (${formatMoney(postSpend)} < ${formatMoneyAmount(MIN_POST_SPEND_DECISIVE)}) to judge whether keeping/scaling held.`, confidence: 'low' }
   }
   if (postBookings < MIN_POST_BOOKINGS_DECISIVE) {
-    return { outcome: 'inconclusive', note: `Only ${postBookings} post-period booking(s) on ${formatMoney(postSpend)} — below the ${MIN_POST_BOOKINGS_DECISIVE}-booking bar to call it worked or failed.`, confidence: 'low' }
+    return { outcome: 'inconclusive', note: `Only ${postBookings} post-period modelled conversion(s) on ${formatMoney(postSpend)} — below the ${MIN_POST_BOOKINGS_DECISIVE}-conversion bar to call it worked or failed.`, confidence: 'low' }
   }
   // One-bad-day guard: don't let a single anomalous day carry a decisive verdict.
   if (!enoughActiveDays) {
@@ -153,10 +153,10 @@ function scoreFlagBase(
   if (postCpa !== null && ceiling !== null) {
     const decisive = decisiveCpaVsTarget(postSpend, postBookings, ceiling)
     if (decisive === 'better') {
-      return { outcome: 'worked', note: `The 90% count-uncertainty interval stays below the ${formatMoneyAmount(ceiling)} CPA ceiling (${cpaStr} point estimate; ${postBookings} bookings).`, confidence }
+      return { outcome: 'worked', note: `The 90% count-uncertainty interval stays below the ${formatMoneyAmount(ceiling)} CPA ceiling (${cpaStr} point estimate; ${postBookings} modelled conversions).`, confidence }
     }
     if (decisive === 'worse') {
-      return { outcome: 'failed', note: `The 90% count-uncertainty interval stays above the ${formatMoneyAmount(ceiling)} CPA ceiling (${cpaStr} point estimate; ${postBookings} bookings).`, confidence }
+      return { outcome: 'failed', note: `The 90% count-uncertainty interval stays above the ${formatMoneyAmount(ceiling)} CPA ceiling (${cpaStr} point estimate; ${postBookings} modelled conversions).`, confidence }
     }
     return { outcome: 'inconclusive', note: `${cpaStr} is a point estimate whose 90% count-uncertainty interval crosses the ${formatMoneyAmount(ceiling)} CPA ceiling; not decisive.`, confidence }
   }
@@ -181,7 +181,7 @@ export function scoreFlag(
     : `GA4 campaign-tag coverage ${(attributionCoverage * 100).toFixed(0)}%${attributionCoverage < MIN_ATTRIBUTED_SHARE ? ` < ${MIN_ATTRIBUTED_SHARE * 100}%` : ''}`
   return {
     outcome: 'inconclusive',
-    note: `[diagnostic only — Meta-modelled bookings and CPA; ${coverage}. This evidence has no settled-cost reconciliation or causal counterfactual and cannot establish incremental contribution.] ${base.note}`,
+    note: `[diagnostic only — Meta-modelled conversions and CPA; ${coverage}. This evidence has no settled-cost reconciliation or causal counterfactual and cannot establish incremental contribution.] ${base.note}`,
     confidence: 'low',
     estimateOnly: true,
   }

@@ -97,6 +97,11 @@ export const formats = {
   trueOnly: text('true to enable; anything else is off', z.string()),
   positiveNumber: refine('a positive number', (v) => Number.isFinite(Number(v)) && Number(v) > 0),
   positiveInteger: refine('a positive whole number', (v) => /^[1-9]\d{0,8}$/.test(v)),
+  isoInstant: text('an ISO 8601 date and time with a zone, such as 2026-11-10T18:00:00Z', z.iso.datetime({ offset: true })),
+  // Checked against the clock when the configuration is validated (startup, doctor, /setup): a later end
+  // is off today but would open by itself once within 7 days, so it is reported rather than ignored.
+  graceWindowEnd: refine('an ISO 8601 date and time with a zone, at most 7 days ahead', (v) =>
+    z.iso.datetime({ offset: true }).safeParse(v).success && Date.parse(v) - Date.now() <= 7 * 86_400_000),
   positiveDecimal: refine('a positive decimal amount such as 3000 or 12.5', (v) => /^\d+(\.\d+)?$/.test(v) && Number(v) > 0),
   hops: refine('an integer from 0 to 5', (v) => /^[0-5]$/.test(v)),
   date: text('a date YYYY-MM-DD', z.string().regex(/^\d{4}-\d{2}-\d{2}$/)),

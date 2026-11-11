@@ -34,7 +34,7 @@ const token = (id: string, key = TOKEN_SECRET) => issuePaidTouchToken(id, key)
 let db: PGlite
 let source: string
 
-async function insertTouch(account: string, touch: string, tokenId: string, observedAt: string) {
+async function insertTouch(account: string, touch: string, tokenId: string, observedAt: string, key = TOKEN_SECRET) {
   await db.query(`
     INSERT INTO public.paid_touch_observations(
       id,ad_account_id,browser_capture_id,observed_at,source,fbclid,meta_campaign_id,meta_adset_id,meta_ad_id,
@@ -46,7 +46,7 @@ async function insertTouch(account: string, touch: string, tokenId: string, obse
     INSERT INTO public.paid_attribution_tokens(
       id,ad_account_id,touch_id,first_touch_id,last_touch_id,token_hash,policy_version,issued_at,expires_at)
     VALUES ($1,$2,$3,$3,$3,$4,1,$5,($5::timestamptz + interval '90 days'))`,
-  [tokenId, account, touch, hashPaidTouchToken(token(tokenId)), observedAt])
+  [tokenId, account, touch, hashPaidTouchToken(token(tokenId, key)), observedAt])
 }
 
 const delivery = (externalId: string, over: Record<string, unknown> = {}) => JSON.stringify({
@@ -188,11 +188,78 @@ describe('webhook paid-touch linking on the shipped schema', () => {
     expect(small.rows).toEqual([{ v: '120.50' }])
   })
 
+  it('after a secret rotation, a token signed with the replaced secret links only inside the grace window', async () => {
+    const replaced = 'f'.repeat(64)
+    // The token was minted before the switch, so the database holds the hash of the old-signed token.
+    const [touch, tokenId] = [fixtureUuid(9714), fixtureUuid(9724)]
+    await insertTouch(ACCOUNT, touch, tokenId, '2026-07-20T16:30:00Z', replaced)
+    // Control: without the grace window the replaced secret verifies nothing.
+    expect((await post(withToken('ORDER-NOGRACE', token(tokenId, replaced)))).body.paid_touch).toBe('rejected')
+    vi.stubEnv('PAID_TOUCH_TOKEN_PREVIOUS_SECRET', replaced)
+    vi.stubEnv('PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL', new Date(Date.now() + 3_600_000).toISOString())
+    expect((await post(withToken('ORDER-GRACE', token(tokenId, replaced)))).body.paid_touch).toBe('linked')
+    vi.stubEnv('PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL', new Date(Date.now() - 1_000).toISOString())
+    expect((await post(withToken('ORDER-LATE', token(tokenId, replaced), { occurred_at: '2026-07-20T19:00:00Z' }))).body.paid_touch).toBe('rejected')
+    expect(await links()).toEqual([{ external_id: 'ORDER-GRACE', token_id: tokenId }])
+  })
+
   it('without PAID_TOUCH_TOKEN_SECRET nothing links and the gap is recorded as not configured', async () => {
     vi.stubEnv('PAID_TOUCH_TOKEN_SECRET', '')
     expect((await post(withToken('ORDER-A', token(TOKEN_1)))).body.paid_touch).toBe('not_configured')
     expect(await links()).toEqual([])
     expect((await evaluations())[0]).toMatchObject({ evaluation_status: 'not_configured', reason_code: 'linker_not_configured' })
+  })
+})
+
+describe('fbclid fallback for a tokenless delivery (same rule as the reference adapter)', () => {
+  // TOUCH_1 was observed 2026-07-20T16:00Z with fbclid `fbclid-<last 4 of its id>` and is identity complete.
+  const FBCLID_1 = `fbclid-${TOUCH_1.slice(-4)}`
+  const paidClick = (fbclid: string, over: Record<string, string> = {}) =>
+    ({ attribution: { fbclid, utm_source: 'facebook', utm_medium: 'paid_social', ...over } })
+
+  it('links a paid-social click id to its observed paid touch and completes the linker', async () => {
+    await activateSurfaces()
+    const res = await post(delivery('ORDER-F', paidClick(FBCLID_1)))
+    expect(res).toMatchObject({ status: 200, body: { ok: true, applied: true, paid_touch: 'linked' } })
+    expect(await links()).toEqual([{ external_id: 'ORDER-F', token_id: null }])
+    expect(await evaluations()).toEqual([
+      { external_id: 'ORDER-F', evaluation_status: 'linked', reason_code: null, paid_evidence_present: true },
+    ])
+    expect(await manifest(1)).toMatchObject({ linker_complete: true, eligible_outcomes: 1, evaluated_outcomes: 1, linked_outcomes: 1 })
+  })
+
+  it('fails closed on anything ambiguous: no link, the evidence stays unlinked and the linker incomplete', async () => {
+    const cases: Array<[string, Record<string, unknown>, string, boolean]> = [
+      // Paid-social click id with no observed touch.
+      ['ORDER-UNSEEN', paidClick('fbclid-never-seen'), 'no_paid_touch_token', true],
+      // The only touch with this click id happened after the outcome.
+      ['ORDER-BEFORE', { ...paidClick(FBCLID_1), occurred_at: '2026-07-20T15:00:00Z' }, 'no_paid_touch_token', true],
+      // The click id belongs to another account's touch.
+      ['ORDER-OTHER', paidClick(`fbclid-${TOUCH_OTHER.slice(-4)}`), 'no_paid_touch_token', true],
+      // A staff-entered or origin-unknown outcome is never linked to an ad click.
+      ['ORDER-STAFFF', { ...paidClick(FBCLID_1), origin: 'staff_or_manual' }, 'no_paid_touch_token', true],
+      ['ORDER-UNKNOWN', { ...paidClick(FBCLID_1), origin: 'unknown' }, 'no_paid_touch_token', true],
+      // No paid-social UTMs: a click id alone is not paid evidence, so there is no fallback.
+      ['ORDER-ORGANIC', { attribution: { fbclid: FBCLID_1, utm_source: 'facebook', utm_medium: 'social' } }, 'no_paid_evidence', false],
+    ]
+    for (const [externalId, over, reason, evidence] of cases) {
+      const res = await post(delivery(externalId, over))
+      expect(res, externalId).toMatchObject({ status: 200, body: { ok: true, applied: true, paid_touch: 'absent' } })
+      expect((await evaluations()).find((row) => row.external_id === externalId), externalId)
+        .toEqual({ external_id: externalId, evaluation_status: 'absent', reason_code: reason, paid_evidence_present: evidence })
+    }
+    // A token that fails verification is terminal: the click id beside it is not a second chance.
+    const forged = await post(delivery('ORDER-FORGEDF', {
+      attribution: { ...paidClick(FBCLID_1).attribution, paid_touch_token: token(TOKEN_1, 'f'.repeat(64)) },
+    }))
+    expect(forged.body.paid_touch).toBe('rejected')
+    expect(await links()).toEqual([])
+  })
+
+  it('without PAID_TOUCH_TOKEN_SECRET the fallback does not run either', async () => {
+    vi.stubEnv('PAID_TOUCH_TOKEN_SECRET', '')
+    expect((await post(delivery('ORDER-NC', paidClick(FBCLID_1)))).body.paid_touch).toBe('not_configured')
+    expect(await links()).toEqual([])
   })
 })
 

@@ -4,8 +4,8 @@ import { computeVideoMetrics } from '@/lib/creative/video-metrics'
 import {
   findActionValue,
   findActionValueOrNull,
-  findAppointmentConfirmedResults,
-  findAppointmentConfirmedViewThrough,
+  findOutcomeEventResults,
+  findOutcomeEventViewThrough,
   readBookingValue,
   readBookingValueViewThrough,
   requiredDeliveryNumber,
@@ -22,13 +22,13 @@ export {
   isCoverageBlockerCode,
   reconcileMetaOutcomeHierarchy,
   findActionValueOrNull,
-  readAppointmentConfirmedResult,
-  findAppointmentConfirmedResults,
-  findAppointmentConfirmedViewThrough,
+  readOutcomeEventResult,
+  findOutcomeEventResults,
+  findOutcomeEventViewThrough,
   readBookingValueViewThrough,
   readBookingValue,
 } from './insight-outcomes'
-export type { InsightLevel, MetaOutcomePlaneReadiness, AppointmentConfirmedResultRead } from './insight-outcomes'
+export type { InsightLevel, MetaOutcomePlaneReadiness, OutcomeEventResultRead } from './insight-outcomes'
 
 const CHUNK_SIZE = 500
 
@@ -177,9 +177,9 @@ export async function upsertInsights(
       )
       // AppointmentConfirmed bookings are ONLY the indicator-named Results default total. Named action
       // aliases remain diagnostic; the generic custom aggregate is never a booking fallback.
-      const bookings = findAppointmentConfirmedResults(r.results)
+      const bookings = findOutcomeEventResults(r.results)
       // View-through share of those bookings (1d_view per-window entries; null = breakdown unavailable).
-      const bookingsViewThrough = findAppointmentConfirmedViewThrough(r.results)
+      const bookingsViewThrough = findOutcomeEventViewThrough(r.results)
       const appointmentValueViewThroughRead = readBookingValueViewThrough(r.action_values, undefined, r.conversion_values)
       const appointmentValueViewThrough = appointmentValueViewThroughRead.value
       // Booking value, read through the SAME function the readiness gate reads through, so the stored

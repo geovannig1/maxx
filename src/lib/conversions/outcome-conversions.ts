@@ -3,8 +3,10 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { getOutcomeAdapter } from '@/lib/outcomes/registry'
 import type { OutcomeOrigin, OutcomeStatus, OutcomeType } from '@/lib/outcomes/model'
 import { decideConversionEvent } from './event-mapping'
-import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
-import type { CapiResponseVerdict } from '@/lib/platforms/types'
+import { requireCapability } from '@/lib/platforms/registry'
+import { adPlatformForAccount, type PlatformAccount } from '@/lib/platforms/account-platform'
+import type { CapiResponseVerdict, ConversionsDelivery } from '@/lib/platforms/types'
+import { phoneCallingCodeFor } from '@/lib/capi/phone'
 
 // Conversions for generic outcomes (ADR-058, the v1 release). A source whose adapter declares its own
 // conversion sender (the reference example keeps its byte-identical one) is skipped here; every other
@@ -22,8 +24,8 @@ import type { CapiResponseVerdict } from '@/lib/platforms/types'
 // The event payload, its window and the platform credentials are the platform's conversions capability.
 // Terminal skips are written to outcomes.conversion_send_error so the sweep stops retrying them.
 
-// The conversions transport and event are the Meta platform's.
-const metaConversions = () => requireCapability(getAdPlatform('meta'), 'conversions')
+// The conversions transport and event are those of the outcome's ad account platform
+// (ad_accounts.platform); the default phone calling code comes from the account's country.
 
 export type OutcomeSendMode = 'live' | 'test' | 'off'
 
@@ -33,15 +35,23 @@ export const OUTCOME_CONVERSION_TERMINAL: ReadonlySet<string> = new Set([
   'expired', 'no_event_source_url', 'no_user_data', 'missed-48h-window',
 ])
 
-export function resolveOutcomeSendMode(env: Record<string, string | undefined> = process.env): OutcomeSendMode {
-  const flag = (env.OUTCOME_CONVERSIONS_SEND ?? '').trim().toLowerCase()
+/** `test` needs the platform's test event code, so it is off without the platform's conversions
+ *  capability (`conversions` null): only `live` is decided by the flag alone. */
+export function resolveOutcomeSendMode(
+  env: Record<string, string | undefined> = process.env,
+  conversions: Pick<ConversionsDelivery, 'testEventCode'> | null = null,
+): OutcomeSendMode {
+  const flag = sendFlag(env)
   if (flag === 'true') return 'live'
-  if (flag === 'test') return metaConversions().testEventCode(env) ? 'test' : 'off'
+  if (flag === 'test') return conversions?.testEventCode(env) ? 'test' : 'off'
   return 'off'
 }
 
+const sendFlag = (env: Record<string, string | undefined>) => (env.OUTCOME_CONVERSIONS_SEND ?? '').trim().toLowerCase()
+
 export interface OutcomeConversionRow {
   id: string
+  ad_account_id: string
   source_id: string
   outcome_type: OutcomeType
   status: OutcomeStatus
@@ -62,7 +72,7 @@ export interface OutcomeConversionRow {
   conversion_event_id?: string | null
 }
 
-const ROW_COLUMNS = 'id, source_id, outcome_type, status, origin, origin_observed_at, occurred_at, gross_value, currency, '
+const ROW_COLUMNS = 'id, ad_account_id, source_id, outcome_type, status, origin, origin_observed_at, occurred_at, gross_value, currency, '
   + 'email, phone, first_name, last_name, fbp, fbc, landing_page, conversion_sent_at, conversion_event_id'
 
 export interface OutcomeSendResult {
@@ -85,12 +95,21 @@ export async function sendOutcomeConversion(
   opts: { nowMs?: number; env?: Record<string, string | undefined> } = {},
 ): Promise<OutcomeSendResult> {
   const env = opts.env ?? process.env
-  const mode = resolveOutcomeSendMode(env)
-  if (mode === 'off') return { mode, status: 'off' }
+  const flag = sendFlag(env)
+  if (flag !== 'true' && flag !== 'test') return { mode: 'off', status: 'off' }
+  // The mode as requested until the account's platform confirms `test` (its test event code).
+  let mode: OutcomeSendMode = flag === 'true' ? 'live' : 'test'
   try {
     const { data: row, error } = await db.from('outcomes').select(ROW_COLUMNS).eq('id', outcomeId).maybeSingle()
     if (error || !row) return { mode, status: 'error', error: 'outcome unavailable' }
     const outcome = row as unknown as OutcomeConversionRow
+
+    const { data: account, error: accountError } = await db
+      .from('ad_accounts').select('platform, country').eq('id', outcome.ad_account_id).maybeSingle()
+    if (accountError || !account) return { mode, status: 'error', error: 'ad account unavailable' }
+    const conversions = requireCapability(adPlatformForAccount(account as PlatformAccount), 'conversions')
+    mode = resolveOutcomeSendMode(env, conversions)
+    if (mode === 'off') return { mode, status: 'off' }
     if (outcome.conversion_sent_at) return { mode, status: 'already_sent' }
 
     const { data: source, error: sourceError } = await db
@@ -116,23 +135,24 @@ export async function sendOutcomeConversion(
       return { mode, status: 'skipped', skip: decision.reason }
     }
 
-    const built = metaConversions().buildOutcomeEvent(outcome, {
-      eventName: decision.eventName, testEventCode: mode === 'test' ? metaConversions().testEventCode(env) : null, nowMs: opts.nowMs,
+    const built = conversions.buildOutcomeEvent(outcome, {
+      eventName: decision.eventName, testEventCode: mode === 'test' ? conversions.testEventCode(env) : null, nowMs: opts.nowMs,
+      phoneCallingCode: phoneCallingCodeFor((account as { country?: string | null }).country),
     })
     if (!built.ok) {
       await label(db, outcomeId, built.skip)
       return { mode, status: 'skipped', skip: built.skip }
     }
     const { event } = built
-    const { destinationId, accessToken } = await metaConversions().resolveSendCredentials(env)
+    const { destinationId, accessToken } = await conversions.resolveSendCredentials(env)
     if (!destinationId || !accessToken) return { mode, status: 'error', error: 'pixel id / access token unavailable', eventId: event.id }
 
-    const response = await metaConversions().send(destinationId, accessToken, built.payload)
+    const response = await conversions.send(destinationId, accessToken, built.payload)
     const verdict: CapiResponseVerdict = 'networkError' in response
       ? { accepted: false, errorClass: 'network_error', message: response.networkError, eventsReceived: null }
-      : metaConversions().interpretResponse(response.httpOk, response.httpStatus, response.parsed)
+      : conversions.interpretResponse(response.httpOk, response.httpStatus, response.parsed)
     const errorState = verdict.accepted ? null : verdict.errorClass
-    const recorded = await metaConversions().recordDelivery({
+    const recorded = await conversions.recordDelivery({
       outcomeId,
       eventId: event.id,
       eventTimeSec: event.timeSec,

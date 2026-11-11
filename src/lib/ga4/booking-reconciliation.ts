@@ -9,6 +9,10 @@ import { requireOutcomeLedgerHealth } from '@/lib/outcomes/source-health'
 import { listOutcomeAdapters } from '@/lib/outcomes/registry'
 import { requireOutcomeCurrency } from '@/lib/outcomes/aggregation'
 import { formatMoney } from '@/lib/utils/format-currency'
+import { outcomeWords } from '@/config/outcome-nouns'
+
+// What this business calls its outcomes (NEXT_PUBLIC_OUTCOME_NOUN).
+const OW = outcomeWords()
 
 /** A ledger row the GA join can use: its source's analytics event carries the numeric external id. */
 type LedgerAppointmentLite = OutcomeLedgerRow & { id: number }
@@ -304,10 +308,10 @@ export function reconcileGa4Bookings(
 
   const warnings: string[] = []
   if (unmatchedGaEvents.length) warnings.push(`${unmatchedGaEvents.length} GA confirmation event id(s) match NO ledger appointment — a reconciliation defect (GA fired for something the ledger never recorded). Unmatched telemetry, NOT bookings.`)
-  if (duplicateAppointments.length) warnings.push(`${duplicateAppointments.length} appointment(s) emitted more than one GA confirmation event (${duplicateAppointments.map((d) => `${d.appointmentId}x${d.eventCount}`).join(', ')}). Each counts ONCE; the duplicates indicate a missing per-page latch in the browser handler.`)
-  if (ambiguousAttribution.length) warnings.push(`${ambiguousAttribution.length} appointment(s) appear under CONFLICTING channels. They remain business bookings but are EXCLUDED from channel allocation — choosing one would be a guess presented as attribution.`)
+  if (duplicateAppointments.length) warnings.push(`${duplicateAppointments.length} ${OW.one}(s) emitted more than one GA confirmation event (${duplicateAppointments.map((d) => `${d.appointmentId}x${d.eventCount}`).join(', ')}). Each counts ONCE; the duplicates indicate a missing per-page latch in the browser handler.`)
+  if (ambiguousAttribution.length) warnings.push(`${ambiguousAttribution.length} ${OW.one}(s) appear under CONFLICTING channels. They remain business ${OW.many} but are EXCLUDED from channel allocation — choosing one would be a guess presented as attribution.`)
   if (legacyUnlinkedEvents) warnings.push(`${legacyUnlinkedEvents} GA confirmation event(s) carry no appointment_id (they predate the custom dimension). LEGACY/UNLINKED — never exact, and not usable to justify a money action.`)
-  if (ledgerWithoutGa.length) warnings.push(`${ledgerWithoutGa.length} outcome-bearing appointment(s) have no GA confirmation event. Appointment and outcome-source values are RETAINED; only their web attribution is unavailable.`)
+  if (ledgerWithoutGa.length) warnings.push(`${ledgerWithoutGa.length} value-bearing ${OW.one}(s) have no GA confirmation event. ${OW.One} and outcome-source values are RETAINED; only their web attribution is unavailable.`)
 
   // ── EXACTNESS: every way the picture can be incomplete ──────────────────────────────────────────
   //
@@ -327,25 +331,25 @@ export function reconcileGa4Bookings(
       : `the window starts ${ctx.windowStart ?? '(unknown)'}, before the proven appointment_id boundary ${provenBoundary}`)
   }
   if (unjoinedWebsiteBookings.length > 0) {
-    blockers.push(`${unjoinedWebsiteBookings.length} WEBSITE-origin outcome-bearing appointment(s) produced no GA event (${unjoinedWebsiteBookings.slice(0, 5).join(', ')}${unjoinedWebsiteBookings.length > 5 ? ', …' : ''}) — they belong in the numerator but are missing from it`)
+    blockers.push(`${unjoinedWebsiteBookings.length} WEBSITE-origin value-bearing ${OW.one}(s) produced no GA event (${unjoinedWebsiteBookings.slice(0, 5).join(', ')}${unjoinedWebsiteBookings.length > 5 ? ', …' : ''}) — they belong in the numerator but are missing from it`)
   }
   if (unknownOriginBookings.length > 0) {
-    blockers.push(`${unknownOriginBookings.length} outcome-bearing appointment(s) have an UNKNOWN origin, so they can be neither required to join nor exempted`)
+    blockers.push(`${unknownOriginBookings.length} value-bearing ${OW.one}(s) have an UNKNOWN origin, so they can be neither required to join nor exempted`)
   }
   if (ambiguousAttribution.length > 0) {
-    blockers.push(`${ambiguousAttribution.length} appointment(s) carry CONFLICTING channel/campaign attribution — excluding them from allocation while calling the result exact would report a fabricated zero`)
+    blockers.push(`${ambiguousAttribution.length} ${OW.one}(s) carry CONFLICTING channel/campaign attribution — excluding them from allocation while calling the result exact would report a fabricated zero`)
   }
   if (unmatchedGaEvents.length > 0) {
     blockers.push(`${unmatchedGaEvents.length} GA event id(s) match no ledger appointment, so the two planes disagree about what exists`)
   }
   if (unknownChannelAppointments.length > 0) {
-    blockers.push(`${unknownChannelAppointments.length} joined appointment(s) carry an UNKNOWN GA channel, which cannot be classified paid or organic`)
+    blockers.push(`${unknownChannelAppointments.length} joined ${OW.one}(s) carry an UNKNOWN GA channel, which cannot be classified paid or organic`)
   }
   if (originContradictions.length > 0) {
-    blockers.push(`${originContradictions.length} appointment(s) have a STAFF/MANUAL ledger origin yet produced a GA confirmation event (${originContradictions.slice(0, 5).join(', ')}${originContradictions.length > 5 ? ', …' : ''}) — the origin and GA planes CONTRADICT each other, so neither can be trusted for them until one is corrected`)
+    blockers.push(`${originContradictions.length} ${OW.one}(s) have a STAFF/MANUAL ledger origin yet produced a GA confirmation event (${originContradictions.slice(0, 5).join(', ')}${originContradictions.length > 5 ? ', …' : ''}) — the origin and GA planes CONTRADICT each other, so neither can be trusted for them until one is corrected`)
   }
   if (missingAmountPaidAppointments.length > 0) {
-    blockers.push(`${missingAmountPaidAppointments.length} active appointment(s) lack recorded collected value (${missingAmountPaidAppointments.slice(0, 5).join(', ')}${missingAmountPaidAppointments.length > 5 ? ', …' : ''}); checkout revenue is an observed lower bound, not an exact numerator`)
+    blockers.push(`${missingAmountPaidAppointments.length} active ${OW.one}(s) lack recorded collected value (${missingAmountPaidAppointments.slice(0, 5).join(', ')}${missingAmountPaidAppointments.length > 5 ? ', …' : ''}); checkout revenue is an observed lower bound, not an exact numerator`)
   }
 
   if (blockers.length > 0) {
@@ -387,7 +391,7 @@ export function renderGa4ReconciliationBlock(r: Ga4LedgerReconciliation): string
   }
 
   const b = r.business
-  lines.push(`  Confirmed appointments: ${b.confirmedAppointments} — of which ${b.valueBearingBookings} value-bearing and ${b.zeroValueAppointments} zero-value. SOURCE: outcome ledger. GA4 contributes no count and no dollar to this line.`)
+  lines.push(`  Confirmed appointments: ${b.confirmedAppointments} — of which ${b.valueBearingBookings} value-bearing and ${b.zeroValueAppointments} zero-value. SOURCE: outcome ledger. GA4 contributes no count and no money to this line.`)
   lines.push(`  Booked value: ${formatMoney(b.bookedValue)} (scheduled charged price over value-bearing appointments; separate from checkout revenue).`)
   if (b.recordedOutcomeValue === null) {
     lines.push(`  Recorded collected value: UNAVAILABLE — amount_paid exists for ${b.amountPaidCoverage.withRecordedAmount}/${b.amountPaidCoverage.total} active appointments. Observed amount_paid lower bound: ${formatMoney(b.observedCollectedValue)}. Never use that lower bound for MER or ROAS.`)

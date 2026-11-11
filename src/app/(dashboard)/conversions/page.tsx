@@ -257,7 +257,7 @@ export default function ConversionsPage() {
       </div>
 
       <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-        Meta-reported actions (7-day click / 1-day view attribution), account-level. Cost per action = spend ${spend.toFixed(0)} ÷ event count.
+        Meta-reported actions (7-day click / 1-day view attribution), account-level. Cost per action = spend {formatMoney(spend, { maximumFractionDigits: 0 })} ÷ event count.
         Categories can overlap (e.g. an engagement also counts toward page engagement). Values appear only where Meta reports a conversion value.
       </p>
     </div>

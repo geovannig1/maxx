@@ -5,7 +5,7 @@ import type { MetaInsightRow } from '@/types/meta-api'
 import {
   COUNT_TOLERANCE,
   normalizedActionSum,
-  readAppointmentConfirmedResult,
+  readOutcomeEventResult,
   readBookingValue,
   readBookingValueViewThrough,
 } from './insight-outcome-readers'
@@ -14,13 +14,13 @@ import {
 export {
   findActionValue,
   findActionValueOrNull,
-  findAppointmentConfirmedResults,
-  findAppointmentConfirmedViewThrough,
-  readAppointmentConfirmedResult,
+  findOutcomeEventResults,
+  findOutcomeEventViewThrough,
+  readOutcomeEventResult,
   readBookingValue,
   readBookingValueViewThrough,
 } from './insight-outcome-readers'
-export type { AppointmentConfirmedResultRead } from './insight-outcome-readers'
+export type { OutcomeEventResultRead } from './insight-outcome-readers'
 
 export type InsightLevel = 'account' | 'campaign' | 'adset' | 'ad'
 
@@ -115,7 +115,7 @@ export function normalizeOutcome(row: MetaInsightRow): NormalizedOutcome {
     row.actions,
     (type) => type === 'lead' || type === 'offsite_conversion.fb_pixel_lead',
   )
-  const result = readAppointmentConfirmedResult(row.results)
+  const result = readOutcomeEventResult(row.results)
   const bookings = result.value
 
   const bookingValue = readBookingValue(row.action_values, undefined, row.conversion_values)

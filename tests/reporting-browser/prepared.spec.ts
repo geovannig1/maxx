@@ -2,6 +2,8 @@ import { expect, test, type Page } from '@playwright/test'
 import { createServer, request as proxyRequest, type ServerResponse } from 'node:http'
 import type { Socket } from 'node:net'
 import { fixtureCookie } from './auth-fixture.mjs'
+import { forwardHmrUpgrades } from '../../scripts/demo/hmr-upgrade'
+import { openReportingTrust, sourceRow } from './source-strip'
 import { fixturePacket } from '../../scripts/demo/sample/reports'
 import { preparedComplete, preparedReply, preparedRunning, preparedJobId, jobStartedAt } from '../fixtures/reporting-prepared'
 import { snapshotContext } from '../fixtures/reporting-snapshot'
@@ -9,6 +11,7 @@ import { REPORTING_PREPARED_TYPE, type PreparedReportingReply, type ValidatedPre
 import { makeReportingSnapshotScope } from '../../src/lib/reporting/snapshot-scope'
 import { validatePreparedReportingReply } from '../../src/lib/reporting/prepared-validation'
 import type { ReportingPacket } from '../../src/lib/reporting/contracts'
+import { compactReportingPacket, isCompactReportingPacket } from '../../src/lib/reporting/packet-format'
 
 type Mode = 'saved' | 'running' | 'progress' | 'ready' | 'complete' | 'failed' | 'interrupted'
 type WireCall = { method: string; section: string; from: string; job: string | null; accept: string; body: string }
@@ -56,8 +59,10 @@ async function preparedGateway() {
   const calls: WireCall[] = [], held: HeldPoll[] = [], faults: string[] = []
   const sockets = new Set<Socket>(), modes = new Map<string, Mode>(), heldPeriods = new Set<string>()
   const send = (response: ServerResponse, value: PreparedReportingReply) => {
+    // The real reply carries the packetVersion 2 packet (src/lib/reporting/prepared-response.ts).
+    const packet = value.packet && !isCompactReportingPacket(value.packet) ? compactReportingPacket(value.packet as ReportingPacket) : value.packet
     response.writeHead(200, { 'Content-Type': REPORTING_PREPARED_TYPE, 'Cache-Control': 'private, no-store' })
-    response.end(JSON.stringify(value))
+    response.end(JSON.stringify({ ...value, packet }))
   }
   const server = createServer(async (request, response) => {
     try {
@@ -72,7 +77,7 @@ async function preparedGateway() {
         if (!['GET', 'POST'].includes(request.method ?? '')) { response.writeHead(405); response.end(); return }
         if (section !== 'meta') {
           response.writeHead(200, { 'Content-Type': 'application/json' })
-          response.end(JSON.stringify(packet(section, from, to))); return
+          response.end(JSON.stringify(compactReportingPacket(packet(section, from, to)))); return
         }
         if (request.method === 'POST') modes.set(from, 'running')
         if (url.searchParams.has('job') && heldPeriods.has(from)) {
@@ -99,22 +104,8 @@ async function preparedGateway() {
     }
   })
   server.on('connection', socket => { sockets.add(socket); socket.on('close', () => sockets.delete(socket)) })
-  server.on('upgrade', (request, socket, head) => {
-    if (!request.url?.startsWith('/_next/webpack-hmr')) { socket.destroy(); return }
-    const upstream = proxyRequest({ hostname: '127.0.0.1', port: 3147, path: request.url,
-      headers: { ...request.headers, host: '127.0.0.1:3147' },
-    })
-    upstream.on('upgrade', (response, target, first) => {
-      const headers = response.rawHeaders.reduce((text, value, index, values) => index % 2 === 0 ? `${text}${value}: ${values[index + 1]}\r\n` : text, '')
-      socket.write(`HTTP/1.1 101 Switching Protocols\r\n${headers}\r\n`)
-      if (head.length) target.write(head)
-      if (first.length) socket.write(first)
-      target.on('error', () => socket.destroy()); socket.on('error', () => target.destroy())
-      socket.on('close', () => target.destroy()); target.pipe(socket); socket.pipe(target)
-    })
-    upstream.on('response', () => { upstream.destroy(); socket.destroy() })
-    upstream.on('error', () => socket.destroy()); upstream.end()
-  })
+  // Turbopack's HMR socket is /_next/hmr; dropping it leaves the page rendered but never hydrated.
+  forwardHmrUpgrades(server, { appPort: 3147, host: '127.0.0.1:3147' })
   await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(3151, '127.0.0.1', resolve) })
   return { url: 'http://127.0.0.1:3151', calls, held, faults,
     mode(mode: Mode, from = firstPeriod) { modes.set(from, mode) },
@@ -139,10 +130,12 @@ async function preparedGateway() {
 
 let gateway: Awaited<ReturnType<typeof preparedGateway>>
 const metaCalls = () => gateway.calls.filter(call => call.section === 'meta')
-const sourceStatus = (page: Page) => page.getByLabel('Reporting source status').locator('> div').filter({ hasText: 'Meta advertising' })
+const sourceStatus = (page: Page) => sourceRow(page, 'Meta advertising')
 const advertising = (page: Page) => page.getByRole('region', { name: 'Advertising results' })
-const currentSpend = (page: Page) => advertising(page).getByRole('heading', { name: 'Ad spend', exact: true }).locator('..').locator('p').first()
-const open = (page: Page) => page.goto(`${gateway.url}/dashboard?from=${firstPeriod}&to=${lastDay}`)
+// The Spend tile shows a compact total ($240); its summary's accessible name carries the exact current value.
+const currentSpend = (page: Page) => advertising(page).getByLabel(/^Spend: .*\. Definition and source$/)
+/** Opens the overview with its Trust panel expanded, so the source rows and Refresh buttons are visible. */
+const open = async (page: Page) => { await page.goto(`${gateway.url}/dashboard?from=${firstPeriod}&to=${lastDay}`); await openReportingTrust(page) }
 test.beforeAll(async () => { gateway = await preparedGateway() })
 test.afterAll(async () => { await gateway.close() })
 test.beforeEach(async ({ context, page }) => {
@@ -228,8 +221,10 @@ test('date navigation aborts an in-flight job poll and cannot display the previo
   await expect(advertising(page)).toContainText('$240.00')
   await expect.poll(() => gateway.held[0].aborted).toBe(true)
   gateway.release('complete')
-  await expect(page.getByText('2026-08-02 – 2026-08-04 · America/New_York · USD')).toBeVisible()
-  await expect(currentSpend(page)).toHaveText('$240.00')
+  // The header's account context comes from the new period's packet: Aug 2-4 compares with Jul 30 - Aug 1,
+  // and the comparison's title carries that packet's dates, timezone and currency.
+  await expect(page.getByText('vs Jul 30 – Aug 1', { exact: true })).toHaveAttribute('title', '2026-07-30 – 2026-08-01 · America/New_York · USD')
+  await expect(currentSpend(page)).toHaveAccessibleName('Spend: $240.00. Definition and source')
   expect(metaCalls().filter(call => call.method === 'POST')).toHaveLength(0)
   expect(metaCalls().some(call => call.from === '2026-08-02' && call.job === null)).toBe(true)
 })
@@ -243,7 +238,8 @@ test('a foreign-account publication is rejected while other source results remai
   await expect(sourceStatus(page)).toContainText('Unavailable')
   await page.getByLabel('Meta advertising source details').click()
   await expect(sourceStatus(page)).toContainText('invalid prepared report')
-  await expect(currentSpend(page)).not.toHaveText('$120.00')
+  await expect(currentSpend(page)).toBeVisible()
+  await expect(currentSpend(page)).not.toHaveAccessibleName('Spend: $120.00. Definition and source')
   await expect(advertising(page)).not.toContainText('$999.00')
   await expect(page.getByRole('region', { name: 'Business results' })).toContainText('$500.00')
 })

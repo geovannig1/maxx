@@ -1,3 +1,4 @@
+import 'server-only'
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
 
@@ -107,7 +108,43 @@ export type PaidTouchTokenVerification =
   | { ok: true; tokenId: string }
   | { ok: false; reason: 'malformed' | 'invalid_signature' | 'secret_invalid' }
 
-export function verifyPaidTouchToken(token: string, secret: string): PaidTouchTokenVerification {
+/** The longest rotation grace window for the replaced paid-touch secret, ahead of now. */
+export const PAID_TOUCH_PREVIOUS_SECRET_MAX_GRACE_MS = 7 * 86_400_000
+const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,9})?)?(Z|[+-]\d{2}:\d{2})$/
+
+/**
+ * The replaced PAID_TOUCH_TOKEN_SECRET while its rotation grace window is open, else null. It only
+ * VERIFIES tokens minted before the switch; nothing is signed with it. The window ends at
+ * PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL and may reach at most 7 days ahead: a missing, unreadable or
+ * farther end, or a secret under 32 bytes, turns it off (fail closed).
+ */
+export function paidTouchPreviousSecret(
+  env: Record<string, string | undefined> = process.env,
+  nowMs: number = Date.now(),
+): string | null {
+  const secret = env.PAID_TOUCH_TOKEN_PREVIOUS_SECRET ?? ''
+  const until = env.PAID_TOUCH_TOKEN_PREVIOUS_SECRET_UNTIL?.trim() ?? ''
+  if (Buffer.byteLength(secret, 'utf8') < 32 || !ISO_INSTANT.test(until)) return null
+  const untilMs = Date.parse(until)
+  if (!Number.isFinite(untilMs) || untilMs <= nowMs || untilMs - nowMs > PAID_TOUCH_PREVIOUS_SECRET_MAX_GRACE_MS) return null
+  return secret
+}
+
+function signatureMatches(secret: string, message: string, supplied: Buffer): boolean {
+  const expected = createHmac('sha256', secret).update(message, 'utf8').digest()
+  return supplied.length === expected.length && timingSafeEqual(supplied, expected)
+}
+
+/**
+ * Verify a token against the current secret and, during a rotation grace window, the replaced one
+ * (`previousSecret`, by default read from the environment: paidTouchPreviousSecret). Both comparisons
+ * are constant-time over fixed-length digests.
+ */
+export function verifyPaidTouchToken(
+  token: string,
+  secret: string,
+  previousSecret: string | null = paidTouchPreviousSecret(),
+): PaidTouchTokenVerification {
   try {
     requireTokenSecret(secret)
   } catch {
@@ -117,16 +154,16 @@ export function verifyPaidTouchToken(token: string, secret: string): PaidTouchTo
   if (!match) return { ok: false, reason: 'malformed' }
   const tokenId = match[1].toLowerCase()
   const message = `${PAID_TOUCH_TOKEN_VERSION}.${tokenId}`
-  const expected = createHmac('sha256', secret).update(message, 'utf8').digest()
   let supplied: Buffer
   try {
     supplied = Buffer.from(match[2], 'base64url')
   } catch {
     return { ok: false, reason: 'malformed' }
   }
-  if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) {
-    return { ok: false, reason: 'invalid_signature' }
-  }
+  const current = signatureMatches(secret, message, supplied)
+  const previous = previousSecret !== null && previousSecret !== secret
+    && Buffer.byteLength(previousSecret, 'utf8') >= 32 && signatureMatches(previousSecret, message, supplied)
+  if (!current && !previous) return { ok: false, reason: 'invalid_signature' }
   return { ok: true, tokenId }
 }
 

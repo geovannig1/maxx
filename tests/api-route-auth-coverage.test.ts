@@ -14,6 +14,8 @@ const MARKERS = [
   /ownerOnly\(/, /ownerGate\(/, /authenticateOwner\(/, /authorizeOwnerAndAccount\(/,
   /checkCronAuthorization\(/, /verifyAcuitySignature\(/, /savedReportingRoute\(/,
   /verifyOutcomeWebhookSignature\(/,
+  // A push source's signature check through its registered adapter (the Acuity webhook route).
+  /adapter\.verifyPush\(/,
 ]
 
 function routes(dir: string): string[] {

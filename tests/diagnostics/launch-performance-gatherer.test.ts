@@ -111,7 +111,7 @@ describe('diagnoseLaunchPerformance required-read health', () => {
 
   it('throws a deterministic unavailable error when the active-ad-set read fails', async () => {
     mocks.getAdminClient.mockReturnValue(dbFor({
-      ad_accounts: { data: { id: 'account-1' }, error: null },
+      ad_accounts: { data: { id: 'account-1', platform: 'meta' }, error: null },
       adsets: { data: null, error: { message: 'adsets unavailable' } },
     }))
 
@@ -127,6 +127,8 @@ describe('diagnoseLaunchPerformance required-read health', () => {
     delete (baselineAdset as Record<string, unknown>).delivery_sub_status_read_available
     delete (baselineAdset as Record<string, unknown>).delivery_sub_status_synced_at
     mocks.getAdminClient.mockReturnValue(dbForSequence({
+      // The account-id lookup finds no Meta id; the platform read finds a Meta account.
+      ad_accounts: [{ data: null, error: null }, { data: { platform: 'meta' }, error: null }],
       adsets: [
         {
           data: null,
@@ -164,7 +166,7 @@ describe('diagnoseLaunchPerformance required-read health', () => {
 
   it('throws a deterministic unavailable error when the required insights read fails', async () => {
     mocks.getAdminClient.mockReturnValue(dbFor({
-      ad_accounts: { data: { id: 'account-1' }, error: null },
+      ad_accounts: { data: { id: 'account-1', platform: 'meta' }, error: null },
       adsets: { data: [activeAdset], error: null },
       daily_insights: { data: null, error: { message: 'insights unavailable' } },
     }))
@@ -177,7 +179,7 @@ describe('diagnoseLaunchPerformance required-read health', () => {
 
   it('keeps a successful empty active-ad-set read as a healthy no-delivery diagnosis', async () => {
     mocks.getAdminClient.mockReturnValue(dbFor({
-      ad_accounts: { data: { id: 'account-1' }, error: null },
+      ad_accounts: { data: { id: 'account-1', platform: 'meta' }, error: null },
       adsets: { data: [], error: null },
     }))
 
@@ -192,7 +194,7 @@ describe('diagnoseLaunchPerformance required-read health', () => {
 
   it('does not turn a thrown dataset-stats read into an empty diagnosis', async () => {
     mocks.getAdminClient.mockReturnValue(dbFor({
-      ad_accounts: { data: { id: 'account-1' }, error: null },
+      ad_accounts: { data: { id: 'account-1', platform: 'meta' }, error: null },
       adsets: { data: [], error: null },
     }))
     mocks.fetchDatasetEventVolume.mockRejectedValue(new Error('dataset transport failed'))
@@ -205,6 +207,7 @@ describe('diagnoseLaunchPerformance required-read health', () => {
 
   it('carries reporting coverage and budget ownership into the diagnosis', async () => {
     mocks.getAdminClient.mockReturnValue(dbFor({
+      ad_accounts: { data: { platform: 'meta' }, error: null },
       adsets: {
         data: [{
           ...activeAdset,
@@ -464,6 +467,7 @@ describe('diagnoseLaunchPerformance required-read health', () => {
 
   it('uses an explicit reporting window instead of silently replacing historical bounds with today', async () => {
     const db = dbFor({
+      ad_accounts: { data: { platform: 'meta' }, error: null },
       adsets: { data: [activeAdset], error: null },
       daily_insights: { data: [], error: null },
       campaigns: { data: [{ id: 'campaign-db-1', daily_budget: 100, lifetime_budget: null }], error: null },
@@ -523,6 +527,7 @@ describe('diagnoseLaunchPerformance required-read health', () => {
 
   it('degrades spend ownership to unknown when campaign budgets cannot be read', async () => {
     mocks.getAdminClient.mockReturnValue(dbFor({
+      ad_accounts: { data: { platform: 'meta' }, error: null },
       adsets: { data: [activeAdset], error: null },
       daily_insights: {
         data: [{

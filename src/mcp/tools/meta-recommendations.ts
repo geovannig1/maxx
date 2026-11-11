@@ -1,5 +1,7 @@
-import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
-import type { NativeRecommendationsResult as MetaRecommendationsResult } from '@/lib/platforms/types'
+import { requireCapability } from '@/lib/platforms/registry'
+import { loadActiveAccountPlatform } from '@/lib/platforms/account-platform'
+import { getAdminClient } from '@/lib/supabase/admin'
+import type { NativeRecommendations, NativeRecommendationsResult as MetaRecommendationsResult } from '@/lib/platforms/types'
 
 // MCP tool: Meta's OWN recommendation engine for this account (the suggestions behind Ads Manager's
 // opportunity score, sometimes with estimated lift). An empty list is a real state — "no pending
@@ -9,11 +11,11 @@ import type { NativeRecommendationsResult as MetaRecommendationsResult } from '@
 // for a model to repeat as Maxx advice. Keep the complete record inside the fetch/audit layer and expose
 // only presence, freshness, paging and contract health here.
 
-const recommendations = () => requireCapability(getAdPlatform('meta'), 'recommendations')
-
+/** `isStale` is the staleness rule of the platform the recommendations came from. */
 export function projectMetaRecommendationsForModel(
   result: MetaRecommendationsResult,
-  nowMs: number = Date.now(),
+  nowMs: number,
+  isStale: NativeRecommendations['isStale'],
 ): object {
   if (!result.available) {
     return {
@@ -32,7 +34,7 @@ export function projectMetaRecommendationsForModel(
   }
 
   const staleCount = result.recommendations.filter((recommendation) =>
-    recommendations().isStale(recommendation, nowMs),
+    isStale(recommendation, nowMs),
   ).length
 
   return {
@@ -58,6 +60,8 @@ export function projectMetaRecommendationsForModel(
 }
 
 export async function getMetaRecommendations(nowMs: number = Date.now()): Promise<object> {
-  const result = await recommendations().fetch()
-  return projectMetaRecommendationsForModel(result, nowMs)
+  // The recommendations of the active account's own platform.
+  const recommendations = requireCapability(await loadActiveAccountPlatform(getAdminClient()), 'recommendations')
+  const result = await recommendations.fetch()
+  return projectMetaRecommendationsForModel(result, nowMs, (recommendation, at) => recommendations.isStale(recommendation, at))
 }

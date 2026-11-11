@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { CampaignRow, FlagRow } from '@/components/dashboard/dashboard-data'
+import { formatMoney } from '@/lib/utils/format-currency'
 
 // Tier 3 (money) detail tables — Top Campaigns + Active Flags, at the bottom of the money tier. Meta paid;
 // the caller hides this in the Organic view. Presentational, server-rendered. (The old standalone
@@ -46,7 +47,7 @@ export function TopCampaignsFlags({
                     {c.campaign_name ?? c.meta_campaign_id ?? `Campaign ${i + 1}`}
                   </td>
                   <td style={{ color: 'var(--text-secondary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                    ${(c.spend ?? 0).toFixed(0)}
+                    {formatMoney(c.spend ?? 0, { maximumFractionDigits: 0 })}
                   </td>
                   <td style={{ color: 'var(--text-secondary)', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                     {c.leads ?? 0}
@@ -100,7 +101,7 @@ export function TopCampaignsFlags({
                   </div>
                   {f.cpa_in_window !== null && (
                     <span className="text-xs shrink-0" style={{ color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
-                      ${f.cpa_in_window.toFixed(2)}
+                      {formatMoney(f.cpa_in_window)}
                     </span>
                   )}
                 </div>

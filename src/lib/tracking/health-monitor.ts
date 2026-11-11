@@ -2,8 +2,13 @@ import 'server-only'
 import { roundMoney } from '@/lib/utils/format-currency'
 import { getAdminClient } from '@/lib/supabase/admin'
 import { nyToday, nyDaysAgo } from '@/lib/utils/date-utils'
-import { getAdPlatform, requireCapability } from '@/lib/platforms/registry'
+import { requireCapability } from '@/lib/platforms/registry'
+import { loadAccountPlatform } from '@/lib/platforms/account-platform'
 import { metaOutcomeEventName } from '@/config/business-config'
+import { outcomeWords } from '@/config/outcome-nouns'
+
+// What this business calls its outcomes (NEXT_PUBLIC_OUTCOME_NOUN).
+const OW = outcomeWords()
 
 export interface TrackingHealthResult {
   pixel_id: string
@@ -13,8 +18,8 @@ export interface TrackingHealthResult {
   is_firing: boolean
   browser_pixel_status: 'healthy' | 'critical' | 'unavailable' | 'unverified'
   dataset_capi_status: 'healthy' | 'warning' | 'critical' | 'unverified'
-  appointment_confirmed_last_7d: number
-  appointment_confirmed_prev_7d: number
+  outcome_events_last_7d: number
+  outcome_events_prev_7d: number
   volume_drop_pct: number | null // negative = drop
   delivery_last_7d: number // ad spend in the last 7d; 0 = dormant (nothing to judge the pixel against)
   status: 'healthy' | 'warning' | 'critical' | 'unverified'
@@ -24,11 +29,11 @@ export interface TrackingHealthResult {
 
 export interface TrackingHealthSignals {
   isFiring: boolean
-  appointmentLast7: number
-  appointmentPrev7: number
+  outcomeEventsLast7: number
+  outcomeEventsPrev7: number
   deliveryLast7: number // ad spend in the window; <= 0 means dormant
   volumeDropPct: number | null
-  /** Whether the pixel is firing AppointmentConfirmed SITE-WIDE (from pixel event_stats), independent of
+  /** Whether the pixel is firing the configured outcome event SITE-WIDE (from pixel event_stats), independent of
    *  ad attribution. true = pixel alive; false = event absent site-wide; null = unknown. */
   pixelFiringSiteWide?: boolean | null
   /** Browser Pixel status read from Meta's pixel endpoint. This is separate from dataset/CAPI health. */
@@ -36,7 +41,7 @@ export interface TrackingHealthSignals {
 }
 
 // PURE decision (audit Bug 1). On a DORMANT account (no ad delivery in the window), zero
-// AppointmentConfirmed events proves nothing about the pixel — there was simply no traffic — so it is
+// outcome events proves nothing about the pixel — there was simply no traffic — so it is
 // UNVERIFIED, never "broken". The broken-pixel signals only apply once ads are actually delivering.
 export function evaluateTrackingHealth(
   s: TrackingHealthSignals,
@@ -48,27 +53,27 @@ export function evaluateTrackingHealth(
       status: 'unverified',
       dormant: true,
       issues: [
-        'Conversion tracking is UNVERIFIED (not broken) — there was no ad delivery in the last 7 days ($0 spend), so zero ${event} events is expected and says nothing about the pixel. Re-check once ads deliver, or test the pixel manually on the booking confirmation page.',
+        `Conversion tracking is UNVERIFIED (not broken) — there was no ad delivery in the last 7 days (no spend), so zero ${event} events is expected and says nothing about the pixel. Re-check once ads deliver, or test the pixel manually on the ${OW.one} confirmation page.`,
       ],
     }
   }
   const issues: string[] = []
   if (s.pixelBrowserHealthUnavailable) {
-    issues.push(`Meta Pixel browser health is unavailable — ${s.pixelBrowserHealthUnavailable}. Warehouse bookings can prove business activity, but they do not prove the browser Pixel is firing.`)
+    issues.push(`Meta Pixel browser health is unavailable — ${s.pixelBrowserHealthUnavailable}. Warehouse ${OW.many} can prove business activity, but they do not prove the browser Pixel is firing.`)
     return { status: 'unverified', issues, dormant: false }
   } else if (s.isFiring === false) {
     issues.push('Pixel has not fired in over 24 hours despite active ad delivery — check pixel status.')
   }
-  // Zero AppointmentConfirmed ATTRIBUTED to campaigns, with delivery > 0. This is only a broken-pixel
+  // Zero outcome events ATTRIBUTED to campaigns, with delivery > 0. This is only a broken-pixel
   // signal when the pixel isn't firing site-wide either. If it IS firing site-wide (pixelFiringSiteWide),
   // then ~0 attributed conversions is an ads-not-converting / attribution situation (rare event, cold
   // paid traffic) — a PERFORMANCE question, not a pixel to re-check. Mis-framing it as pixel-broken sent
   // the owner chasing a working pixel; route it to the performance diagnosis instead.
   let attributedZeroIsPerf = false
-  if (s.appointmentLast7 === 0) {
+  if (s.outcomeEventsLast7 === 0) {
     if (s.pixelFiringSiteWide === true) {
       attributedZeroIsPerf = true
-      issues.push('Ads are delivering and the pixel IS firing site-wide, yet ~0 ${event} are ATTRIBUTED to campaigns. The site-wide firing is evidence the pixel itself is installed and working; what is unresolved is whether the ads are converting at all or the conversions are not being attributed. Diagnose performance (diagnose_ad_performance) before re-checking the pixel.')
+      issues.push(`Ads are delivering and the pixel IS firing site-wide, yet ~0 ${event} are ATTRIBUTED to campaigns. The site-wide firing is evidence the pixel itself is installed and working; what is unresolved is whether the ads are converting at all or the conversions are not being attributed. Diagnose performance (diagnose_ad_performance) before re-checking the pixel.`)
     } else {
       issues.push(`No ${event} events in the last 7 days despite active ad delivery — check the pixel on the confirmation page.`)
     }
@@ -76,7 +81,7 @@ export function evaluateTrackingHealth(
     issues.push(`${event} volume dropped ${Math.abs(Math.round(s.volumeDropPct))}% vs the prior week — check for pixel breakage.`)
   }
   // Critical only for a genuine pixel failure — never for the ads-not-converting (attribution) case.
-  const critical = s.isFiring === false || (s.appointmentLast7 === 0 && !attributedZeroIsPerf)
+  const critical = s.isFiring === false || (s.outcomeEventsLast7 === 0 && !attributedZeroIsPerf)
   const status: TrackingHealthResult['status'] = issues.length === 0 ? 'healthy' : critical ? 'critical' : 'warning'
   return { status, issues, dormant: false }
 }
@@ -102,13 +107,13 @@ function browserPixelStatus(input: {
 
 function datasetCapiStatus(input: {
   browserUnavailable: string | null
-  appointmentLast7: number
+  outcomeEventsLast7: number
   deliveryLast7: number
   pixelFiringSiteWide: boolean | null
 }): TrackingHealthResult['dataset_capi_status'] {
   if (input.browserUnavailable) return 'unverified'
   if (input.deliveryLast7 <= 0) return 'unverified'
-  if (input.appointmentLast7 > 0) return 'healthy'
+  if (input.outcomeEventsLast7 > 0) return 'healthy'
   return input.pixelFiringSiteWide === true ? 'warning' : 'critical'
 }
 
@@ -167,8 +172,8 @@ export async function checkTrackingHealth(
     is_firing: false,
     browser_pixel_status: 'unverified',
     dataset_capi_status: 'unverified',
-    appointment_confirmed_last_7d: 0,
-    appointment_confirmed_prev_7d: 0,
+    outcome_events_last_7d: 0,
+    outcome_events_prev_7d: 0,
     volume_drop_pct: null,
     delivery_last_7d: 0,
     status: 'critical',
@@ -212,13 +217,13 @@ export async function checkTrackingHealth(
     let lastFiredIso: string | null = null
     let lastFiredHoursAgo: number | null = null
     let isFiring = true
-    // Is the pixel firing AppointmentConfirmed SITE-WIDE (any source), from event_stats? Distinguishes a
+    // Is the pixel firing the configured outcome event SITE-WIDE (any source), from event_stats? Distinguishes a
     // genuinely broken pixel from "ads deliver but ~0 conversions attributed". null = couldn't tell.
     let pixelFiringSiteWide: boolean | null = null
     let pixelBrowserHealthUnavailable: string | null = null
 
     try {
-      const pixelJson = (await requireCapability(getAdPlatform('meta'), 'trackingHealth').fetchPixelStatus(pixelId)) as MetaPixelResponse
+      const pixelJson = (await requireCapability(await loadAccountPlatform(supabase, adAccountDbId), 'trackingHealth').fetchPixelStatus(pixelId)) as MetaPixelResponse
       if (!pixelJson || typeof pixelJson !== 'object') {
         throw new Error('Meta pixel endpoint returned a malformed response')
       }
@@ -254,7 +259,7 @@ export async function checkTrackingHealth(
       isFiring = false
     }
 
-    // 3. Query daily_insights for AppointmentConfirmed (bookings column) last 7d vs prev 7d
+    // 3. Query daily_insights for the configured outcome event (bookings column) last 7d vs prev 7d
     const last7StartStr = nyDaysAgo(7)
     const prev7StartStr = nyDaysAgo(14)
     // last 7: [last7Start, today)
@@ -277,19 +282,19 @@ export async function checkTrackingHealth(
         .lt('date_start', last7StartStr),
     ])
 
-    const appointmentLast7 = (last7Res.data ?? []).reduce(
+    const outcomeEventsLast7 = (last7Res.data ?? []).reduce(
       (s, r) => s + Number(r.bookings ?? 0),
       0
     )
-    const appointmentPrev7 = (prev7Res.data ?? []).reduce(
+    const outcomeEventsPrev7 = (prev7Res.data ?? []).reduce(
       (s, r) => s + Number(r.bookings ?? 0),
       0
     )
 
     // 4. Calculate volume drop
     let volumeDropPct: number | null = null
-    if (appointmentPrev7 > 0) {
-      volumeDropPct = ((appointmentLast7 - appointmentPrev7) / appointmentPrev7) * 100
+    if (outcomeEventsPrev7 > 0) {
+      volumeDropPct = ((outcomeEventsLast7 - outcomeEventsPrev7) / outcomeEventsPrev7) * 100
     }
 
     // 5-6. Evaluate — a DORMANT account (no ad delivery in the window) is UNVERIFIED, not broken (Bug 1).
@@ -299,8 +304,8 @@ export async function checkTrackingHealth(
     )
     const evalResult = evaluateTrackingHealth({
       isFiring,
-      appointmentLast7,
-      appointmentPrev7,
+      outcomeEventsLast7,
+      outcomeEventsPrev7,
       deliveryLast7,
       volumeDropPct,
       pixelFiringSiteWide,
@@ -319,12 +324,12 @@ export async function checkTrackingHealth(
       }),
       dataset_capi_status: datasetCapiStatus({
         browserUnavailable: pixelBrowserHealthUnavailable,
-        appointmentLast7,
+        outcomeEventsLast7,
         deliveryLast7,
         pixelFiringSiteWide,
       }),
-      appointment_confirmed_last_7d: appointmentLast7,
-      appointment_confirmed_prev_7d: appointmentPrev7,
+      outcome_events_last_7d: outcomeEventsLast7,
+      outcome_events_prev_7d: outcomeEventsPrev7,
       volume_drop_pct: volumeDropPct !== null ? Math.round(volumeDropPct * 10) / 10 : null,
       delivery_last_7d: roundMoney(deliveryLast7),
       status: evalResult.status,
@@ -364,17 +369,17 @@ export async function checkTrackingHealth(
         title: result.status === 'critical' ? 'Pixel tracking critical issue detected' : 'Pixel tracking warning',
         message: issue,
         metric_name: 'appointment_confirmed',
-        metric_value: appointmentLast7,
+        metric_value: outcomeEventsLast7,
         threshold_value: null,
-        baseline_value: appointmentPrev7 > 0 ? appointmentPrev7 : null,
+        baseline_value: outcomeEventsPrev7 > 0 ? outcomeEventsPrev7 : null,
         is_resolved: false,
         why_it_matters: result.status === 'critical'
           ? 'Without a working pixel, Meta cannot optimize for conversions. You will be paying for clicks without the algorithm learning what a good conversion looks like, causing CPA to rise and ROAS to collapse.'
-          : `A significant drop in ${metaOutcomeEventName()} events can indicate pixel drift, a broken booking flow, or a code deployment that removed the tracking snippet.`,
+          : `A significant drop in ${metaOutcomeEventName()} events can indicate pixel drift, a broken ${OW.one} flow, or a code deployment that removed the tracking snippet.`,
         recommended_actions: [
           'Open Meta Events Manager and check the pixel status and recent events',
-          'Test the pixel by going through the actual booking flow end-to-end',
-          'Check if a recent code deployment changed the booking confirmation page',
+          `Test the pixel by going through the actual ${OW.one} flow end-to-end`,
+          `Check if a recent code deployment changed the ${OW.one} confirmation page`,
           'Use Meta Pixel Helper browser extension to verify the event fires on the confirmation page',
         ],
         amount_at_risk: null,

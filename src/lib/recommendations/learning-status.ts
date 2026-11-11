@@ -96,7 +96,7 @@ export function outcomeLearningLabel(o: OutcomeLabelInput): LearningStatus {
   if ((o.outcome === 'worked' || o.outcome === 'failed')
       && !isCausalContributionMetric(o.metric_name)) {
     return { state: 'attribution_unclear', label: 'Diagnostic only', tone: 'warn',
-      tooltip: 'This result was not measured as causal incremental contribution dollars, so it cannot become a commercial learning.' }
+      tooltip: 'This result was not measured as causal incremental contribution, so it cannot become a commercial learning.' }
   }
   if (o.estimate_only) {
     return { state: 'attribution_unclear', label: 'Attribution unclear', tone: 'warn',

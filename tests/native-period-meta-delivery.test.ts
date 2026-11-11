@@ -10,7 +10,7 @@ vi.mock('@/lib/platforms/meta/fetch-insights', () => ({
 
 type Row = Record<string, unknown>
 
-function fakeDb(rows: Record<'daily_insights' | 'api_sync_logs', Row[]>) {
+function fakeDb(rows: Record<'daily_insights' | 'api_sync_logs' | 'ad_accounts', Row[]>) {
   return {
     from(table: keyof typeof rows) {
       let selected = [...rows[table]]
@@ -30,6 +30,7 @@ function fakeDb(rows: Record<'daily_insights' | 'api_sync_logs', Row[]>) {
         },
         order: () => builder,
         limit: () => builder,
+        maybeSingle: async () => ({ data: selected[0] ?? null, error: null }),
         then: (resolve: (value: { data: Row[]; error: null }) => unknown) =>
           Promise.resolve({ data: selected, error: null }).then(resolve),
       }
@@ -41,7 +42,7 @@ function fakeDb(rows: Record<'daily_insights' | 'api_sync_logs', Row[]>) {
 const dbAccountId = '00000000-0000-4000-8000-000000000001'
 const range = { start: '2026-08-01', end: '2026-08-02', basis: 'closed_account_days' as const, timezone: 'America/New_York' as const }
 
-function completeRows(): Record<'daily_insights' | 'api_sync_logs', Row[]> {
+function completeRows(): Record<'daily_insights' | 'api_sync_logs' | 'ad_accounts', Row[]> {
   return {
     daily_insights: [
       { ad_account_id: dbAccountId, entity_level: 'account', date_start: '2026-08-01', date_stop: '2026-08-01', spend: 10, impressions: 100, link_clicks: 5, bookings: 0, actions: [], action_values: [] },
@@ -49,6 +50,8 @@ function completeRows(): Record<'daily_insights' | 'api_sync_logs', Row[]> {
       { ad_account_id: dbAccountId, entity_level: 'campaign', meta_campaign_id: 'campaign-1', date_start: '2026-08-01', date_stop: '2026-08-01', spend: 10, impressions: 100, link_clicks: 5, bookings: 0, actions: [], action_values: [] },
       { ad_account_id: dbAccountId, entity_level: 'campaign', meta_campaign_id: 'campaign-1', date_start: '2026-08-02', date_stop: '2026-08-02', spend: 20, impressions: 200, link_clicks: 10, bookings: 0, actions: [], action_values: [] },
     ],
+    // The account's platform (ad_accounts.platform) serves the native period read.
+    ad_accounts: [{ id: dbAccountId, platform: 'meta' }],
     api_sync_logs: [{
       ad_account_id: dbAccountId,
       status: 'success',

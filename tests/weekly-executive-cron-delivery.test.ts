@@ -45,7 +45,7 @@ function queryChain(table: string) {
   }
   for (const method of ['not', 'order', 'limit', 'gte', 'lte']) chain[method] = () => chain
   const single = async () => {
-    if (table === 'ad_accounts') return { data: { id: AD_ACCOUNT_DB_ID }, error: null }
+    if (table === 'ad_accounts') return { data: { id: AD_ACCOUNT_DB_ID, platform: 'meta' }, error: null }
     if (table === 'weekly_reports') {
       return {
         data: {

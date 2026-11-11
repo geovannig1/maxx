@@ -3,7 +3,7 @@ import { getAdminClient } from '@/lib/supabase/admin'
 import { ACTION_DECISION_POLICY_FLOOR } from '@/lib/authority/legacy-cutover'
 import { readExecutiveEvidenceGeneration } from './executive-evidence-store'
 import { buildWeeklyExecutiveDigest, type WeeklyExecutiveDigestV1 } from './weekly-executive'
-import { outcomeArrivalLine, reportSourceCompleteness, type ReportOutcomeArrival } from '@/lib/outcomes/report-gate'
+import { outcomeArrivalLine, reportMoneyCompleteness, reportSourceCompleteness, type ReportOutcomeArrival } from '@/lib/outcomes/report-gate'
 
 // ── Weekly knowledge & learning digest (brain-audit hole 15) ────────────────────────────────
 // Deterministic markdown appended to the weekly report AFTER the LLM narrative (renders even when no
@@ -192,9 +192,12 @@ export async function generateWeeklyReport(
         version: 1,
         basis: 'outcome_collected_value',
         source_available: snapshotOutcomeAvailable,
-        // Collected-value coverage, not source completeness (source_completeness).
-        revenue_complete: snapshotOutcomeAvailable
-          && snapshotOutcome.activeAmountPaidRevenue !== null,
+        // revenue_complete only for reconciled sources; coverage in collected_value_coverage_complete.
+        ...reportMoneyCompleteness({
+          sourceAvailable: snapshotOutcomeAvailable,
+          collectedValueCovered: (snapshotOutcome?.activeAmountPaidRevenue ?? null) !== null,
+          completeness: reportSourceCompleteness(options.outcomeArrival),
+        }),
         observed_collected_value_lower_bound: snapshotOutcome?.activeAmountPaidObserved ?? null,
         covered_outcomes: snapshotOutcome?.amountPaidCoverage.withRecordedAmount ?? null,
         total_outcomes: snapshotOutcome?.amountPaidCoverage.total ?? null,

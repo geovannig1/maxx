@@ -58,7 +58,7 @@ export async function submitPlanForApproval(input: { versionId: string; ownerUse
       step_percent: validation.stepPercent, max_step_percent: loaded.context.validation.maxStepPercent,
     })
   }
-  const money = minorFormatter(spec.data.currency)
+  const money = minorFormatter(loaded.context.account.platform.budgetUnits, spec.data.currency)
   const active = loaded.context.validation.accountActiveDailyMinor
   const preview = planPreview(spec.data, money, {
     projectedAccountMinor: active === null ? null : active + validation.totalDailyMinor,

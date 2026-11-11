@@ -33,7 +33,7 @@ function httpUrl(value: string | null): string | null {
 /** PURE: the single Meta event for one outcome, or the terminal reason it cannot be built. */
 export function buildOutcomeConversionEvent(
   row: ConversionOutcome,
-  opts: { eventName: string; testEventCode?: string | null; nowMs?: number },
+  opts: ConversionEventOptions,
 ): MetaOutcomeEventBuild {
   const now = opts.nowMs ?? Date.now()
   const occurredMs = row.occurred_at ? new Date(row.occurred_at).getTime() : NaN
@@ -43,7 +43,8 @@ export function buildOutcomeConversionEvent(
 
   const user: Record<string, unknown> = {}
   const em = hashEmail(row.email)
-  const ph = hashPhone(row.phone)
+  // An explicit calling code (core chose it from the account) wins; otherwise the configured default.
+  const ph = opts.phoneCallingCode === undefined ? hashPhone(row.phone) : hashPhone(row.phone, opts.phoneCallingCode)
   const fn = hashName(row.first_name)
   const ln = hashName(row.last_name)
   if (em) { user.em = [em]; user.external_id = [em] }

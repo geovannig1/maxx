@@ -30,6 +30,7 @@ import { readMetaReport } from './reporting/meta-reader'
 // that replace one module from affecting the others.
 
 import { fromMetaMinorUnits, metaSupportsCurrency, toMetaMinorUnits } from './currency-offset'
+import { metaAdRecord, metaAdSetRecord, metaCampaignRecord, metaCreativeRecord, metaInsightRecord } from './records'
 
 export const metaAdPlatform = {
   id: 'meta',
@@ -39,6 +40,13 @@ export const metaAdPlatform = {
     supports: (...args: Parameters<typeof metaSupportsCurrency>) => metaSupportsCurrency(...args),
     toMinor: (...args: Parameters<typeof toMetaMinorUnits>) => toMetaMinorUnits(...args),
     fromMinor: (...args: Parameters<typeof fromMetaMinorUnits>) => fromMetaMinorUnits(...args),
+  },
+  records: {
+    campaign: metaCampaignRecord,
+    adSet: metaAdSetRecord,
+    ad: metaAdRecord,
+    creative: metaCreativeRecord,
+    insight: metaInsightRecord,
   },
   entities: {
     fetchAccount: (...args: Parameters<typeof fetchAdAccount>) => fetchAdAccount(...args),

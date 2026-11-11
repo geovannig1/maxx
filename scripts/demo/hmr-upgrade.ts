@@ -5,7 +5,7 @@ import { request as proxyRequest, type Server } from 'node:http'
 // (scripts/demo/gateway.ts) and the browser preview (tests/reporting-browser/interactive-preview.ts).
 
 /** Turbopack serves HMR at /_next/hmr; webpack at /_next/webpack-hmr. */
-const NEXT_HMR_PATH = /^\/_next\/(?:hmr|webpack-hmr)(?:[/?]|$)/
+export const NEXT_HMR_PATH = /^\/_next\/(?:hmr|webpack-hmr)(?:[/?]|$)/
 
 export interface HmrUpgradeOptions {
   appPort: number

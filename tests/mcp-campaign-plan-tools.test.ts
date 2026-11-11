@@ -30,6 +30,7 @@ vi.mock('@/lib/ai', async () => ({
 
 const { TOOL_DEFINITIONS, WRITE_TOOLS, isMcpExposedTool, executeTool } = await import('@/mcp/tools')
 const { context: validationContext } = await import('./_support/campaign-plan-fixtures')
+const { getAdPlatform } = await import('@/lib/platforms/registry')
 
 beforeEach(async () => {
   state.writes = []
@@ -37,7 +38,7 @@ beforeEach(async () => {
   state.context = {
     ok: true,
     context: {
-      account: { id: 'account-1', metaAccountId: 'act_1', currency: 'USD', timezone: 'America/New_York', pixelId: '111', pageId: '555' },
+      account: { id: 'account-1', platform: getAdPlatform('meta'), metaAccountId: 'act_1', currency: 'USD', timezone: 'America/New_York', pixelId: '111', pageId: '555' },
       draft: {
         currency: 'USD', today: '2026-11-08', pixelId: '111', pageId: '555', outcomeEvent: 'Purchase', landingHosts: ['studio.example'],
         defaultDestination: 'https://studio.example/book', audiences: [], copyBank: [],

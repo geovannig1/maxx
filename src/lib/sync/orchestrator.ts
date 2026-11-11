@@ -1,8 +1,8 @@
 import { accountCurrency } from '@/config/business-config'
 import * as Sentry from '@sentry/nextjs'
 import { getAdminClient } from '@/lib/supabase/admin'
-import { getAdPlatform } from '@/lib/platforms/registry'
-import type { AdAccountRecord } from '@/lib/platforms/types'
+import { adPlatformForAccount, type PlatformAccount } from '@/lib/platforms/account-platform'
+import type { AdAccountRecord, AdPlatform } from '@/lib/platforms/types'
 import { yesterday, nyDaysAgo, nyToday } from '@/lib/utils/date-utils'
 import { refreshReportRollups } from '@/lib/report/rollup-refresh'
 import { PAID_COHORT_POLICY } from '@/lib/attribution/paid-cohort-policy'
@@ -48,8 +48,7 @@ import type { MetaInsightRow } from '@/types/meta-api'
 
 /** An ad-account money field (spend_cap, amount_spent) in major units of the account's own currency,
  *  on Meta's offset table (not a fixed /100); null when absent or the currency is not a Meta currency. */
-function metaAccountMoney(value: string | undefined, currency: string | undefined): number | null {
-  const units = getAdPlatform('meta').budgetUnits
+function metaAccountMoney(value: string | undefined, currency: string | undefined, units: AdPlatform['budgetUnits']): number | null {
   if (!value || !currency || !units.supports(currency)) return null
   const minor = parseFloat(value)
   return Number.isFinite(minor) ? units.fromMinor(minor, currency) : null
@@ -216,7 +215,8 @@ export interface DailySyncResult {
 async function withRetry<T>(
   fn: () => Promise<T>,
   context: string,
-  apiCallsRef: { count: number; rateLimitHit: boolean; retryCount: number }
+  apiCallsRef: { count: number; rateLimitHit: boolean; retryCount: number },
+  platform: AdPlatform,
 ): Promise<T> {
   let attempt = 0
   let backoffMs = INITIAL_BACKOFF_MS
@@ -226,8 +226,8 @@ async function withRetry<T>(
       apiCallsRef.count++
       return await fn()
     } catch (err) {
-      const isRateLimit = getAdPlatform('meta').isApiError(err) && err.isRateLimit?.()
-      const retryable = getAdPlatform('meta').isApiError(err) && (isRateLimit || err.isTransient?.())
+      const isRateLimit = platform.isApiError(err) && err.isRateLimit?.()
+      const retryable = platform.isApiError(err) && (isRateLimit || err.isTransient?.())
 
       if (retryable && attempt < MAX_RETRIES) {
         attempt++
@@ -244,16 +244,33 @@ async function withRetry<T>(
   }
 }
 
+/** ad_accounts.platform's column default (migration 0003). A first sync of an account id creates its row,
+ *  which the database records as a Meta account: the only platform a sync is configured for
+ *  (META_AD_ACCOUNT_ID). Every later sync reads the platform the row records. */
+const NEW_ACCOUNT_PLATFORM = 'meta'
+
+/** The platform the account's row records, or the column default when the row does not exist yet. */
+async function accountPlatformForSync(adAccountId: string): Promise<AdPlatform> {
+  const { data, error } = await getAdminClient()
+    .from('ad_accounts')
+    .select('platform')
+    .eq('account_id', adAccountId)
+    .maybeSingle()
+  if (error) throw new Error(`reading the ad account platform failed: ${error.message}`)
+  return adPlatformForAccount((data as PlatformAccount | null) ?? { platform: NEW_ACCOUNT_PLATFORM })
+}
+
 async function upsertAdAccount(
   adAccountId: string
-): Promise<{ dbId: string; accountName: string; currency: string }> {
+): Promise<{ dbId: string; accountName: string; currency: string; platform: AdPlatform }> {
   const supabase = getAdminClient()
   const now = new Date().toISOString()
+  const platform = await accountPlatformForSync(adAccountId)
 
   // Fetch live account data from Meta API (includes pixel, IG, page IDs)
   let accountMeta: AdAccountRecord | null = null
   try {
-    accountMeta = await getAdPlatform('meta').entities.fetchAccount(adAccountId)
+    accountMeta = await platform.entities.fetchAccount(adAccountId)
   } catch (err) {
     console.warn('[Sync] fetchAdAccount failed — upserting with ID only:', err instanceof Error ? err.message : err)
   }
@@ -270,8 +287,8 @@ async function upsertAdAccount(
     upsertPayload.timezone_name = accountMeta.timezone_name
     upsertPayload.business_id = accountMeta.business?.id ?? null
     upsertPayload.business_name = accountMeta.business?.name ?? null
-    upsertPayload.spend_cap = metaAccountMoney(accountMeta.spend_cap, accountMeta.currency)
-    upsertPayload.amount_spent = metaAccountMoney(accountMeta.amount_spent, accountMeta.currency)
+    upsertPayload.spend_cap = metaAccountMoney(accountMeta.spend_cap, accountMeta.currency, platform.budgetUnits)
+    upsertPayload.amount_spent = metaAccountMoney(accountMeta.amount_spent, accountMeta.currency, platform.budgetUnits)
     upsertPayload.disable_reason = accountMeta.disable_reason ?? null
     if (accountMeta.pixel_id) upsertPayload.pixel_id = accountMeta.pixel_id
     if (accountMeta.instagram_account_id) upsertPayload.instagram_account_id = accountMeta.instagram_account_id
@@ -281,7 +298,7 @@ async function upsertAdAccount(
   const { data, error } = await supabase
     .from('ad_accounts')
     .upsert(upsertPayload, { onConflict: 'account_id', ignoreDuplicates: false })
-    .select('id, account_name, currency')
+    .select('id, account_name, currency, platform')
     .single()
 
   if (error) {
@@ -292,6 +309,8 @@ async function upsertAdAccount(
     dbId: data.id as string,
     accountName: (data.account_name as string) ?? adAccountId,
     currency: (data.currency as string) ?? accountCurrency(),
+    // The row is authoritative: the rest of the sync uses the platform it records.
+    platform: adPlatformForAccount(data as PlatformAccount),
   }
 }
 
@@ -328,7 +347,7 @@ export async function runDailySync(params: {
   // Step 1: Upsert ad account to get the DB UUID (required for sync log FK)
   // We do this before creating the log so the log has a valid ad_account_id FK.
   console.log(`[Sync] Upserting ad account ${metaAccountId}`)
-  const { dbId: adAccountDbId } = await upsertAdAccount(metaAccountId)
+  const { dbId: adAccountDbId, platform } = await upsertAdAccount(metaAccountId)
 
   // Step 1a: Watchdog — reconcile orphaned in-progress syncs before starting a new one.
   try {
@@ -380,9 +399,9 @@ export async function runDailySync(params: {
     // Step 2: Fetch & upsert campaigns
     console.log(`[Sync] Fetching campaigns`)
     const campaigns = await withRetry(
-      () => getAdPlatform('meta').entities.fetchCampaigns(metaAccountId),
+      () => platform.entities.fetchCampaigns(metaAccountId),
       'fetchCampaigns',
-      apiCalls
+      apiCalls, platform
     )
     const campaignCount = await upsertCampaigns(adAccountDbId, campaigns)
     console.log(`[Sync] Upserted ${campaignCount} campaigns`)
@@ -390,9 +409,9 @@ export async function runDailySync(params: {
     // Step 3: Fetch & upsert ad sets
     console.log(`[Sync] Fetching ad sets`)
     const adSets = await withRetry(
-      () => getAdPlatform('meta').entities.fetchAdSets(metaAccountId),
+      () => platform.entities.fetchAdSets(metaAccountId),
       'fetchAdSets',
-      apiCalls
+      apiCalls, platform
     )
     const adSetCount = await upsertAdSets(adAccountDbId, adSets)
     console.log(`[Sync] Upserted ${adSetCount} ad sets`)
@@ -403,9 +422,9 @@ export async function runDailySync(params: {
     try {
       console.log('[Sync] Fetching custom audiences')
       const audiences = await withRetry(
-        () => getAdPlatform('meta').entities.fetchCustomAudiences(metaAccountId),
+        () => platform.entities.fetchCustomAudiences(metaAccountId),
         'fetchCustomAudiences',
-        apiCalls,
+        apiCalls, platform,
       )
       const audienceCount = await upsertCustomAudiences(adAccountDbId, metaAccountId, audiences)
       console.log(`[Sync] Upserted ${audienceCount} custom audiences`)
@@ -419,9 +438,9 @@ export async function runDailySync(params: {
     // Step 4: Fetch & upsert ads
     console.log(`[Sync] Fetching ads`)
     const ads = await withRetry(
-      () => getAdPlatform('meta').entities.fetchAds(metaAccountId),
+      () => platform.entities.fetchAds(metaAccountId),
       'fetchAds',
-      apiCalls
+      apiCalls, platform
     )
     const adCount = await upsertAds(adAccountDbId, ads)
     console.log(`[Sync] Upserted ${adCount} ads`)
@@ -439,9 +458,9 @@ export async function runDailySync(params: {
       if (creativeIds.length > 0) {
         console.log(`[Sync] Fetching ${creativeIds.length} creatives`)
         const creatives = await withRetry(
-          () => getAdPlatform('meta').entities.fetchCreatives(creativeIds),
+          () => platform.entities.fetchCreatives(creativeIds),
           'fetchCreatives',
-          apiCalls
+          apiCalls, platform
         )
         creativeCount = await upsertCreatives(adAccountDbId, creatives)
         console.log(`[Sync] Upserted ${creativeCount} creatives`)
@@ -500,9 +519,9 @@ export async function runDailySync(params: {
       try {
         console.log(`[Sync] Fetching insights at level: ${level}`)
         const rawInsightRows = await withRetry(
-          () => getAdPlatform('meta').insights.fetchInsights({ accountId: metaAccountId, level, since: dateStart, until: dateEnd }),
+          () => platform.insights.fetchInsights({ accountId: metaAccountId, level, since: dateStart, until: dateEnd }),
           `fetchInsights:${level}`,
-          apiCalls
+          apiCalls, platform
         )
         const insightRows = level === 'account'
           ? prepareAccountInsightRows(rawInsightRows, dateStart, dateEnd)
@@ -897,7 +916,7 @@ export async function runDailySync(params: {
 
     // Surface sync failures to Sentry. Token expiry is fatal — a silent expired token caused a
     // past data outage, so it must page rather than sit unnoticed in the sync log.
-    const isTokenError = getAdPlatform('meta').isApiError(err) && err.isTokenError?.()
+    const isTokenError = platform.isApiError(err) && err.isTokenError?.()
     Sentry.captureException(error, {
       level: isTokenError ? 'fatal' : 'error',
       tags: { area: 'sync', meta_token_expired: isTokenError ? 'true' : 'false' },
@@ -911,8 +930,8 @@ export async function runDailySync(params: {
       rateLimitHit: apiCalls.rateLimitHit,
       retryCount: apiCalls.retryCount,
       errorMessage: safeMessage,
-      errorCode: getAdPlatform('meta').isApiError(err) ? String(err.code ?? '') : undefined,
-      errorDetails: getAdPlatform('meta').isApiError(err) ? { code: err.code, subcode: err.subcode } : undefined,
+      errorCode: platform.isApiError(err) ? String(err.code ?? '') : undefined,
+      errorDetails: platform.isApiError(err) ? { code: err.code, subcode: err.subcode } : undefined,
       decisionGate,
     })
 

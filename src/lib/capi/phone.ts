@@ -2,9 +2,12 @@
 // calling code, then the national number, with no '+', no symbols, no leading zeros and no national
 // trunk prefix. A hash of anything else never matches.
 //
-// The calling code for numbers written without one is configuration (CONVERSIONS_PHONE_COUNTRY_CODE).
-// The ad account's country is not stored by this app, so it cannot be derived here; with nothing
-// configured a national number is sent without a prefix rather than with another country's code.
+// The calling code for numbers written without one comes from the ad account's country
+// (ad_accounts.country) when it is set, else from configuration (CONVERSIONS_PHONE_COUNTRY_CODE); see
+// phoneCallingCodeFor. With neither, a national number is sent without a prefix rather than with another
+// country's code.
+
+import { COUNTRY_CALLING_CODES } from './country-calling-codes'
 
 export const PHONE_CALLING_CODE_ENV = 'CONVERSIONS_PHONE_COUNTRY_CODE'
 
@@ -27,6 +30,18 @@ export function configuredPhoneCallingCode(): string | null {
     throw new Error(`${PHONE_CALLING_CODE_ENV} must be a country calling code of 1 to 3 digits without + (for example 44).`)
   }
   return value
+}
+
+/** The calling code of an ISO 3166-1 alpha-2 country, or null when the table does not know it. */
+export function callingCodeForCountry(country: string): string | null {
+  return Object.hasOwn(COUNTRY_CALLING_CODES, country) ? COUNTRY_CALLING_CODES[country] : null
+}
+
+/** The default calling code for an account: its country's code when the country is set and known,
+ *  otherwise the configured one (null when unset). */
+export function phoneCallingCodeFor(accountCountry: string | null | undefined): string | null {
+  const fromCountry = accountCountry ? callingCodeForCountry(accountCountry) : null
+  return fromCountry ?? configuredPhoneCallingCode()
 }
 
 /**

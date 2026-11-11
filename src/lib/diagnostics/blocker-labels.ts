@@ -171,6 +171,7 @@ const COCKPIT_CELL_LABELS: Record<string, string> = {
   meta_lead_canonical_action_invalid: 'the Lead action Meta returned failed validation',
   meta_native_period_frequency_missing: 'Meta did not return frequency for this period',
   meta_native_period_all_days_query_failed: 'the whole-period Meta figures could not be read',
+  meta_native_period_all_days_platform_unavailable: "the ad account's platform could not be read",
   meta_native_period_all_days_freshness_unavailable: 'we cannot tell how recent the whole-period figures are',
   meta_native_period_all_days_account_scope_invalid: 'the whole-period figures came back for the wrong account',
   meta_native_period_all_days_coverage_invalid: 'the whole-period figures do not cover the days requested',
